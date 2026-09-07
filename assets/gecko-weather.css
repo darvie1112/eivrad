@@ -1,0 +1,51 @@
+.gecko-page{--gecko-accent:#4c6249;--gecko-soft:#edf0e7}
+.gecko-hero{padding-top:56px}
+.gecko-kicker{display:flex;align-items:center;justify-content:space-between;gap:20px;color:var(--gecko-accent)}
+.release-status{font-size:11px;border:1px solid #cbd3c3;border-radius:2px;padding:6px 13px;letter-spacing:.04em}
+.gecko-hero-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:60px;align-items:end;padding-block:52px 66px}
+.gecko-name{font-size:15px;letter-spacing:.1em;margin-bottom:20px;color:var(--gecko-accent)}
+.gecko-hero h1{font-size:clamp(40px,4.5vw,66px);line-height:1.6;letter-spacing:-.065em}
+.gecko-small-break{display:none}
+.gecko-intro{max-width:350px;justify-self:end;font-size:15px;line-height:2}
+.gecko-intro>p+p{font-size:13px;color:var(--muted);margin-top:20px;line-height:2.1}
+.gecko-intro .text-link{margin-top:17px}
+.gecko-hero-bottom{border-top:1px solid var(--line);padding-block:20px;display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-size:10px;letter-spacing:.07em}
+.gecko-hero-bottom a{letter-spacing:0}
+.gecko-hero-bottom a span{margin-left:16px}
+.gecko-features,.gecko-help{background:var(--gecko-soft)}
+.gecko-feature-list{margin-top:42px;border-top:1px solid #cdd4c5;display:grid;grid-template-columns:repeat(3,1fr)}
+.gecko-feature-list article{padding:28px 30px 0 0}
+.gecko-feature-list article+article{border-left:1px solid #cdd4c5;margin-top:28px;padding:0 30px}
+.gecko-feature-list article:last-child{padding-right:0}
+.gecko-feature-number{font-size:12px;color:var(--gecko-accent);display:block;margin-bottom:22px}
+.gecko-feature-list h3{font-size:20px;letter-spacing:-.02em;line-height:1.7}
+.gecko-feature-list p{font-size:14px;color:var(--muted);margin-top:16px;line-height:2}
+.gecko-note{font-size:12px;color:var(--muted);line-height:1.9;margin-top:32px;max-width:900px}
+.gecko-plans{display:grid;grid-template-columns:1fr 1fr;margin-top:40px;border-block:1px solid var(--line)}
+.gecko-plan{padding:30px 40px 34px 0}
+.gecko-plan+.gecko-plan{border-left:1px solid var(--line);padding-left:40px}
+.gecko-plan .eyebrow{color:var(--gecko-accent);margin-bottom:12px}
+.gecko-plan h3{font-size:24px}
+.gecko-plan-intro{font-size:12px;color:var(--muted);margin-top:8px}
+.gecko-plan ul{font-size:14px;line-height:1.9;padding-left:1.2em;margin:22px 0 0}
+.gecko-plan li+li{margin-top:10px}
+.gecko-plan li::marker{color:var(--gecko-accent)}
+.gecko-help-grid{display:grid;grid-template-columns:1fr 1.45fr;gap:60px}
+.gecko-faq{border-top:1px solid #cdd4c5}
+.gecko-faq details{border-bottom:1px solid #cdd4c5}
+.gecko-faq summary{font-size:15px;padding:22px 24px 22px 0;cursor:pointer;line-height:1.8;list-style-position:inside}
+.gecko-faq summary::marker{color:var(--gecko-accent);font-size:12px}
+.gecko-faq details p{font-size:14px;color:var(--muted);line-height:2;padding:0 0 24px}
+.gecko-faq a,.gecko-english a{text-decoration:underline}
+.gecko-page .contact{background:var(--ink);color:var(--paper)}
+.gecko-page .contact p,.gecko-page .contact .eyebrow,.gecko-support .contact-link small{color:#d5d8d0}
+.gecko-support{display:grid;grid-template-columns:1fr 1.25fr;align-items:center;gap:36px 70px;padding-block:64px 44px}
+.gecko-support .contact-link{display:flex;justify-content:space-between;gap:20px;width:100%;padding-block:16px}
+.gecko-support .contact-link>span:first-child{font-size:clamp(25px,2.7vw,40px)}
+.gecko-support .gecko-support-hint{font-size:12px;color:#d5d8d0;margin-top:20px}
+.gecko-english{grid-column:1/-1;max-width:850px;border-top:1px solid #62665e;padding-top:28px;margin-top:10px}
+.gecko-english h3{font-size:14px;letter-spacing:.02em}
+.gecko-support .gecko-english p{font-size:12px;color:#d5d8d0;line-height:1.9;margin-top:10px}
+@media(max-width:1000px){.gecko-hero-grid{gap:36px;grid-template-columns:1.3fr 1fr}.gecko-feature-list h3{font-size:18px}.gecko-feature-list article{padding-right:22px}.gecko-feature-list article+article{padding-inline:22px}.gecko-help-grid{gap:36px;grid-template-columns:.85fr 1.4fr}.gecko-support{gap:30px}}
+@media(max-width:760px){.gecko-hero{padding-top:30px}.gecko-kicker{gap:12px}.gecko-kicker .eyebrow{font-size:8px;letter-spacing:.1em}.release-status{font-size:9px;padding:5px 8px}.gecko-hero-grid{grid-template-columns:1fr;gap:26px;padding-block:32px 38px}.gecko-name{font-size:13px;margin-bottom:14px}.gecko-hero h1{font-size:clamp(32px,7.6vw,54px);line-height:1.65}.gecko-intro{max-width:480px;justify-self:start;font-size:14px}.gecko-intro>p+p{font-size:14px;line-height:2;margin-top:15px}.gecko-hero-bottom{font-size:8px;letter-spacing:.02em;gap:12px;padding-block:18px}.gecko-hero-bottom a{font-size:10px}.gecko-hero-bottom a span{margin-left:5px}.gecko-feature-list{grid-template-columns:1fr;margin-top:30px}.gecko-feature-list article,.gecko-feature-list article+article,.gecko-feature-list article:last-child{display:grid;grid-template-columns:28px 1fr;gap:12px;margin:0;border-left:0;border-bottom:1px solid #cdd4c5;padding:24px 0}.gecko-feature-number{margin:4px 0 0;font-size:11px}.gecko-feature-list h3{font-size:21px}.gecko-feature-list p{margin-top:9px}.gecko-note{font-size:12px;margin-top:24px}.gecko-plans{grid-template-columns:1fr;margin-top:30px}.gecko-plan,.gecko-plan+.gecko-plan{padding:26px 0;border-left:0}.gecko-plan+.gecko-plan{border-top:1px solid var(--line)}.gecko-plan h3{font-size:23px}.gecko-plan ul{margin-top:18px}.gecko-help-grid{grid-template-columns:1fr;gap:24px}.gecko-faq summary{font-size:14px;padding-block:20px;padding-right:0}.gecko-support{grid-template-columns:1fr;padding-block:44px 35px;gap:22px}.gecko-support .contact-link{margin-top:0;min-height:65px}.gecko-support .contact-link>span:first-child{font-size:clamp(24px,6.9vw,37px)}.gecko-support .gecko-support-hint{font-size:12px;margin-top:15px}.gecko-english{margin-top:4px;padding-top:24px}}
+@media(max-width:380px){.gecko-small-break{display:initial}.gecko-hero h1{font-size:36px}.gecko-hero-bottom{flex-wrap:wrap;gap:8px}.gecko-kicker{flex-wrap:wrap;gap:10px}.gecko-feature-list h3{font-size:19px}.gecko-support .contact-link>span:first-child{font-size:23px}}
