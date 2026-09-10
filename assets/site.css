@@ -60,6 +60,7 @@
 .legal-dl>div{display:grid;grid-template-columns:150px 1fr;gap:20px;padding:17px 0;border-bottom:1px solid var(--line);font-size:12.5px;line-height:2}
 .legal-dl dt{font-size:11px;letter-spacing:.03em}
 .legal-dl dd{color:var(--muted)}
+.legal-dl dd>.english-copy{display:block;font-size:10px;margin-top:5px}
 .legal a{text-decoration:underline;text-decoration-color:#b9bcae;color:var(--ink)}
 .legal a:hover{text-decoration-color:var(--ink)}
 .legal-date{font-size:11px;color:var(--muted);letter-spacing:.06em}
