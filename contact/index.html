@@ -41,6 +41,15 @@
           <p class="english-copy" lang="en">We usually reply within three business days.</p>
         </div>
 
+        <noscript>
+          <style>#contact-form{display:none}</style>
+          <div class="eiv-notice eiv-noscript">
+            <p><strong>お問い合わせフォームのご利用には JavaScript が必要です</strong></p>
+            <p>スパム対策の認証に JavaScript を使用しているため、無効の状態では送信できません。恐れ入りますが、ブラウザの JavaScript を有効にしてから再度お試しください。</p>
+            <p>有効にできない場合は、<b>contact [at] eivrad.com</b>（[at] を @ に置き換えてください）宛にメールでお寄せくださいませ。</p>
+          </div>
+        </noscript>
+
         <form id="contact-form" class="eiv-form" method="POST" action="/api/contact" novalidate>
           <div class="eiv-field">
             <label for="f-name">お名前 <span lang="en">Name</span> <em aria-hidden="true">必須</em></label>
@@ -86,7 +95,7 @@
           <div class="eiv-notice">
             <p><strong>お預かりする情報の取り扱いについて</strong></p>
             <p>お名前・メールアドレス・会社名・ご用件・お問い合わせ内容は、お問い合わせへのご返信と、その対応記録の保存のためにのみ利用いたします。営業目的のご連絡には利用いたしません。</p>
-            <p>お問い合わせの受付および通知には、Cloudflare, Inc.（米国）および Resend（米国）のサービスを利用しております。お預かりした情報は、これらの事業者の設備を経由し、米国内で取り扱われる場合がございます。当社は、これらの事業者との間で当社の指示の範囲を超えて情報を取り扱わない旨を定め、米国における個人情報の保護に関する制度を把握したうえで、安全管理のための措置を講じております。</p>
+            <p>お問い合わせの受付および通知には、Cloudflare, Inc.（米国）および Resend, Inc.（米国）のサービスを利用しております。お預かりした情報は、これらの事業者の設備を経由し、米国内で取り扱われる場合がございます。当社は、これらの事業者との間で当社の指示の範囲を超えて情報を取り扱わない旨を定め、米国における個人情報の保護に関する制度を把握したうえで、安全管理のための措置を講じております。</p>
             <p>送信いただいた後、ご入力のメールアドレス宛に受付確認のご連絡をお送りする場合がございます。</p>
             <p>詳しくは<a href="/privacy.html">プライバシーポリシー</a>をご覧ください。個人情報の開示等のご請求も、上記「ご用件」よりお申し出いただけます。</p>
             <p>営業・広告を目的とした送信はお断りいたします。</p>
@@ -124,8 +133,36 @@
         origin: '送信元を確認できませんでした。恐れ入りますが、ページを再読み込みのうえお試しください。'
       };
 
+      // novalidate でネイティブ検証を切っているため、送信前に自前で検査する。
+      // 検査しないと、ご用件が未選択のまま送られ「その他」として届いてしまう。
+      var validate = function () {
+        var fields = form.querySelectorAll('[required]');
+        for (var i = 0; i < fields.length; i++) {
+          var el = fields[i];
+          var bad = !el.value.trim() ||
+            (el.type === 'email' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(el.value.trim())) ||
+            (el.id === 'f-message' && el.value.trim().length < 10);
+          el.setAttribute('aria-invalid', bad ? 'true' : 'false');
+          if (bad) {
+            el.focus();
+            return el.id === 'f-message'
+              ? 'お問い合わせ内容を10文字以上ご入力ください。'
+              : el.type === 'email' && el.value.trim()
+                ? 'メールアドレスの形式をご確認ください。'
+                : '必須の項目が入力されておりません。';
+          }
+        }
+        return null;
+      };
+
       form.addEventListener('submit', function (event) {
         event.preventDefault();
+        var invalid = validate();
+        if (invalid) {
+          status.className = 'eiv-status is-error';
+          status.textContent = invalid;
+          return;
+        }
         var button = form.querySelector('.eiv-submit');
         button.disabled = true;
         markElapsed();

@@ -66,3 +66,11 @@
 .legal-date{font-size:11px;color:var(--muted);letter-spacing:.06em}
 .legal-note{font-size:12px;line-height:2;color:var(--muted);padding:20px 24px;background:var(--soft)}
 @media(max-width:760px){.legal{gap:40px;margin-top:30px}.legal-lead{font-size:12.5px}.legal-item h3{font-size:14px;gap:12px}.legal-dl>div{grid-template-columns:1fr;gap:5px;padding:15px 0}.legal-dl dd{font-size:12.5px}}
+
+/* Turnstile の固定 300px が狭幅でグリッドを押し広げるのを止める */
+.cf-turnstile{max-width:100%}
+@media(max-width:350px){.form-layout,.eiv-form,.form-layout>*,.eiv-form>*{min-width:0}.cf-turnstile{overflow-x:auto}}
+/* iOS のフォーカス時自動ズームは font-size のみで決まる。横向き・iPad でも 16px を確保する */
+@media(hover:none) and (pointer:coarse){.eiv-field>input,.eiv-field>select,.eiv-field>textarea{font-size:16px}}
+.eiv-field>input[aria-invalid=true],.eiv-field>select[aria-invalid=true],.eiv-field>textarea[aria-invalid=true]{border-color:#8a4b32}
+.eiv-noscript b{font-weight:500;color:var(--ink)}
