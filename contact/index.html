@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fafaf7">
+  <title>お問い合わせ｜合同会社Eivrad</title>
+  <meta name="description" content="合同会社Eivradへのお問い合わせフォームです。事業・デジタルコンテンツ・アプリケーションに関するご相談を承っております。">
+  <link rel="canonical" href="https://eivrad.com/contact/">
+  <link rel="icon" href="/assets/eivrad-logo.png" type="image/png">
+  <link rel="stylesheet" href="/assets/site.css">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:site_name" content="Eivrad LLC">
+  <meta property="og:title" content="お問い合わせ｜合同会社Eivrad">
+  <meta property="og:description" content="事業・デジタルコンテンツ・アプリケーションに関するご相談を承っております。">
+  <meta property="og:url" content="https://eivrad.com/contact/">
+  <script src="/assets/site.js" defer></script>
+</head>
+<body id="top">
+  <a class="skip-link" href="#main">本文へスキップ</a>
+  <header class="site-header">
+    <div class="header-inner container">
+      <a class="wordmark" href="/" aria-label="Eivrad ホーム"><img src="/assets/eivrad-logo.png" width="1254" height="1254" alt="Eivrad" fetchpriority="high"></a>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="primary-nav" aria-label="メニューを開く"><span></span><span></span></button>
+      <nav class="primary-nav" id="primary-nav" aria-label="メインナビゲーション">
+        <a href="/#about">About<span>私たちについて</span></a>
+        <a href="/#business">Business<span>事業内容</span></a>
+        <a href="/#company">Company<span>会社概要</span></a>
+        <a class="nav-contact" href="/contact/" aria-current="page">Contact <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+  <main id="main">
+    <section class="section container" aria-labelledby="form-title">
+      <div class="section-heading"><p class="eyebrow"><span class="section-number">01</span> CONTACT</p><span class="section-note">お話は、ここから。</span></div>
+      <div class="form-layout">
+        <div class="form-intro">
+          <h2 id="form-title">お問い合わせ</h2>
+          <p>事業・デジタルコンテンツ・アプリケーションに関するご相談を承っております。<br class="desktop-break">いただいた内容には、3営業日以内にご返信いたします。</p>
+          <p class="english-copy" lang="en">We usually reply within three business days.</p>
+        </div>
+
+        <form id="contact-form" class="eiv-form" method="POST" action="/api/contact" novalidate>
+          <div class="eiv-field">
+            <label for="f-name">お名前 <span lang="en">Name</span> <em aria-hidden="true">必須</em></label>
+            <input id="f-name" name="name" type="text" required autocomplete="name" maxlength="100">
+          </div>
+
+          <div class="eiv-field">
+            <label for="f-email">メールアドレス <span lang="en">Email</span> <em aria-hidden="true">必須</em></label>
+            <input id="f-email" name="email" type="email" required autocomplete="email" maxlength="200" inputmode="email">
+          </div>
+
+          <div class="eiv-field">
+            <label for="f-company">会社名・ご所属 <span lang="en">Organisation</span></label>
+            <input id="f-company" name="company" type="text" autocomplete="organization" maxlength="120">
+          </div>
+
+          <div class="eiv-field">
+            <label for="f-kind">ご用件 <span lang="en">Subject</span> <em aria-hidden="true">必須</em></label>
+            <select id="f-kind" name="kind" required>
+              <option value="">選択してください</option>
+              <option>制作・開発のご相談</option>
+              <option>ゲッコー天気について</option>
+              <option>取材・掲載のご依頼</option>
+              <option>個人情報の開示等のご請求</option>
+              <option>その他</option>
+            </select>
+          </div>
+
+          <div class="eiv-field">
+            <label for="f-message">お問い合わせ内容 <span lang="en">Message</span> <em aria-hidden="true">必須</em></label>
+            <textarea id="f-message" name="message" rows="9" required maxlength="4000"></textarea>
+            <p class="eiv-hint">ご相談の背景やご予算、ご希望の時期など、わかる範囲でお書きください。</p>
+          </div>
+
+          <div class="eiv-hp" aria-hidden="true">
+            <label for="f-url">Company URL</label>
+            <input id="f-url" name="company_url" type="text" tabindex="-1" autocomplete="off">
+          </div>
+          <input type="hidden" name="t" id="eiv-t">
+
+          <div class="cf-turnstile" data-sitekey="TURNSTILE_SITE_KEY" data-language="ja"></div>
+
+          <div class="eiv-notice">
+            <p><strong>お預かりする情報の取り扱いについて</strong></p>
+            <p>お名前・メールアドレス・会社名・ご用件・お問い合わせ内容は、お問い合わせへのご返信と、その対応記録の保存のためにのみ利用いたします。営業目的のご連絡には利用いたしません。</p>
+            <p>お問い合わせの受付および通知には、Cloudflare, Inc.（米国）および Resend（米国）のサービスを利用しております。お預かりした情報は、これらの事業者の設備を経由し、米国内で取り扱われる場合がございます。当社は、これらの事業者との間で当社の指示の範囲を超えて情報を取り扱わない旨を定め、米国における個人情報の保護に関する制度を把握したうえで、安全管理のための措置を講じております。</p>
+            <p>送信いただいた後、ご入力のメールアドレス宛に受付確認のご連絡をお送りする場合がございます。</p>
+            <p>詳しくは<a href="/privacy.html">プライバシーポリシー</a>をご覧ください。個人情報の開示等のご請求も、上記「ご用件」よりお申し出いただけます。</p>
+            <p>営業・広告を目的とした送信はお断りいたします。</p>
+          </div>
+
+          <button type="submit" class="eiv-submit">送信する <span aria-hidden="true">↗</span></button>
+          <p id="eiv-status" class="eiv-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+  <footer class="site-footer container"><div class="footer-top"><a class="wordmark" href="/" aria-label="Eivrad ホーム"><img src="/assets/eivrad-logo.png" width="1254" height="1254" loading="lazy" alt="Eivrad"></a><p>Little ideas. Lasting experiences.</p><a class="back-top" href="#top">BACK TO TOP <span aria-hidden="true">↑</span></a></div><div class="footer-bottom"><span>© 2026 Eivrad LLC</span><div class="footer-legal"><a href="/gecko-weather/">ゲッコー天気について</a><a href="/privacy.html">プライバシーポリシー</a><a href="/gecko-weather/terms.html">ゲッコー天気 利用規約</a></div><span>TOKYO, JAPAN</span></div></footer>
+
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script>
+    (function () {
+      var form = document.getElementById('contact-form');
+      var status = document.getElementById('eiv-status');
+      var stamp = document.getElementById('eiv-t');
+      if (!form || !status || !stamp) return;
+
+      // 絶対時刻ではなく「描画からの経過ミリ秒」を送る。
+      // 絶対時刻だと利用者の時計がずれているだけで弾いてしまう。
+      var loadedAt = Date.now();
+      var markElapsed = function () { stamp.value = String(Date.now() - loadedAt); };
+      markElapsed();
+
+      var MESSAGES = {
+        captcha: '認証を完了してから、もう一度お試しください。',
+        too_fast: '送信が速すぎました。恐れ入りますが、もう一度お試しください。',
+        invalid: 'ご入力の内容をご確認ください。メールアドレスの形式、または本文が短すぎる可能性がございます。',
+        too_many_links: 'URL が多い送信はお受けできません。恐れ入りますが、本文を調整のうえお試しください。',
+        send_failed: '送信処理に失敗いたしました。恐れ入りますが、時間をおいて再度お試しください。',
+        rate_limited: '短時間に送信が集中しております。恐れ入りますが、しばらく経ってからお試しください。',
+        origin: '送信元を確認できませんでした。恐れ入りますが、ページを再読み込みのうえお試しください。'
+      };
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var button = form.querySelector('.eiv-submit');
+        button.disabled = true;
+        markElapsed();
+        status.className = 'eiv-status is-busy';
+        status.textContent = '送信しています…';
+
+        fetch('/api/contact', { method: 'POST', body: new FormData(form) })
+          .then(function (response) { return response.json(); })
+          .then(function (result) {
+            if (result && result.ok) {
+              form.querySelectorAll('.eiv-field, .cf-turnstile, .eiv-notice, .eiv-submit').forEach(function (el) { el.hidden = true; });
+              status.className = 'eiv-status is-done';
+              status.textContent = 'お問い合わせを承りました。3営業日以内にご返信いたします。';
+              return;
+            }
+            button.disabled = false;
+            status.className = 'eiv-status is-error';
+            status.textContent = MESSAGES[result && result.error] || '送信できませんでした。恐れ入りますが、時間をおいて再度お試しください。';
+            if (window.turnstile) window.turnstile.reset();
+            loadedAt = Date.now();
+          })
+          .catch(function () {
+            button.disabled = false;
+            status.className = 'eiv-status is-error';
+            status.textContent = '通信に失敗いたしました。恐れ入りますが、時間をおいて再度お試しください。';
+            if (window.turnstile) window.turnstile.reset();
+            loadedAt = Date.now();
+          });
+      });
+    })();
+  </script>
+</body>
+</html>
