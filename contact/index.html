@@ -9,6 +9,7 @@
   <link rel="canonical" href="https://eivrad.com/contact/">
   <link rel="icon" href="/assets/eivrad-logo.png" type="image/png">
   <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/contact.css?v=20260910">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ja_JP">
   <meta property="og:site_name" content="Eivrad LLC">
@@ -17,7 +18,7 @@
   <meta property="og:url" content="https://eivrad.com/contact/">
   <script src="/assets/site.js" defer></script>
 </head>
-<body id="top">
+<body id="top" class="contact-page">
   <a class="skip-link" href="#main">本文へスキップ</a>
   <header class="site-header">
     <div class="header-inner container">
@@ -32,13 +33,18 @@
     </div>
   </header>
   <main id="main">
-    <section class="section container" aria-labelledby="form-title">
-      <div class="section-heading"><p class="eyebrow"><span class="section-number">01</span> CONTACT</p><span class="section-note">お話は、ここから。</span></div>
+    <section class="contact-section container" aria-labelledby="form-title">
       <div class="form-layout">
         <div class="form-intro">
-          <h2 id="form-title">お問い合わせ</h2>
-          <p>事業・デジタルコンテンツ・アプリケーションに関するご相談を承っております。<br class="desktop-break">いただいた内容には、3営業日以内にご返信いたします。</p>
-          <p class="english-copy" lang="en">We usually reply within three business days.</p>
+          <p class="contact-eyebrow" lang="en">GET IN TOUCH</p>
+          <h1 id="form-title">お問い合わせ<span lang="en" aria-hidden="true">Contact.</span></h1>
+          <p class="contact-lead">ご相談やご質問を、<br>お聞かせください。</p>
+          <p class="contact-description">事業・デジタルコンテンツ・アプリケーションに関するお問い合わせを承っております。<br>どうぞお気軽にご連絡ください。</p>
+          <div class="contact-response">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <div><p>3営業日以内にご返信いたします</p><span lang="en">We reply within three business days.</span></div>
+          </div>
+          <a class="contact-home" href="/"><span aria-hidden="true">←</span> ホームへ戻る</a>
         </div>
 
         <noscript>
@@ -50,25 +56,26 @@
           </div>
         </noscript>
 
-        <form id="contact-form" class="eiv-form" method="POST" action="/api/contact" novalidate>
-          <div class="eiv-field">
+        <form id="contact-form" class="eiv-form" method="POST" action="/api/contact" novalidate aria-labelledby="contact-form-heading">
+          <div class="eiv-form-heading"><h2 id="contact-form-heading">お問い合わせフォーム</h2><p><span>必須</span>の項目をご入力ください。</p></div>
+          <div class="eiv-field eiv-field--half">
             <label for="f-name">お名前 <span lang="en">Name</span> <em aria-hidden="true">必須</em></label>
-            <input id="f-name" name="name" type="text" required autocomplete="name" maxlength="100">
+            <input id="f-name" name="name" type="text" required autocomplete="name" maxlength="100" placeholder="山田 太郎" aria-describedby="eiv-status">
+          </div>
+
+          <div class="eiv-field eiv-field--half">
+            <label for="f-company">会社名・ご所属 <span lang="en">Company</span> <em class="is-optional">任意</em></label>
+            <input id="f-company" name="company" type="text" autocomplete="organization" maxlength="120" placeholder="株式会社〇〇">
           </div>
 
           <div class="eiv-field">
             <label for="f-email">メールアドレス <span lang="en">Email</span> <em aria-hidden="true">必須</em></label>
-            <input id="f-email" name="email" type="email" required autocomplete="email" maxlength="200" inputmode="email">
-          </div>
-
-          <div class="eiv-field">
-            <label for="f-company">会社名・ご所属 <span lang="en">Organisation</span></label>
-            <input id="f-company" name="company" type="text" autocomplete="organization" maxlength="120">
+            <input id="f-email" name="email" type="email" required autocomplete="email" maxlength="200" inputmode="email" placeholder="you@example.com" aria-describedby="eiv-status">
           </div>
 
           <div class="eiv-field">
             <label for="f-kind">ご用件 <span lang="en">Subject</span> <em aria-hidden="true">必須</em></label>
-            <select id="f-kind" name="kind" required>
+            <select id="f-kind" name="kind" required aria-describedby="eiv-status">
               <option value="">選択してください</option>
               <option>制作・開発のご相談</option>
               <option>ゲッコー天気について</option>
@@ -80,8 +87,8 @@
 
           <div class="eiv-field">
             <label for="f-message">お問い合わせ内容 <span lang="en">Message</span> <em aria-hidden="true">必須</em></label>
-            <textarea id="f-message" name="message" rows="9" required maxlength="4000"></textarea>
-            <p class="eiv-hint">ご相談の背景やご予算、ご希望の時期など、わかる範囲でお書きください。</p>
+            <textarea id="f-message" name="message" rows="6" required maxlength="4000" placeholder="ご相談・ご質問の内容をご記入ください。" aria-describedby="message-hint eiv-status"></textarea>
+            <p class="eiv-hint" id="message-hint">ご相談の背景やご希望の時期など、わかる範囲でお書きください。<span>10〜4,000文字</span></p>
           </div>
 
           <div class="eiv-hp" aria-hidden="true">
@@ -90,16 +97,22 @@
           </div>
           <input type="hidden" name="t" id="eiv-t">
 
-          <div class="cf-turnstile" data-sitekey="0x4AAAAAAEvBvQhDl2dWq9r6" data-language="ja"></div>
-
-          <div class="eiv-notice">
+          <div class="eiv-notice eiv-privacy">
             <p><strong>お預かりする情報の取り扱いについて</strong></p>
             <p>お名前・メールアドレス・会社名・ご用件・お問い合わせ内容は、お問い合わせへのご返信と、その対応記録の保存のためにのみ利用いたします。営業目的のご連絡には利用いたしません。</p>
-            <p>お問い合わせの受付および通知には、Cloudflare, Inc.（米国）および Resend, Inc.（米国）のサービスを利用しております。お預かりした情報は、これらの事業者の設備を経由し、米国内で取り扱われる場合がございます。当社は、これらの事業者との間で当社の指示の範囲を超えて情報を取り扱わない旨を定め、米国における個人情報の保護に関する制度を把握したうえで、安全管理のための措置を講じております。</p>
-            <p>送信いただいた後、ご入力のメールアドレス宛に受付確認のご連絡をお送りする場合がございます。</p>
-            <p>詳しくは<a href="/privacy.html">プライバシーポリシー</a>をご覧ください。個人情報の開示等のご請求も、上記「ご用件」よりお申し出いただけます。</p>
-            <p>営業・広告を目的とした送信はお断りいたします。</p>
+            <details class="eiv-privacy-details">
+              <summary>利用サービス・個人情報の取り扱い <span aria-hidden="true">＋</span></summary>
+              <div>
+                <p>お問い合わせの受付および通知には、Cloudflare, Inc.（米国）および Resend, Inc.（米国）のサービスを利用しております。お預かりした情報は、これらの事業者の設備を経由し、米国内で取り扱われる場合がございます。当社は、これらの事業者との間で当社の指示の範囲を超えて情報を取り扱わない旨を定め、米国における個人情報の保護に関する制度を把握したうえで、安全管理のための措置を講じております。</p>
+                <p>受付が完了すると、この画面に完了メッセージが表示されます。</p>
+                <p>詳しくは<a href="/privacy.html">プライバシーポリシー</a>をご覧ください。個人情報の開示等のご請求も、上記「ご用件」よりお申し出いただけます。</p>
+              </div>
+            </details>
+            <p class="eiv-privacy-link"><a href="/privacy.html">プライバシーポリシー</a><span aria-hidden="true">↗</span></p>
+            <p class="eiv-sales-note">営業・広告を目的とした送信はお断りいたします。</p>
           </div>
+
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAEvBvQhDl2dWq9r6" data-language="ja" data-theme="light"></div>
 
           <button type="submit" class="eiv-submit">送信する <span aria-hidden="true">↗</span></button>
           <p id="eiv-status" class="eiv-status" role="status" aria-live="polite"></p>
@@ -173,7 +186,7 @@
           .then(function (response) { return response.json(); })
           .then(function (result) {
             if (result && result.ok) {
-              form.querySelectorAll('.eiv-field, .cf-turnstile, .eiv-notice, .eiv-submit').forEach(function (el) { el.hidden = true; });
+              form.querySelectorAll('.eiv-form-heading, .eiv-field, .cf-turnstile, .eiv-notice, .eiv-submit').forEach(function (el) { el.hidden = true; });
               status.className = 'eiv-status is-done';
               status.textContent = 'お問い合わせを承りました。3営業日以内にご返信いたします。';
               return;
