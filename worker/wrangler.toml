@@ -1,6 +1,8 @@
 name = "eivrad-contact"
 main = "src/index.js"
 compatibility_date = "2026-09-10"
+# workers.dev の公開 URL は作らない。入口は eivrad.com/api/contact だけにする。
+workers_dev = false
 
 # 本番ルート。GitHub Pages 側に /api/ は存在しないため衝突しない。
 [[routes]]
