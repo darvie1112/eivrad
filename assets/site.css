@@ -15,3 +15,62 @@
 @media(max-width:350px){.container{width:calc(100% - 32px)}.hero h1{font-size:32px}.hero-intro{grid-template-columns:1fr;gap:14px}.hero-lead br{display:none}.hero-lead{font-size:17px}.hero-description{font-size:13px}.hero-intro .text-link{margin-top:2px}.company-info>div{grid-template-columns:63px 1fr;gap:12px;font-size:11px}.contact-link>span:first-child{font-size:22px}.section-note{font-size:8px}}
 @media(max-width:760px){.hero-intro{grid-template-columns:1fr;gap:15px}.hero-lead br{display:none}.hero-description{font-size:13px;line-height:1.95;max-width:340px}.hero-intro .text-link{margin-top:0}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
+
+/* ---- Contact form (/contact/) ---- */
+[hidden]{display:none!important}
+.form-layout{display:grid;grid-template-columns:.85fr 1.15fr;gap:70px;align-items:start}
+.form-intro>p{font-size:13px;color:var(--muted);line-height:2;margin-top:22px}
+.form-intro .english-copy{margin-top:14px}
+.eiv-form{display:grid;gap:30px;max-width:560px}
+.eiv-field{display:grid}
+.eiv-field>label{font-size:11px;letter-spacing:.05em;line-height:1.7}
+.eiv-field>label>span[lang=en]{color:var(--muted);font-size:10px;margin-left:7px}
+.eiv-field>label>em{font-style:normal;font-size:9px;letter-spacing:.1em;color:var(--muted);border:1px solid var(--line);padding:2px 6px;margin-left:9px;vertical-align:1px}
+.eiv-field>input,.eiv-field>select,.eiv-field>textarea{width:100%;margin-top:11px;padding:14px 16px;font:inherit;font-size:15px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:0;transition:border-color .2s;appearance:none}
+.eiv-field>select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 21px) 50%,calc(100% - 15px) 50%;background-size:6px 6px,6px 6px;background-repeat:no-repeat;padding-right:44px;cursor:pointer}
+.eiv-field>textarea{line-height:2;resize:vertical;min-height:180px}
+.eiv-field>input:hover,.eiv-field>select:hover,.eiv-field>textarea:hover{border-color:#b9bcae}
+.eiv-field>input:focus-visible,.eiv-field>select:focus-visible,.eiv-field>textarea:focus-visible{outline:none;border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.eiv-hint{font-size:11px;color:var(--muted);line-height:1.9;margin-top:9px}
+.eiv-hp{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}
+.eiv-notice{font-size:11px;line-height:2.1;color:var(--muted);padding:24px 26px;background:var(--soft);display:grid;gap:13px}
+.eiv-notice strong{font-weight:500;color:var(--ink);font-size:11px;letter-spacing:.04em}
+.eiv-notice a{text-decoration:underline;text-decoration-color:#b9bcae;color:var(--ink)}
+.eiv-notice a:hover{text-decoration-color:var(--ink)}
+.eiv-submit{justify-self:start;display:inline-flex;align-items:center;gap:44px;min-height:56px;padding:0 34px;background:var(--ink);color:var(--paper);border:1px solid var(--ink);font-size:12px;letter-spacing:.1em;cursor:pointer;transition:opacity .2s}
+.eiv-submit>span{font-size:18px;line-height:1}
+.eiv-submit:hover{opacity:.82}
+.eiv-submit:disabled{opacity:.45;cursor:progress}
+.eiv-status{font-size:12px;line-height:2;color:var(--muted);min-height:1px}
+.eiv-status.is-done{color:var(--ink);padding:20px 24px;background:var(--soft);font-size:13px}
+.eiv-status.is-error{color:#8a4b32}
+@media(max-width:1100px){.form-layout{gap:45px}}
+@media(max-width:800px){.form-layout{gap:32px;grid-template-columns:.8fr 1.2fr}.form-intro h2{font-size:28px}}
+@media(max-width:760px){.form-layout{grid-template-columns:1fr;gap:30px}.form-intro h2{font-size:29px}.form-intro>p{font-size:12px;margin-top:15px}.eiv-form{gap:26px;max-width:none}.eiv-field>input,.eiv-field>select,.eiv-field>textarea{font-size:16px;padding:13px 14px}.eiv-notice{padding:20px 20px;font-size:11px}.eiv-submit{width:100%;justify-content:space-between;gap:20px}}
+
+/* ---- Legal pages (/privacy.html) ---- */
+.legal{max-width:760px;margin-top:40px;display:grid;gap:52px}
+.legal-lead{font-size:13px;line-height:2.1;color:var(--muted);letter-spacing:.02em}
+.legal-item{display:grid;gap:16px}
+.legal-item h3{font-size:15px;letter-spacing:.02em;line-height:1.8;padding-bottom:14px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:16px}
+.legal-no{font-size:10px;color:var(--muted);letter-spacing:.1em;flex-shrink:0;min-width:14px}
+.legal-item p{font-size:13px;line-height:2.1;color:var(--muted);letter-spacing:.02em}
+.legal-ol{margin:0;padding-left:1.4em;display:grid;gap:9px;font-size:13px;line-height:2.05;color:var(--muted);letter-spacing:.02em}
+.legal-dl{display:grid;gap:0;border-top:1px solid var(--line)}
+.legal-dl>div{display:grid;grid-template-columns:150px 1fr;gap:20px;padding:17px 0;border-bottom:1px solid var(--line);font-size:12.5px;line-height:2}
+.legal-dl dt{font-size:11px;letter-spacing:.03em}
+.legal-dl dd{color:var(--muted)}
+.legal-dl dd>.english-copy{display:block;font-size:10px;margin-top:5px}
+.legal a{text-decoration:underline;text-decoration-color:#b9bcae;color:var(--ink)}
+.legal a:hover{text-decoration-color:var(--ink)}
+.legal-date{font-size:11px;color:var(--muted);letter-spacing:.06em}
+.legal-note{font-size:12px;line-height:2;color:var(--muted);padding:20px 24px;background:var(--soft)}
+@media(max-width:760px){.legal{gap:40px;margin-top:30px}.legal-lead{font-size:12.5px}.legal-item h3{font-size:14px;gap:12px}.legal-dl>div{grid-template-columns:1fr;gap:5px;padding:15px 0}.legal-dl dd{font-size:12.5px}}
+
+/* Turnstile の固定 300px が狭幅でグリッドを押し広げるのを止める */
+.cf-turnstile{max-width:100%}
+@media(max-width:350px){.form-layout,.eiv-form,.form-layout>*,.eiv-form>*{min-width:0}.cf-turnstile{overflow-x:auto}}
+/* iOS のフォーカス時自動ズームは font-size のみで決まる。横向き・iPad でも 16px を確保する */
+@media(hover:none) and (pointer:coarse){.eiv-field>input,.eiv-field>select,.eiv-field>textarea{font-size:16px}}
+.eiv-field>input[aria-invalid=true],.eiv-field>select[aria-invalid=true],.eiv-field>textarea[aria-invalid=true]{border-color:#8a4b32}
+.eiv-noscript b{font-weight:500;color:var(--ink)}
