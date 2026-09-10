@@ -1,4 +1,29 @@
 /* Contact page only. Shared navigation and other pages retain site.css. */
+/* Form primitives live here so a cached pre-form site.css cannot break layout. */
+.contact-page [hidden]{display:none!important}
+.contact-section .form-layout{display:grid;align-items:start}
+.contact-section :where(.form-intro)>p{color:var(--muted);line-height:2}
+.contact-section .eiv-form,.contact-section .eiv-field{display:grid}
+.contact-section .eiv-field>label{line-height:1.7}
+.contact-section .eiv-field>label>span[lang=en]{color:var(--muted)}
+.contact-section .eiv-field>label>em{font-style:normal}
+.contact-section .eiv-field>input,.contact-section .eiv-field>select,.contact-section .eiv-field>textarea{width:100%;font:inherit;color:var(--ink);appearance:none}
+.contact-section .eiv-field>select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 21px) 50%,calc(100% - 15px) 50%;background-size:6px 6px,6px 6px;background-repeat:no-repeat;cursor:pointer}
+.contact-section .eiv-field>textarea{resize:vertical}
+.contact-section .eiv-field>input:focus-visible,.contact-section .eiv-field>select:focus-visible,.contact-section .eiv-field>textarea:focus-visible{outline:none}
+.contact-section .eiv-hp{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}
+.contact-section .eiv-hint{color:var(--muted)}
+.contact-section .eiv-notice{display:grid;gap:13px;padding:24px 26px;color:var(--muted);font-size:11px;line-height:2.1;background:var(--soft)}
+.contact-section .eiv-notice strong,.contact-section .eiv-noscript b{font-weight:500;color:var(--ink)}
+.contact-section .eiv-notice a{text-decoration:underline;text-decoration-color:#b9bcae;color:var(--ink)}
+.contact-section .eiv-notice a:hover{text-decoration-color:var(--ink)}
+.contact-section .cf-turnstile{max-width:100%}
+.contact-section .eiv-submit{display:inline-flex;align-items:center;color:var(--paper);border:1px solid;padding-block:0;cursor:pointer}
+.contact-section .eiv-submit>span{font-size:18px;line-height:1}
+.contact-section .eiv-submit:disabled{cursor:progress}
+.contact-section .eiv-status{font-size:12px;line-height:2;color:var(--muted);min-height:1px}
+.contact-section .eiv-status.is-error{color:#8a4b32}
+.contact-section .eiv-status.is-done{color:var(--ink);font-size:13px}
 .contact-page{--contact-accent:#566249;background:#f6f7f2}
 .contact-page .site-header{background:rgba(246,247,242,.96)}
 .contact-section{padding-block:76px 100px;max-width:1200px}
