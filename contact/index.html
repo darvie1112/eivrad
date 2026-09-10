@@ -130,6 +130,13 @@
       var stamp = document.getElementById('eiv-t');
       if (!form || !status || !stamp) return;
 
+      // Only known support links may preselect a subject; preserve restored input.
+      var subjectField = document.getElementById('f-kind');
+      if (new URLSearchParams(window.location.search).get('subject') === 'gecko-weather' &&
+          subjectField && !subjectField.value) {
+        subjectField.value = 'ゲッコー天気について';
+      }
+
       // 絶対時刻ではなく「描画からの経過ミリ秒」を送る。
       // 絶対時刻だと利用者の時計がずれているだけで弾いてしまう。
       var loadedAt = Date.now();
