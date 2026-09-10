@@ -103,7 +103,9 @@ export default {
     const kindRaw = oneLine(form.get('kind') || '', 60);
     const message = String(form.get('message') || '').trim().slice(0, 4000);
 
-    const kind = KINDS.has(kindRaw) ? kindRaw : 'その他';
+    // 未選択・不正値を 'その他' に丸めると「個人情報の開示等のご請求」が埋没する。弾く。
+    if (!KINDS.has(kindRaw)) return json({ ok: false, error: 'invalid' }, 400);
+    const kind = kindRaw;
 
     if (!name || !EMAIL_RE.test(email) || message.length < 10) {
       return json({ ok: false, error: 'invalid' }, 400);
@@ -144,13 +146,16 @@ export default {
       }),
     }).catch(() => null);
 
-    // (g) Slack への保険通知。メールが隔離された場合の取りこぼしを防ぐ
+    // (g) Slack への保険通知。メールが隔離されても「届いたこと」に気づけるようにする。
+    //     氏名・メール・本文は載せない。載せると Slack (米国) への個人データの越境移転となり、
+    //     プライバシーポリシーへの記載と DPA の締結が別途必要になるため。
+    //     中身はメール本文で読む。ここで欲しいのは「来た」という事実だけ。
     if (env.SLACK_WEBHOOK) {
       await fetch(env.SLACK_WEBHOOK, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          text: `:mailbox_with_mail: お問い合わせ [${kind}]\n${name} / ${email}\n${message.slice(0, 800)}`,
+          text: `:mailbox_with_mail: eivrad.com にお問い合わせが1件届きました（種別: ${kind}）\ncontact@eivrad.com をご確認ください。`,
         }),
       }).catch(() => null);
     }
