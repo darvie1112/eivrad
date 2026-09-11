@@ -51,7 +51,7 @@
 .contact-section .eiv-field>label{display:flex;align-items:center;flex-wrap:wrap;gap:3px 6px;font-size:12px;letter-spacing:.02em;color:var(--ink);font-weight:500}
 .contact-section .eiv-field>label>span[lang=en]{font-size:10px;margin-left:0;font-weight:400;letter-spacing:0}
 .contact-section .eiv-field>label>em{margin-left:auto;font-size:9px;line-height:1.5;padding:3px 7px;border:0;border-radius:4px;background:#eef1e8;color:#566249;font-weight:500;letter-spacing:.02em;white-space:nowrap}
-.contact-section .eiv-field>label>em.is-optional{color:#73766e;background:#f3f4f0}
+.contact-section .eiv-field>label>em.is-optional{color:#62655d;background:#f3f4f0}
 .contact-section .eiv-field>input,.contact-section .eiv-field>select,.contact-section .eiv-field>textarea{border:1px solid #dcded5;border-radius:7px;background-color:#fafbf8;font-size:16px;line-height:1.6;padding:13px 14px;margin-top:10px;min-width:0;transition:border-color .2s,box-shadow .2s,background-color .2s}
 .contact-section .eiv-field>input::placeholder,.contact-section .eiv-field>textarea::placeholder{color:#85897e;opacity:1;font-size:13px}
 .contact-section .eiv-field>select{padding-right:40px;font-size:16px;min-height:53px}
@@ -71,7 +71,7 @@
 .eiv-privacy-details>div{display:grid;gap:13px;padding:4px 0 18px}
 .eiv-privacy-link{display:flex;align-items:center;gap:10px}
 .eiv-privacy-link a{display:inline-flex;align-items:center;min-height:30px}
-.eiv-sales-note{font-size:10px;color:#73766e}
+.eiv-sales-note{font-size:10px;color:#62655d}
 .contact-section .cf-turnstile{overflow-x:auto;min-height:65px}
 .contact-section .eiv-submit{justify-self:stretch;justify-content:space-between;gap:20px;width:100%;min-height:58px;padding-inline:24px;border-radius:7px;background:#30392d;border-color:#30392d;font-size:13px;letter-spacing:.08em;transition:background-color .2s,box-shadow .2s}
 .contact-section .eiv-submit:hover{background:#46533f;opacity:1;box-shadow:0 3px 10px #30392d18}

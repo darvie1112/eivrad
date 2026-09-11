@@ -22,6 +22,7 @@ const ALLOWED_ORIGIN = 'https://eivrad.com';
 const KINDS = new Set([
   '制作・開発のご相談',
   'ゲッコー天気について',
+  'Eve Voice について',
   '取材・掲載のご依頼',
   '個人情報の開示等のご請求',
   'その他',

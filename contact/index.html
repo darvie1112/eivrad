@@ -9,8 +9,8 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260911b" sizes="180x180">
   <meta name="description" content="合同会社Eivradへのお問い合わせフォームです。事業・デジタルコンテンツ・アプリケーションに関するご相談を承っております。">
   <link rel="canonical" href="https://eivrad.com/contact/">
-  <link rel="stylesheet" href="/assets/site.css?v=20260911a">
-  <link rel="stylesheet" href="/assets/contact.css?v=20260911a">
+  <link rel="stylesheet" href="/assets/site.css?v=20260911c">
+  <link rel="stylesheet" href="/assets/contact.css?v=20260911c">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ja_JP">
   <meta property="og:site_name" content="Eivrad LLC">
@@ -18,6 +18,12 @@
   <meta property="og:description" content="事業・デジタルコンテンツ・アプリケーションに関するご相談を承っております。">
   <meta property="og:url" content="https://eivrad.com/contact/">
   <script src="/assets/site.js" defer></script>
+<meta property="og:image" content="https://eivrad.com/assets/og-eivrad.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Eivrad — 日々に、ちいさな驚きを。">
+<meta name="twitter:card" content="summary_large_image">
 </head>
 <body id="top" class="contact-page">
   <a class="skip-link" href="#main">本文へスキップ</a>
@@ -80,6 +86,7 @@
               <option value="">選択してください</option>
               <option>制作・開発のご相談</option>
               <option>ゲッコー天気について</option>
+              <option>Eve Voice について</option>
               <option>取材・掲載のご依頼</option>
               <option>個人情報の開示等のご請求</option>
               <option>その他</option>
@@ -121,7 +128,7 @@
       </div>
     </section>
   </main>
-  <footer class="site-footer container"><div class="footer-top"><a class="wordmark" href="/" aria-label="Eivrad ホーム"><img src="/assets/eivrad-logo.png" width="1254" height="1254" loading="lazy" alt="Eivrad"></a><p>Little ideas. Lasting experiences.</p><a class="back-top" href="#top">BACK TO TOP <span aria-hidden="true">↑</span></a></div><div class="footer-bottom"><span>© 2026 Eivrad LLC</span><div class="footer-legal"><a href="/gecko-weather/">ゲッコー天気について</a><a href="/privacy.html">プライバシーポリシー</a><a href="/gecko-weather/terms.html">ゲッコー天気 利用規約</a></div><span>TOKYO, JAPAN</span></div></footer>
+  <footer class="site-footer container"><div class="footer-top"><a class="wordmark" href="/" aria-label="Eivrad ホーム"><img src="/assets/eivrad-logo.png" width="1254" height="1254" loading="lazy" alt="Eivrad"></a><p>Little ideas. Lasting experiences.</p><a class="back-top" href="#top">BACK TO TOP <span aria-hidden="true">↑</span></a></div><div class="footer-bottom"><span>© 2026 Eivrad LLC</span><div class="footer-legal"><a href="/evevoice/">Eve Voice について</a><a href="/gecko-weather/">ゲッコー天気について</a><a href="/privacy.html">プライバシーポリシー</a><a href="/tokushoho.html">特定商取引法に基づく表記</a><a href="/gecko-weather/privacy.html">ゲッコー天気 プライバシー</a><a href="/gecko-weather/terms.html">ゲッコー天気 利用規約</a></div><span>TOKYO, JAPAN</span></div></footer>
 
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <script>
@@ -133,9 +140,11 @@
 
       // Only known support links may preselect a subject; preserve restored input.
       var subjectField = document.getElementById('f-kind');
-      if (new URLSearchParams(window.location.search).get('subject') === 'gecko-weather' &&
+      var supportSubjects = { 'gecko-weather': 'ゲッコー天気について', 'evevoice': 'Eve Voice について' };
+      var requestedSubject = new URLSearchParams(window.location.search).get('subject');
+      if (Object.prototype.hasOwnProperty.call(supportSubjects, requestedSubject) &&
           subjectField && !subjectField.value) {
-        subjectField.value = 'ゲッコー天気について';
+        subjectField.value = supportSubjects[requestedSubject];
       }
 
       // 絶対時刻ではなく「描画からの経過ミリ秒」を送る。

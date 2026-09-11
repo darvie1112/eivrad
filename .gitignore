@@ -1,3 +1,5 @@
 .DS_Store
-worker/node_modules/
-worker/.wrangler/
+.claude/
+.wrangler/
+node_modules/
+HANDOFF.md

@@ -1,0 +1,39 @@
+/* Document layouts use the site's paper, type, and rules without changing other pages. */
+.legal-header .header-inner{gap:20px;flex-wrap:nowrap}
+.legal-product-link{display:inline-flex;align-items:center;gap:14px;min-height:44px;font-size:12px;line-height:1.8}
+.legal-product-link:hover{text-decoration:underline}
+.legal-document{max-width:800px;overflow-wrap:break-word}
+.legal-document h1,.legal-notice>h1{font-size:34px;line-height:1.65;letter-spacing:-.035em}
+.legal-document .date{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.8}
+.legal-document p:not(.date){margin-top:28px;font-size:15px;line-height:1.9}
+.legal-document ol{display:grid;gap:28px;margin:32px 0 0;padding-left:1.55em;color:var(--muted);font-size:15px;line-height:1.9}
+.legal-document li{padding-left:6px;min-width:0}
+.legal-document li::marker{font-size:12px;color:var(--muted)}
+.legal-document strong{font-weight:500;color:var(--ink)}
+.legal-document a{color:var(--ink);text-decoration:underline;text-decoration-color:#b9bcae}
+.legal-document a:hover{text-decoration-color:var(--ink)}
+.legal-translation{margin-top:64px;padding-top:44px;border-top:1px solid var(--line)}
+.legal-translation h2{font-size:27px;line-height:1.55;letter-spacing:-.025em}
+.legal-notice .legal{max-width:800px}
+.legal-notice .legal-item h2{font-size:16px;letter-spacing:.02em;line-height:1.8;padding-bottom:14px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:16px}
+.legal-notice .legal-lead,.legal-notice .legal-item p,.legal-notice .legal-ol{font-size:15px;line-height:1.9}
+.legal-notice .legal-dl>div{font-size:14px}
+.legal-notice .legal-dl dt{font-size:12px}
+.legal-notice .legal-dl dd{min-width:0;overflow-wrap:break-word}
+.legal-notice .legal-dl dd>.english-copy{font-size:11px}
+.legal-notice .legal-item p strong{color:var(--ink);font-weight:600}
+@media(max-width:760px){
+  .legal-document h1,.legal-notice>h1{font-size:29px;line-height:1.65}
+  .legal-document ol{gap:26px;padding-left:1.4em}
+  .legal-document li{padding-left:4px}
+  .legal-translation{margin-top:48px;padding-top:32px}
+  .legal-translation h2{font-size:24px}
+  .legal-notice .legal-item h2{font-size:16px;gap:12px}
+  .legal-notice .legal-dl dd{font-size:14px}
+}
+@media(max-width:380px){
+  .legal-header .header-inner{gap:12px}
+  .legal-header .wordmark{width:108px}
+  .legal-product-link{font-size:11px;gap:6px}
+  .legal-document h1,.legal-notice>h1{font-size:26px}
+}
