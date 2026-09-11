@@ -52,7 +52,7 @@
 .legal{max-width:760px;margin-top:40px;display:grid;gap:52px}
 .legal-lead{font-size:13px;line-height:2.1;color:var(--muted);letter-spacing:.02em}
 .legal-item{display:grid;gap:16px}
-.legal-item h3{font-size:15px;letter-spacing:.02em;line-height:1.8;padding-bottom:14px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:16px}
+.legal-item :is(h2,h3){font-size:15px;letter-spacing:.02em;line-height:1.8;padding-bottom:14px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:16px}
 .legal-no{font-size:10px;color:var(--muted);letter-spacing:.1em;flex-shrink:0;min-width:14px}
 .legal-item p{font-size:13px;line-height:2.1;color:var(--muted);letter-spacing:.02em}
 .legal-ol{margin:0;padding-left:1.4em;display:grid;gap:9px;font-size:13px;line-height:2.05;color:var(--muted);letter-spacing:.02em}
@@ -65,7 +65,7 @@
 .legal a:hover{text-decoration-color:var(--ink)}
 .legal-date{font-size:11px;color:var(--muted);letter-spacing:.06em}
 .legal-note{font-size:12px;line-height:2;color:var(--muted);padding:20px 24px;background:var(--soft)}
-@media(max-width:760px){.legal{gap:40px;margin-top:30px}.legal-lead{font-size:12.5px}.legal-item h3{font-size:14px;gap:12px}.legal-dl>div{grid-template-columns:1fr;gap:5px;padding:15px 0}.legal-dl dd{font-size:12.5px}}
+@media(max-width:760px){.legal{gap:40px;margin-top:30px}.legal-lead{font-size:12.5px}.legal-item :is(h2,h3){font-size:14px;gap:12px}.legal-dl>div{grid-template-columns:1fr;gap:5px;padding:15px 0}.legal-dl dd{font-size:12.5px}}
 
 /* Turnstile の固定 300px が狭幅でグリッドを押し広げるのを止める */
 .cf-turnstile{max-width:100%}
@@ -74,3 +74,27 @@
 @media(hover:none) and (pointer:coarse){.eiv-field>input,.eiv-field>select,.eiv-field>textarea{font-size:16px}}
 .eiv-field>input[aria-invalid=true],.eiv-field>select[aria-invalid=true],.eiv-field>textarea[aria-invalid=true]{border-color:#8a4b32}
 .eiv-noscript b{font-weight:500;color:var(--ink)}
+
+/* Product links retain the company's quiet, line-led layout. */
+.home-products{margin-top:62px;padding-top:32px;border-top:1px solid #cfd2c6}
+.home-products-heading{display:flex;align-items:baseline;justify-content:space-between;gap:20px;margin-bottom:28px}
+.home-products-heading .eyebrow{color:var(--muted)}
+.home-products-heading h3{font-size:20px;letter-spacing:-.025em}
+.home-product-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.home-product{display:flex;flex-direction:column;min-width:0;padding:30px 40px 10px 0;border-top:1px solid #cfd2c6}
+.home-product+.home-product{padding-left:40px;padding-right:0;border-left:1px solid #cfd2c6}
+.home-product-meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 16px;font-size:10px;letter-spacing:.04em;color:var(--muted)}
+.home-product h4{margin:27px 0 15px;font-size:32px;font-weight:500;line-height:1.5;letter-spacing:-.035em}
+.home-product>p{font-size:14px;line-height:2;color:var(--muted);margin-bottom:24px}
+.home-product-link{display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:12px;margin-top:auto;padding-block:12px}
+.home-product-link>span{font-size:23px;transition:transform .2s}
+.home-product:hover .home-product-link>span{transform:translate(3px,-3px)}
+.home-product--voice h4{color:#3f5670}.home-product--gecko h4{color:#4c6249}
+.footer-legal{font-size:11px;gap:2px 18px;max-width:900px}.footer-legal a{min-height:36px;display:inline-flex;align-items:center}
+@media(max-width:760px){.home-products{margin-top:34px;padding-top:26px}.home-products-heading{display:block;margin-bottom:20px}.home-products-heading h3{font-size:20px;margin-top:12px;line-height:1.8}.home-product-list{grid-template-columns:1fr}.home-product,.home-product+.home-product{padding:26px 0 18px;border-left:0}.home-product h4{font-size:29px;margin-top:20px}.home-product>p{font-size:14px}.home-product-meta{font-size:9px}.footer-legal{font-size:11px;gap:0 16px}.footer-legal a{min-height:44px}}
+@media(max-width:380px){.home-product-meta{letter-spacing:0}.home-product>p{font-size:13px}}
+
+.legal-page-title{font-size:34px;letter-spacing:-.035em;line-height:1.65}
+@media(max-width:760px){.legal-page-title{font-size:29px}}
+
+:is(.ev-page,.gecko-page) .contact :focus-visible{outline-color:var(--paper)}
