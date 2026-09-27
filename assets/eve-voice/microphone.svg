@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 260" fill="none">
+  <rect x="35" y="40" width="410" height="180" rx="4" fill="#fafaf7" stroke="#c6cdd6"/>
+  <rect x="70" y="80" width="24" height="48" rx="12" stroke="#3f5670" stroke-width="2"/>
+  <path d="M61 111v7a21 21 0 0 0 42 0v-7m-21 28v17m-10 0h20" stroke="#3f5670" stroke-width="2" stroke-linecap="round"/>
+  <rect x="127" y="73" width="288" height="45" rx="3" stroke="#c6cdd6"/>
+  <text x="147" y="102" fill="#3f5670" font-family="Helvetica Neue,Arial,sans-serif" font-size="19">USB Microphone</text>
+  <path d="m389 93 6 6 6-6" stroke="#3f5670"/>
+  <path d="M136 142v26m17-26v26m17-26v26m17-26v26m17-26v26m17-26v26m17-26v26m17-26v26m17-26v26m17-26v26" stroke="#718399" stroke-width="9"/>
+  <path d="M306 142v26m17-26v26m17-26v26m17-26v26m17-26v26m17-26v26" stroke="#dcded5" stroke-width="9"/>
+  <path d="M127 190h155" stroke="#c6cdd6"/>
+</svg>
