@@ -13,9 +13,10 @@
   <meta property="og:description" content="発売準備中。音声認識もAI整文もMac内で。専門用語は自分の辞書に、英文は選択して日本語に。4,980円買い切り・14日間無料体験を予定しています。">
   <meta property="og:url" content="https://eivrad.com/evevoice/">
   <link rel="stylesheet" href="/assets/site.css?v=20260911c">
-  <link rel="stylesheet" href="/assets/eve-voice.css?v=20260927a">
+  <link rel="stylesheet" href="/assets/eve-voice.css?v=20260927b">
   <meta name="robots" content="index,follow">
   <script src="/assets/site.js" defer></script>
+  <script src="/assets/eve-voice.js?v=20260927b" defer></script>
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ja_JP">
 <meta property="og:site_name" content="Eivrad LLC">
@@ -54,7 +55,7 @@
         </div>
       </div>
       <figure class="ev-appshot">
-        <img src="/assets/eve-voice-screen.png" width="1120" height="720" alt="Eve Voiceの主画面。マイクの選択と、整えた文章の確認ができます。" decoding="async">
+        <img src="/assets/eve-voice-screen.png?v=20260927-2" width="1120" height="720" alt="Eve Voiceの主画面。マイクの選択と、整えた文章の確認ができます。" decoding="async">
         <figcaption><span class="eyebrow">EVE VOICE ON MAC</span><span>実際のアプリ画面。表示内容はデモ用です。</span></figcaption>
       </figure>
       <div class="ev-hero-bottom"><a href="#spec-title">APPLE SILICON / macOS 26 以降 <span aria-hidden="true">↘</span></a><span>認識も整文も、このMacの中で。</span></div>
@@ -63,35 +64,36 @@
     <section class="ev-how section container" id="how-it-works" aria-labelledby="how-title">
       <div class="section-heading"><p class="eyebrow"><span class="section-number">01</span> HOW IT WORKS</p><span class="section-note">いつもの入力欄で</span></div>
       <div class="ev-how-grid">
-        <h2 id="how-title">入力の流れは、<br>3ステップ。</h2>
+        <div><h2 id="how-title">入力の流れは、<br>3ステップ。</h2><p class="ev-illustration-label">図は操作のイメージです。</p></div>
         <ol class="ev-workflow">
-          <li><span class="ev-step-number" aria-hidden="true">01</span><div><h3>入力欄を選ぶ。</h3><p>文字を入れたい場所に、カーソルを置きます。</p></div></li>
-          <li><span class="ev-step-number" aria-hidden="true">02</span><div><h3>キーを押して、話す。</h3><p>Fn・🌐 や F9 など、使いやすい録音キーを設定できます。長押しと、押して開始・押して終了の操作から選べます。</p></div></li>
-          <li><span class="ev-step-number" aria-hidden="true">03</span><div><h3>整えた文章を、その場所へ。</h3><p>録音を終えると、元の入力欄へ貼り付けます。Enterによる送信はしません。貼り付けられない場合も、アプリで結果を確認・コピーできます。</p></div></li>
+          <li><img class="ev-step-image" src="/assets/eve-voice/input.svg" width="480" height="260" alt="" loading="lazy"><span class="ev-step-number" aria-hidden="true">01</span><div><h3>入力欄を選ぶ。</h3><p>メモやチャットなど、文字を入れたい場所にカーソルを置きます。</p></div></li>
+          <li><img class="ev-step-image" src="/assets/eve-voice/record.svg" width="480" height="260" alt="" loading="lazy"><span class="ev-step-number" aria-hidden="true">02</span><div><h3>キーを押して、話す。</h3><p>Fn・🌐 や F9 など、好きな録音キーを設定。長押し、または押すたびに開始・終了する操作を選べます。</p></div></li>
+          <li><img class="ev-step-image" src="/assets/eve-voice/paste.svg" width="480" height="260" alt="" loading="lazy"><span class="ev-step-number" aria-hidden="true">03</span><div><h3>整えて、その場所へ。</h3><p>録音を終えると、元の入力欄へ貼り付けます。Enterによる送信はしません。</p></div></li>
         </ol>
       </div>
-      <p class="ev-note">入力欄の種類やアプリによっては、自動貼り付けに対応しない場合があります。公開後の無料体験で、普段お使いの環境との相性をご確認ください。</p>
+      <p class="ev-note">入力欄によっては自動貼り付けに対応しません。その場合も、アプリで結果を確認・コピーできます。公開後の無料体験で、普段の環境との相性をご確認ください。</p>
       <figure class="ev-demo" aria-labelledby="demo-title">
         <figcaption>
           <p class="eyebrow">SEE IT IN USE</p>
           <h3 id="demo-title">例文を、整える。<br>その動きを動画で。</h3>
           <p>アプリに用意された例文を、端末内AIで整える操作です。再生ボタンからご覧ください。</p>
         </figcaption>
-        <video controls playsinline preload="none" width="1120" height="720" poster="/assets/eve-voice-screen.png" aria-label="Eve Voiceで例文を整える実機操作（音声なし）" aria-describedby="demo-description">
-          <source src="/assets/eve-voice-demo.mp4" type="video/mp4">
-          <p>動画を再生できない場合は、<a href="/assets/eve-voice-demo.mp4">操作デモの動画を開いてください</a>。</p>
+        <video controls playsinline preload="none" width="1120" height="688" poster="/assets/eve-voice-screen.png?v=20260927-2" aria-label="Eve Voiceで例文を整える実機操作（音声なし）" aria-describedby="demo-description">
+          <source src="/assets/eve-voice-demo.mp4?v=20260927-2" type="video/mp4">
+          <p>動画を再生できない場合は、<a href="/assets/eve-voice-demo.mp4?v=20260927-2">操作デモの動画を開いてください</a>。</p>
         </video>
-        <p id="demo-description" class="ev-media-note">実際のアプリで例文を整える操作（音声なし）。音声認識の速度を示す動画ではありません。</p>
+        <p id="demo-description" class="ev-media-note">内蔵の例文を整える、実際のアプリ操作です（音声なし）。</p>
       </figure>
     </section>
 
     <section class="ev-features section" id="features" aria-labelledby="features-title"><div class="container">
       <div class="section-heading"><p class="eyebrow"><span class="section-number">02</span> FEATURES</p><span class="section-note">できること</span></div>
       <h2 id="features-title">毎日の入力に、<br>使い続けられる工夫を。</h2>
+      <p class="ev-illustration-label">図は各機能のイメージです。</p>
       <div class="ev-feature-list">
-        <article><span class="ev-feature-number" aria-hidden="true">01 / ON YOUR MAC</span><div><h3>認識も整文も、Mac内で。</h3><p>録音した音声をクラウドの文字起こしサービスへ送らず、このMacで処理します。音声と音声入力の履歴は保存しません。モデルの取得やライセンス確認、更新には通信を使います。</p></div></article>
-        <article><span class="ev-feature-number" aria-hidden="true">02 / YOUR MICROPHONE</span><div><h3>使うマイクが、わかる。</h3><p>内蔵マイクやUSBマイクなど、使う入力機器を選べます。機器名と音量を画面で確認でき、小さい声の補正にも対応。音が小さい・途中で途切れた時は、結果を確認するための案内を表示します。</p></div></article>
-        <article><span class="ev-feature-number" aria-hidden="true">03 / YOUR WORDS</span><div><h3>用途に合わせて、整える。</h3><p>「自然な文章」「箇条書き」「そのまま」から仕上げを選べます。認識した原文と整文結果を見比べ、必要なら手直し。画面の文字を参照して、固有名詞の表記を補正する機能も選べます。</p></div></article>
+        <article><span class="ev-feature-number" aria-hidden="true">01 / ON YOUR MAC</span><img class="ev-feature-image" src="/assets/eve-voice/local.svg" width="480" height="260" alt="" loading="lazy"><div><h3>認識も整文も、Mac内で。</h3><p>声から文章へ。その処理はMacの中で完結します。録音した音声と音声入力の履歴は保存しません。</p><p class="ev-feature-footnote">モデルの取得、ライセンス確認、更新には通信を使います。</p></div></article>
+        <article><span class="ev-feature-number" aria-hidden="true">02 / YOUR MICROPHONE</span><img class="ev-feature-image" src="/assets/eve-voice/microphone.svg" width="480" height="260" alt="" loading="lazy"><div><h3>使うマイクが、わかる。</h3><p>内蔵・USBなどのマイクを選び、機器名と音量を画面で確認。小さい声の補正にも対応します。</p><p class="ev-feature-footnote">音が小さい時や途中で途切れた時は、確認のための案内を表示します。</p></div></article>
+        <article><span class="ev-feature-number" aria-hidden="true">03 / YOUR WORDS</span><img class="ev-feature-image" src="/assets/eve-voice/polish.svg" width="480" height="260" alt="" loading="lazy"><div><h3>用途に合わせて、整える。</h3><p>自然な文章、箇条書き、そのまま。仕上げを選び、原文と見比べながら手直しできます。</p><p class="ev-feature-footnote">画面の文字を参照して、固有名詞の表記を補正する機能も選べます。</p></div></article>
       </div>
       <p class="ev-note">音声認識・AI整文は、聞き違いや意味の変化が起こることがあります。人名・数字・日付・否定を含む文章は、使う前に原文と結果をご確認ください。AI整文には、Apple Intelligenceが使える状態が必要です。</p>
     </div></section>
@@ -107,29 +109,69 @@
         <figure class="ev-wordbook" aria-labelledby="wordbook-title" aria-describedby="wordbook-note">
           <figcaption id="wordbook-title"><span>聞き取られた表記</span><span>使いたい表記</span></figcaption>
           <dl>
-            <div><dt>コーデックス</dt><dd><span aria-hidden="true">→</span> Codex</dd></div>
-            <div><dt>ユーチューブスタジオ</dt><dd><span aria-hidden="true">→</span> YouTube Studio</dd></div>
-            <div><dt>ディストロキッド</dt><dd><span aria-hidden="true">→</span> DistroKid</dd></div>
+            <div><dt>クロード</dt><dd><span aria-hidden="true">→</span> Claude</dd></div>
+            <div><dt>ジェミニ</dt><dd><span aria-hidden="true">→</span> Gemini</dd></div>
+            <div><dt>プレミアプロ</dt><dd><span aria-hidden="true">→</span> Premiere Pro</dd></div>
           </dl>
           <p id="wordbook-note">辞書に登録する組み合わせの例です。すべての聞き違いを補正できるわけではありません。</p>
         </figure>
       </div>
       <div class="ev-dictionary-tools">
-        <div><h3>必要なパックを選ぶ。</h3><p>「基本・よく使うアプリ」「YouTube・動画制作」「AI・BGM 制作」のパックを用意。使う分野を選んで、自分の辞書を作れます。</p></div>
-        <div><h3>手持ちの用語集を取り込む。</h3><p>対応する書式のJSON・CSV・テキストファイルを、内容を確認して登録できます。選んだ項目だけをJSONで書き出し、別のMacのEve Voiceへ持ち運ぶこともできます。</p></div>
+        <div class="ev-dictionary-heading"><h3>必要なパックを選ぶ。</h3><p>使う分野だけ、自分の辞書に。各25語のパックを用意しています。</p></div>
+        <div class="ev-pack-grid" aria-label="辞書パックと登録語の例">
+          <article class="ev-pack">
+            <div class="ev-pack-top"><svg viewBox="0 0 52 44" fill="none" aria-hidden="true"><path d="M2 12V4h18l6 8h24v29H2V12Z" stroke="currentColor"/><path d="M2 12h48M19 23h14m-14 6h10" stroke="currentColor"/></svg><span>25 WORDS</span></div>
+            <h4>基本・よく使うアプリ</h4><p>日々の仕事とAIツールに。</p>
+            <ul><li>Claude</li><li>Gemini</li><li>ChatGPT</li><li>Notion</li></ul>
+          </article>
+          <article class="ev-pack">
+            <div class="ev-pack-top"><svg viewBox="0 0 52 44" fill="none" aria-hidden="true"><path d="M2 12V4h18l6 8h24v29H2V12Z" stroke="currentColor"/><path d="M2 12h48" stroke="currentColor"/><path d="m22 21 11 6-11 6V21Z" stroke="currentColor"/></svg><span>25 WORDS</span></div>
+            <h4>YouTube・動画制作</h4><p>編集から公開までの用語を。</p>
+            <ul><li>Premiere Pro</li><li>YouTube Studio</li><li>After Effects</li><li>OBS Studio</li></ul>
+          </article>
+          <article class="ev-pack">
+            <div class="ev-pack-top"><svg viewBox="0 0 52 44" fill="none" aria-hidden="true"><path d="M2 12V4h18l6 8h24v29H2V12Z" stroke="currentColor"/><path d="M2 12h48m-32 11v8m5-12v16m6-12v8m5-10v12" stroke="currentColor"/></svg><span>25 WORDS</span></div>
+            <h4>AI・BGM 制作</h4><p>音楽づくりの名前と用語を。</p>
+            <ul><li>Suno</li><li>Mureka</li><li>Logic Pro</li><li>LUFS</li></ul>
+          </article>
+        </div>
+        <p class="ev-illustration-label">パックの内容例です。追加前に一覧を確認できます。すでに登録した自分の表記が優先されます。</p>
+        <div class="ev-dictionary-heading ev-import-heading"><h3>手持ちの用語集も、<br class="mobile-break">いつもの辞書に。</h3><p>対応する書式のファイルを読み込み、内容を見てから追加できます。</p></div>
+        <ol class="ev-import-flow" aria-label="用語集の読み込みと書き出しの流れ">
+          <li><span class="ev-flow-label">01 / 読み込む</span><div class="ev-file-stack" aria-hidden="true"><span>JSON</span><span>CSV</span><span>TXT</span></div><h4>ファイルを選ぶ</h4><p>使い慣れた用語を、まとめて。</p></li>
+          <li><span class="ev-flow-label">02 / 確認する</span><div class="ev-import-preview"><div><span>クロード</span><span aria-hidden="true">→</span><strong>Claude</strong></div><div><span>ジェミニ</span><span aria-hidden="true">→</span><strong>Gemini</strong></div><p>追加する内容をプレビュー</p></div><h4>表記を見てから追加</h4><p>重複や表記の違いも確認できます。</p></li>
+          <li><span class="ev-flow-label">03 / 持ち運ぶ</span><div class="ev-export-image" aria-hidden="true"><svg viewBox="0 0 84 62" fill="none"><rect x="12" y="7" width="60" height="40" rx="2" stroke="currentColor"/><path d="M4 54h76M28 26h28m-8-7 8 7-8 7" stroke="currentColor"/></svg><span>JSON</span></div><h4>必要な項目だけ書き出す</h4><p>別のMacのEve Voiceへ引き継げます。</p></li>
+        </ol>
+        <p class="ev-illustration-label">図は操作のイメージです。読み込みにはEve Voiceが対応する書式が必要です。</p>
       </div>
     </section>
 
     <section class="ev-translation section" id="translation" aria-labelledby="translation-title"><div class="container">
       <div class="section-heading"><p class="eyebrow"><span class="section-number">04</span> ENGLISH TO JAPANESE</p><span class="section-note">読む時にも</span></div>
       <div class="ev-detail-grid">
-        <div class="ev-detail-copy"><h2 id="translation-title">英文は、選んで<br>「翻訳して」。</h2><p>ブラウザで読む記事や、ツールの英語の説明。文章を選択して話すか、翻訳キーを押すと、日本語を別の表示で確認できます。元の英文は書き換えません。</p></div>
+        <div class="ev-detail-copy"><h2 id="translation-title">英文を選んで、<br>ワンプッシュ。</h2><p>記事やツールの英語の説明を選び、設定した翻訳キーを押すだけ。「翻訳して」と話して操作することもできます。元の英文は書き換えません。</p></div>
         <div class="ev-translation-details">
           <div><h3>英語から日本語へ、Mac内で。</h3><p>原文と訳文を見比べながら読めます。人名や製品名は「翻訳の用語」に表記を登録でき、訳文のコピーやテキストへの書き出しにも対応します。</p></div>
           <div><h3>あとから、もう一度読む。</h3><p>翻訳履歴は、このMacに最新200件まで保存できます。保存は設定でオフにでき、残した履歴の消去も可能です。</p></div>
           <p class="ev-note">一部のアプリでは選択文字を取得できません。訳文は原文と照合してお使いください。翻訳モデルが未準備の場合は、初回に取得します。</p>
         </div>
       </div>
+      <div class="ev-translate-sample" aria-labelledby="translate-sample-title">
+        <div class="ev-translate-sample-heading"><h3 id="translate-sample-title">選んだ英文が、日本語になる。</h3><p>固定の例文で、操作のイメージをお試しください。</p></div>
+        <div class="ev-translate-panels">
+          <div class="ev-translate-source"><span class="ev-flow-label">01 / 英文を選ぶ</span><p lang="en"><mark>Select the text and press the translation shortcut.</mark></p><span class="ev-sample-caption">英語の説明文を選択したイメージ</span></div>
+          <div class="ev-translate-result"><span class="ev-flow-label">02 / キーを押すと、日本語に</span><div id="translation-sample-output" aria-live="polite" aria-atomic="true"><p class="ev-sample-placeholder">下のボタンを押すと、訳文を表示します。</p></div><span class="ev-sample-caption">元の英文は、そのまま</span></div>
+        </div>
+        <div class="ev-translate-actions"><button type="button" class="ev-sample-button" id="translation-sample-button" aria-controls="translation-sample-output" aria-expanded="false" hidden><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 4h8m-4-2v2m-2 2c1 4 4 6 7 7m-3-9c0 4-2 7-6 9m10-5 4 9m-6 0 4-9m-2 6h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-sample-label>例文を日本語に</span><span aria-hidden="true">→</span></button><p>このページでは、用意した訳文を表示します。実際の翻訳はEve Voiceアプリで行います。</p></div>
+        <noscript><p class="ev-sample-nojs">例文の訳：テキストを選択し、翻訳のショートカットキーを押してください。</p></noscript>
+      </div>
+      <details class="ev-translation-video">
+        <summary>実際のアプリで、翻訳する様子を見る<span>約10秒・音声なし</span></summary>
+        <figure class="ev-translation-recording">
+          <figcaption><p class="eyebrow">RECORDED IN EVE VOICE</p><h3>例文から、<br>日本語の結果まで。</h3><p>アプリ内の「翻訳を試す」を押し、英語の例文をこのMacで翻訳する実際の操作です。</p><p id="translation-video-description" class="ev-note">内蔵例文を翻訳する実操作です（音声なし）。処理時間は使用環境によって異なります。</p></figcaption>
+          <video controls playsinline preload="none" width="592" height="688" poster="/assets/eve-voice-translation.png" aria-label="Eve Voiceで内蔵例文を翻訳する実機操作（音声なし）" aria-describedby="translation-video-description"><source src="/assets/eve-voice-translation.mp4" type="video/mp4"><p><a href="/assets/eve-voice-translation.mp4">翻訳操作の動画を開く</a></p></video>
+        </figure>
+      </details>
     </div></section>
 
     <section class="section container" id="price" aria-labelledby="price-title">
@@ -165,7 +207,7 @@
         <div><dt>対応機種</dt><dd>Apple シリコン搭載の Mac（M1 以降）</dd></div>
         <div><dt>OS</dt><dd>macOS 26 以降</dd></div>
         <div><dt>文章を整える機能</dt><dd>Apple Intelligence が使える状態であること。使えない場合も、音声入力そのものはご利用いただけます</dd></div>
-        <div><dt>音声認識とメモリ</dt><dd>「速さ重視」はAppleの音声認識、「精度重視」はWhisper large-v3を使用します。8GBのMacでは速さ重視をご利用ください。精度重視はメモリ16GB以上のMacで利用できます。</dd></div>
+        <div><dt>音声認識とメモリ</dt><dd>8GBのMacでは「速さ重視（Apple）」を使用します。「精度重視（Whisper large-v3）」は16GB以上のMac向けです。</dd></div>
         <div><dt>空き容量</dt><dd>精度重視は、初回に約3.1GBのモデルを取得します。取得用の容量に加え、1GB以上の余裕が必要です。速さ重視には、このWhisperモデルの取得は不要です。</dd></div>
         <div><dt>インターネット</dt><dd>初回のモデル準備、ライセンスの確認、更新の取得にはインターネット接続が必要です。音声認識・AI整文・翻訳の処理はMac内で行います。</dd></div>
       </dl>
