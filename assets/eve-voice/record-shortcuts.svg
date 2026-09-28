@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 260" fill="none" role="img" aria-labelledby="record-title record-description">
+  <title id="record-title">録音キーの設定例</title>
+  <desc id="record-description">Fn・地球儀キー、F9、またはcontrolとoptionとSpaceの組み合わせから設定できます。実際の画面ではなく、キーのイメージです。</desc>
+  <g font-family="Helvetica Neue,Hiragino Sans,Arial,sans-serif" text-anchor="middle">
+    <text x="240" y="28" fill="#65665f" font-size="17">録音キーの例</text>
+    <rect x="51" y="49" width="140" height="66" rx="6" fill="#fafaf7" stroke="#c6cdd6"/>
+    <path d="M62 105h118" stroke="#c6cdd6"/>
+    <text x="88" y="88" fill="#3f5670" font-size="27">Fn</text>
+    <text x="120" y="87" fill="#9aa5b0" font-size="23">/</text>
+    <g stroke="#3f5670" stroke-width="1.3">
+      <circle cx="151" cy="79" r="11"/>
+      <ellipse cx="151" cy="79" rx="4.5" ry="11"/>
+      <path d="M140 79h22m-20-5h18m-18 10h18"/>
+    </g>
+    <text x="240" y="87" fill="#9aa5b0" font-size="16">または</text>
+    <rect x="289" y="49" width="140" height="66" rx="6" fill="#fafaf7" stroke="#c6cdd6"/>
+    <path d="M300 105h118" stroke="#c6cdd6"/>
+    <text x="359" y="88" fill="#3f5670" font-size="27">F9</text>
+    <text x="240" y="144" fill="#9aa5b0" font-size="16">または</text>
+    <rect x="32" y="162" width="108" height="70" rx="6" fill="#fafaf7" stroke="#c6cdd6"/>
+    <rect x="168" y="162" width="120" height="70" rx="6" fill="#fafaf7" stroke="#c6cdd6"/>
+    <rect x="316" y="162" width="132" height="70" rx="6" fill="#fafaf7" stroke="#c6cdd6"/>
+    <path d="M43 223h86m50 0h98m50 0h110" stroke="#c6cdd6"/>
+    <text x="86" y="190" fill="#3f5670" font-size="26">⌃</text>
+    <text x="86" y="212" fill="#3f5670" font-size="17">control</text>
+    <text x="154" y="205" fill="#9aa5b0" font-size="21">+</text>
+    <text x="228" y="190" fill="#3f5670" font-size="26">⌥</text>
+    <text x="228" y="212" fill="#3f5670" font-size="17">option / alt</text>
+    <text x="302" y="205" fill="#9aa5b0" font-size="21">+</text>
+    <text x="382" y="204" fill="#3f5670" font-size="24">Space</text>
+  </g>
+</svg>
