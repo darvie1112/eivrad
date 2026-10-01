@@ -49,8 +49,9 @@
           <p class="contact-description">事業・デジタルコンテンツ・アプリケーションに関するお問い合わせを承っております。<br>どうぞお気軽にご連絡ください。</p>
           <div class="contact-response">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-            <div><p>3営業日以内にご返信いたします</p><span lang="en">We reply within three business days.</span></div>
+            <div><p>通常のお問い合わせは3営業日以内にご返信いたします</p><span lang="en">General inquiries: within three business days.</span></div>
           </div>
+          <p class="contact-description">代表者・通信販売責任者の氏名や電話番号の開示請求には、遅滞なく電子メールで回答いたします。フォームの「その他」から、ご希望の事項をご記入ください。<br><span lang="en">Requests for our representative's name, mail-order business manager's name, or phone number are answered by email without delay. Select “その他” (Other) and tell us which information you need.</span></p>
           <a class="contact-home" href="/"><span aria-hidden="true">←</span> ホームへ戻る</a>
         </div>
 
@@ -140,7 +141,7 @@
 
       // Only known support links may preselect a subject; preserve restored input.
       var subjectField = document.getElementById('f-kind');
-      var supportSubjects = { 'gecko-weather': 'ゲッコー天気について', 'evevoice': 'Eve Voice について' };
+      var supportSubjects = { 'gecko-weather': 'ゲッコー天気について', 'evevoice': 'Eve Voice について', 'business-info': 'その他' };
       var requestedSubject = new URLSearchParams(window.location.search).get('subject');
       if (Object.prototype.hasOwnProperty.call(supportSubjects, requestedSubject) &&
           subjectField && !subjectField.value) {
@@ -205,7 +206,7 @@
             if (result && result.ok) {
               form.querySelectorAll('.eiv-form-heading, .eiv-field, .cf-turnstile, .eiv-notice, .eiv-submit').forEach(function (el) { el.hidden = true; });
               status.className = 'eiv-status is-done';
-              status.textContent = 'お問い合わせを承りました。3営業日以内にご返信いたします。';
+              status.textContent = 'お問い合わせを承りました。代表者・通信販売責任者の氏名や電話番号の開示請求には遅滞なく、通常のお問い合わせには3営業日以内に電子メールで回答いたします。';
               return;
             }
             button.disabled = false;
