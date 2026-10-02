@@ -18,3 +18,8 @@ simple = { limit = 5, period = 60 }
 
 # シークレットはここに書かない。wrangler secret put で投入すること。
 #   TURNSTILE_SECRET / RESEND_API_KEY / NOTIFY_TO / SLACK_WEBHOOK
+
+# 実行ログ（Workers Logs）を使わない。問い合わせの本文・メールアドレス・IP を Cloudflare の
+# ログに残さない（2026-10-02・ゲッコー天気のポリシーの保存期間に合わせる）。
+[observability]
+enabled = false
