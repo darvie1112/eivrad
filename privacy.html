@@ -64,6 +64,8 @@
             <li>上記の対応履歴の記録および保存のため</li>
             <li>当社が提供するアプリケーションおよびサービスに関する不具合対応、サポートのため</li>
             <li>取引先との連絡、契約の履行および経理処理のため</li>
+            <li>当社のアプリ「Eve Voice」の購入の処理、ライセンスキーの発行・送付・再送、Mac の登録の管理、無料体験の期間の管理のため</li>
+            <li>ライセンスの不正な利用の防止、ならびに返金および支払いの取消しへの対応のため</li>
             <li>法令に基づく対応のため</li>
           </ol>
           <p>当社は、あらかじめご本人の同意を得ることなく、上記の利用目的の達成に必要な範囲を超えて個人情報を取り扱うことはいたしません。また、営業目的の連絡には利用いたしません。</p>
@@ -89,6 +91,7 @@
           <h2 id="p5"><span class="legal-no">5</span>外国にある第三者への提供</h2>
           <p>当社は、お問い合わせフォームの受付および通知処理について、Cloudflare, Inc.（米国）および Resend, Inc.（米国）のサービスを利用しており、お預かりした個人データは、これらの事業者の設備を経由して米国内で取り扱われます。これは個人情報保護法第28条にいう外国にある第三者への提供に該当します。</p>
           <p>また、当社のアプリ「ゲッコー天気」の購入の処理には RevenueCat, Inc.（米国）のサービスを利用しています。購入データの削除等のご請求にお応えする際は、ご請求いただいた注文番号をもとに、同社の設備にある記録を照会・削除するため、この範囲で個人データが米国内で取り扱われます。同社とはデータ処理契約（<a href="https://www.revenuecat.com/dpa">RevenueCat DPA</a>）を締結しています（次の段落の「これらの事業者」には同社を含みます）。アプリで取り扱う情報の詳細は、<a href="/gecko-weather/privacy.html#delete-data">ゲッコー天気 プライバシーポリシー</a>をご覧ください。</p>
+          <p>当社のアプリ「Eve Voice」のライセンスの発行・管理には Cloudflare, Inc.（米国）のサービスを、ライセンスキーのメールの送信には Resend, Inc.（米国）のサービスを利用しており、購入時のメールアドレス等が、これらの事業者の設備で取り扱われます（次の段落の「これらの事業者」には両社を含みます）。また、同アプリの決済は Stripe, Inc.（米国）の決済画面で行います。決済画面に入力された情報は同社が直接取得し、同社のプライバシーポリシーに従って取り扱われます。当社は、決済の完了後に、同社からメールアドレス、決済の識別番号、金額を受け取ります。詳しくは、下記の「<a href="#eve-voice">アプリ「Eve Voice」で取り扱う情報</a>」をご覧ください。</p>
           <p>当社は、これらの事業者との間で個人データの取扱いに関する契約を締結し、同法施行規則第16条第1号に定める基準に適合する体制を継続的に整備しています。これにより、同法第28条第1項の同意を要することなく提供を行っています。</p>
           <p>当社は、同法第28条第3項および同法施行規則第18条に基づき、当該事業者による相当措置の実施状況等を定期的に確認しています。当該相当措置に関する情報の提供をご希望の場合は、下記のお問い合わせ窓口よりお申し出ください。</p>
         </section>
@@ -131,11 +134,25 @@
           <p>当社は、法令の改正または事業内容の変更等に応じて、本ポリシーを変更することがあります。変更後の本ポリシーは、本ページに掲載した時点から効力を生じるものといたします。</p>
         </section>
 
+        <section class="legal-item" id="eve-voice" aria-labelledby="p10">
+          <h2 id="p10"><span class="legal-no">10</span>アプリ「Eve Voice」で取り扱う情報</h2>
+          <p>Eve Voice の音声認識、AI による整文、翻訳は、お客様の Mac 内で処理します。録音した音声、認識・整文した文章、参照した画面の文字、単語辞書、設定、翻訳履歴は、お客様の Mac 内にだけ保存し、当社のサーバーには送信しません。当社が取り扱う情報と保存期間は、次のとおりです。</p>
+          <dl class="legal-dl">
+            <div><dt>購入の情報</dt><dd>対象：購入時のメールアドレス、決済の識別番号、金額、ライセンスキー（暗号化して保存します）、ライセンスの状態、メールの送信状況。<br>取得：決済の完了後に Stripe, Inc. から受け取ります。<br>保存期間：ライセンスが有効な間は、キーの再送やお問い合わせへの対応のために保存します。返金または支払いの取消しによりライセンスが失効した場合、メールアドレスは失効から1年を過ぎた後、遅滞なく削除します。決済の識別番号、金額、日時などの取引の記録は、法令で保存が必要な期間、保存します。</dd></div>
+            <div><dt>Mac の登録の情報</dt><dd>対象：Eve Voice が Mac ごとに作成する識別子（ランダムな文字列で、Mac のシリアル番号やお名前は含みません）、登録・解除の日時、利用確認の期限。<br>保存期間：購入の情報と同じです。</dd></div>
+            <div><dt>無料体験の情報</dt><dd>対象：上記の識別子、体験の開始日時と終了日時。<br>保存期間：同じ Mac での無料体験の重複を防ぐため、体験期間の終了後も保存します。</dd></div>
+            <div><dt>IP アドレス</dt><dd>無料体験の開始やキーの再送などが短時間に繰り返されることを防ぐため、送信元の IP アドレスとメールアドレスを、当社の鍵を使って元に戻せない形（ハッシュ値）に変換し、回数を数えます。IP アドレスそのものは保存しません。変換した値は、最長60日で自動的に削除します。</dd></div>
+            <div><dt>メールの送信</dt><dd>ライセンスキーのメールは Resend, Inc. を通じて送信します。Resend に残る送信の記録は、Resend の公表では30日間（バックアップは7日間）で削除されます。</dd></div>
+            <div><dt>アプリの通信</dt><dd>Eve Voice は、ライセンスの利用確認（30日に一度以上）、音声認識モデルの取得、更新の確認と取得のために通信します。音声認識モデルは、お客様の Mac から Hugging Face, Inc.（米国）のサーバーへ直接接続して取得します。更新の確認は eivrad.com へのアクセスで行います。その際、Mac の機種などの詳しい情報（システムの概要）は送信しません。翻訳用の言語データは、macOS の機能により Apple から取得します。これらの接続先では、各事業者の方針に従ってアクセスの記録（IP アドレス等）が扱われることがあります。</dd></div>
+          </dl>
+          <p>購入の情報の削除をご希望の場合は、第7項の開示等のご請求として承ります。ライセンスが有効な間に削除した場合、そのライセンスはご利用いただけなくなります。</p>
+        </section>
+
         <p class="legal-date">制定日：2026年9月10日<br>改定日：2026年10月2日</p>
-        <p class="legal-note">当社が提供するアプリケーション「ゲッコー天気」における個人情報の取り扱いについては、<a href="/gecko-weather/privacy.html">ゲッコー天気 プライバシーポリシー</a>をご覧ください。</p>
+        <p class="legal-note">当社が提供するアプリケーション「ゲッコー天気」における個人情報の取り扱いについては、<a href="/gecko-weather/privacy.html">ゲッコー天気 プライバシーポリシー</a>をご覧ください。「Eve Voice」の利用条件は、<a href="/evevoice/terms.html">Eve Voice 利用規約</a>をご覧ください。</p>
       </div>
     </section>
   </main>
-  <footer class="site-footer container"><div class="footer-top"><a class="wordmark" href="/" aria-label="Eivrad ホーム"><img src="/assets/eivrad-logo.png" width="1254" height="1254" loading="lazy" alt="Eivrad"></a><p>Little ideas. Lasting experiences.</p><a class="back-top" href="#top">BACK TO TOP <span aria-hidden="true">↑</span></a></div><div class="footer-bottom"><span>© 2026 Eivrad LLC</span><div class="footer-legal"><a href="/evevoice/">Eve Voice について</a><a href="/gecko-weather/">ゲッコー天気について</a><a href="/privacy.html">プライバシーポリシー</a><a href="/tokushoho.html">特定商取引法に基づく表記</a><a href="/gecko-weather/privacy.html">ゲッコー天気 プライバシー</a><a href="/gecko-weather/terms.html">ゲッコー天気 利用規約</a></div><span>TOKYO, JAPAN</span></div></footer>
+  <footer class="site-footer container"><div class="footer-top"><a class="wordmark" href="/" aria-label="Eivrad ホーム"><img src="/assets/eivrad-logo.png" width="1254" height="1254" loading="lazy" alt="Eivrad"></a><p>Little ideas. Lasting experiences.</p><a class="back-top" href="#top">BACK TO TOP <span aria-hidden="true">↑</span></a></div><div class="footer-bottom"><span>© 2026 Eivrad LLC</span><div class="footer-legal"><a href="/evevoice/">Eve Voice について</a><a href="/gecko-weather/">ゲッコー天気について</a><a href="/privacy.html">プライバシーポリシー</a><a href="/tokushoho.html">特定商取引法に基づく表記</a><a href="/evevoice/terms.html">Eve Voice 利用規約</a><a href="/gecko-weather/privacy.html">ゲッコー天気 プライバシー</a><a href="/gecko-weather/terms.html">ゲッコー天気 利用規約</a></div><span>TOKYO, JAPAN</span></div></footer>
 </body>
 </html>
