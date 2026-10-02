@@ -146,7 +146,6 @@
 .ev-translation-recording h3{font-size:28px;font-weight:400;line-height:1.7;margin-top:18px}
 .ev-translation-recording figcaption>p:not(.eyebrow){font-size:13px;line-height:2;color:var(--muted);margin-top:20px}
 .ev-translation-recording video{display:block;width:100%;height:auto;aspect-ratio:37/43;background:#1e2923;border:1px solid #647e6f;border-radius:7px}
-.ev-release-note{font-size:13px;line-height:2;color:var(--ev-accent);margin-top:22px}
 .ev-plans{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:34px}
 .ev-plan{display:flex;flex-direction:column;align-items:flex-start;min-width:0;padding:32px;background:#f0f2eb;border:1px solid var(--line);border-radius:7px}
 .ev-plan+.ev-plan{background:#fff;border-color:#8ea596}
@@ -158,7 +157,14 @@
 .ev-plan ul{font-size:13px;line-height:2;padding-left:1.2em;margin:24px 0 30px;flex:1}
 .ev-plan li+li{margin-top:9px}
 .ev-plan li::marker{color:var(--ev-accent)}
-.ev-unavailable{display:block;width:100%;min-height:50px;padding:12px 18px;border:1px solid var(--ev-line);border-radius:4px;background:#e8ede5;color:#667261;font-size:13px;cursor:default;opacity:1;-webkit-text-fill-color:#667261}
+.ev-plan-cta{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:50px;padding:12px 18px;border:1px solid var(--ev-accent);border-radius:4px;font-size:13px;line-height:1.6;transition:background .2s,border-color .2s}
+.ev-plan-cta>[aria-hidden]{flex-shrink:0}
+.ev-plan-cta--buy{background:var(--ev-accent);color:var(--paper)}
+.ev-plan-cta--buy:hover{background:#153d30;border-color:#153d30}
+.ev-plan-cta--trial{background:#fff;color:var(--ev-accent)}
+.ev-plan-cta--trial:hover{background:var(--ev-soft);border-color:#153d30}
+.ev-plan-cta:focus-visible{outline:2px solid var(--ev-accent);outline-offset:3px}
+.ev-plan-cta-note{font-size:12px;line-height:1.8;color:var(--muted);margin-top:12px}
 .ev-spec-title{margin-top:72px}
 .ev-specs{margin-top:25px;border-top:1px solid var(--line)}
 .ev-specs>div{display:grid;grid-template-columns:190px 1fr;gap:24px;border-bottom:1px solid var(--line);padding:20px 0;font-size:13px;line-height:2}
