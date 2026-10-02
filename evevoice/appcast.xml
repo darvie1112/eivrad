@@ -1,0 +1,28 @@
+<?xml version="1.0" standalone="yes"?><!-- sparkle-sign-warning:
+IMPORTANT: This file was signed by Sparkle. Any modifications to this file requires re-signing this file with generate_appcast or sign_update! The signed signature will be embedded at the end of this file.
+--><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>Eve Voice</title>
+        <item>
+            <title>0.13.80</title>
+            <pubDate>Fri, 02 Oct 2026 16:04:12 +0900</pubDate>
+            <sparkle:version>110</sparkle:version>
+            <sparkle:shortVersionString>0.13.80</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <description><![CDATA[<h2>Eve Voice 0.13.80</h2>
+<ul>
+<li>話していないのに「ご視聴ありがとうございました」などの決まり文句が入力されることを、無音や繰り返しの判定を強めて減らしました。</li>
+<li>「精度重視（Whisper）」で、通常版（約3.1GB）と省メモリ版（約0.95GB）を設定の「Whisperの種類」から選べるようになりました。メモリ8GBのMacでも選べます。</li>
+<li>翻訳の画面に、英文を貼り付けて訳す欄と「クリップボードの英文を翻訳」を追加しました。</li>
+<li>公式の辞書パックをオン・オフでき、JSON・CSV・TXTから単語を選んで取り込めるようになりました。</li>
+<li>文字化けした記号が出ることがある不具合など、多くの点を直しました。</li>
+</ul>
+]]></description>
+            <enclosure url="https://eivrad.com/evevoice/downloads/EveVoice-0.13.80-110.zip" length="5670455" type="application/octet-stream" sparkle:edSignature="O69G3SJJM3GjnU3FD5FGj48DVHcoIuST/vktOlsCGpdCSvc76WCp4S1I7lKI6nVqGPbmAChjzOOYvq432DyFCQ=="></enclosure>
+        </item>
+    </channel>
+</rss><!-- sparkle-signatures:
+edSignature: 1aTcMr5yFPfLMbLFwJ8+qOv42ZqTTsXdJZ2wtal69D0A9hqzMhnVvaeeM1LPd8XqA9JXbEYCq+QBy60Fb/SLDg==
+length: 2004
+-->
