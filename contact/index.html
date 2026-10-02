@@ -51,7 +51,7 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
             <div><p>通常のお問い合わせは3営業日以内にご返信いたします</p><span lang="en">General inquiries: within three business days.</span></div>
           </div>
-          <p class="contact-description">代表者・通信販売責任者の氏名や電話番号の開示請求には、遅滞なく電子メールで回答いたします。フォームの「その他」から、ご希望の事項をご記入ください。<br><span lang="en">Requests for our representative's name, mail-order business manager's name, or phone number are answered by email without delay. Select “その他” (Other) and tell us which information you need.</span></p>
+          <p class="contact-description">代表者・通信販売責任者の氏名と電話番号は、<a href="/tokushoho.html">特定商取引法に基づく表記</a>に掲載しています。<br><span lang="en">Our representative's name, the mail-order business manager and our phone number are listed on the <a href="/tokushoho.html">Specified Commercial Transactions Act notice</a>.</span></p>
           <a class="contact-home" href="/"><span aria-hidden="true">←</span> ホームへ戻る</a>
         </div>
 
@@ -206,7 +206,7 @@
             if (result && result.ok) {
               form.querySelectorAll('.eiv-form-heading, .eiv-field, .cf-turnstile, .eiv-notice, .eiv-submit').forEach(function (el) { el.hidden = true; });
               status.className = 'eiv-status is-done';
-              status.textContent = 'お問い合わせを承りました。代表者・通信販売責任者の氏名や電話番号の開示請求には遅滞なく、通常のお問い合わせには3営業日以内に電子メールで回答いたします。';
+              status.textContent = 'お問い合わせを承りました。原則として3営業日以内に電子メールで回答いたします。';
               return;
             }
             button.disabled = false;
