@@ -108,7 +108,7 @@
 
           <div class="eiv-notice eiv-privacy">
             <p><strong>お預かりする情報の取り扱いについて</strong></p>
-            <p>お名前・メールアドレス・会社名・ご用件・お問い合わせ内容は、お問い合わせへのご返信と、その対応記録の保存のためにのみ利用いたします。営業目的のご連絡には利用いたしません。</p>
+            <p>お名前・メールアドレス・会社名・ご用件・お問い合わせ内容は、お問い合わせへのご返信と、その対応記録の保存のためにのみ利用いたします。対応記録は、対応が終わってから1年を過ぎた後、遅滞なく削除いたします（法令により保存が必要な場合を除きます）。営業目的のご連絡には利用いたしません。</p>
             <details class="eiv-privacy-details">
               <summary>利用サービス・個人情報の取り扱い <span aria-hidden="true">＋</span></summary>
               <div>
@@ -141,7 +141,7 @@
 
       // Only known support links may preselect a subject; preserve restored input.
       var subjectField = document.getElementById('f-kind');
-      var supportSubjects = { 'gecko-weather': 'ゲッコー天気について', 'evevoice': 'Eve Voice について', 'business-info': 'その他' };
+      var supportSubjects = { 'gecko-weather': 'ゲッコー天気について', 'evevoice': 'Eve Voice について', 'business-info': 'その他', 'privacy-request': '個人情報の開示等のご請求' };
       var requestedSubject = new URLSearchParams(window.location.search).get('subject');
       if (Object.prototype.hasOwnProperty.call(supportSubjects, requestedSubject) &&
           subjectField && !subjectField.value) {
