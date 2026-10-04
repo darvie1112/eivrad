@@ -4,24 +4,22 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
     <channel>
         <title>Eve Voice</title>
         <item>
-            <title>0.13.80</title>
-            <pubDate>Sun, 04 Oct 2026 16:27:04 +0900</pubDate>
-            <sparkle:version>111</sparkle:version>
-            <sparkle:shortVersionString>0.13.80</sparkle:shortVersionString>
+            <title>0.13.81</title>
+            <pubDate>Sun, 04 Oct 2026 22:08:51 +0900</pubDate>
+            <sparkle:version>112</sparkle:version>
+            <sparkle:shortVersionString>0.13.81</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <description><![CDATA[<h2>Eve Voice 0.13.80（ビルド 111）</h2>
+            <description><![CDATA[<h2>Eve Voice 0.13.81</h2>
 <ul>
-<li>新しいバージョンがあるかどうかを、自動で確認するようにしました（1日1回程度）。新しいバージョンが見つかると、更新のお知らせを表示します。</li>
-<li>見つかった更新を、確認なしにインストールすることはありません。お知らせの画面からお選びください（「更新を自動ダウンロードし、終了時に適用」をオンにしている場合は、これまでどおりアプリの終了時に適用します）。</li>
-<li>自動の確認は、「設定・単語辞書」の「アプリ・権限」にある「新しいバージョンを自動で確認」でオフにできます。この設定をご自身で切り替えたことがある場合は、その設定のまま変わりません。</li>
-<li>確認の際に、Mac の機種などの詳しい情報は送信しません。音声入力や翻訳の処理中は、確認を見送ります。</li>
+<li>初めて起動したときに、マイクと文字入力の許可、体験版の始め方、試し方を順にご案内するようにしました。案内は「設定・単語辞書」の「アプリ・権限」にある「初回の案内をもう一度」から、いつでも開けます。すでにお使いの方には、自動では表示しません。</li>
+<li>「ダウンロード」フォルダなど、アプリケーションフォルダ以外から開いたときに、アプリケーションフォルダへの移動をおすすめするようにしました。アプリケーションフォルダから開くと、アップデートを正しくインストールできます。</li>
 </ul>
 ]]></description>
-            <enclosure url="https://eivrad.com/evevoice/downloads/EveVoice-0.13.80-111.zip" length="5670480" type="application/octet-stream" sparkle:edSignature="0I8zW44hmUBaLS691ySVZ6Js2QwB7jgs7R1/JFiWHq13qlwgyAYOnbcLQaPXpxdYijKeQoX2I6G5zmBp9Rp5Cg=="></enclosure>
+            <enclosure url="https://eivrad.com/evevoice/downloads/EveVoice-0.13.81-112.zip" length="5756575" type="application/octet-stream" sparkle:edSignature="l7GF6N284yUICRK/9uWk93aYRAEpipUqBgou3NS55zDladlQnMK7yaAl540Upx2GQNlB3Y5BcRmcYF2u/wLxAg=="></enclosure>
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: VvuauxrDmEFdsrKOCqu7cgAzv6CUs0q3rNh0VsS+f9xFxUnnAJgN90+eueHqqPVHkTHR2naKGBRKWRdny2u1Bg==
-length: 2185
+edSignature: QSmmocTSxsRcTOOiPMCAb/fFr7sFq1seJ/mInorMXgGG1Q3JifbMC7FRD4hQUopuetF1dyubpfok1UW8O6UxDQ==
+length: 1903
 -->
