@@ -5,24 +5,23 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
         <title>Eve Voice</title>
         <item>
             <title>0.13.80</title>
-            <pubDate>Fri, 02 Oct 2026 16:04:12 +0900</pubDate>
-            <sparkle:version>110</sparkle:version>
+            <pubDate>Sun, 04 Oct 2026 16:27:04 +0900</pubDate>
+            <sparkle:version>111</sparkle:version>
             <sparkle:shortVersionString>0.13.80</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <description><![CDATA[<h2>Eve Voice 0.13.80</h2>
+            <description><![CDATA[<h2>Eve Voice 0.13.80（ビルド 111）</h2>
 <ul>
-<li>話していないのに「ご視聴ありがとうございました」などの決まり文句が入力されることを、無音や繰り返しの判定を強めて減らしました。</li>
-<li>「精度重視（Whisper）」で、通常版（約3.1GB）と省メモリ版（約0.95GB）を設定の「Whisperの種類」から選べるようになりました。メモリ8GBのMacでも選べます。</li>
-<li>翻訳の画面に、英文を貼り付けて訳す欄と「クリップボードの英文を翻訳」を追加しました。</li>
-<li>公式の辞書パックをオン・オフでき、JSON・CSV・TXTから単語を選んで取り込めるようになりました。</li>
-<li>文字化けした記号が出ることがある不具合など、多くの点を直しました。</li>
+<li>新しいバージョンがあるかどうかを、自動で確認するようにしました（1日1回程度）。新しいバージョンが見つかると、更新のお知らせを表示します。</li>
+<li>見つかった更新を、確認なしにインストールすることはありません。お知らせの画面からお選びください（「更新を自動ダウンロードし、終了時に適用」をオンにしている場合は、これまでどおりアプリの終了時に適用します）。</li>
+<li>自動の確認は、「設定・単語辞書」の「アプリ・権限」にある「新しいバージョンを自動で確認」でオフにできます。この設定をご自身で切り替えたことがある場合は、その設定のまま変わりません。</li>
+<li>確認の際に、Mac の機種などの詳しい情報は送信しません。音声入力や翻訳の処理中は、確認を見送ります。</li>
 </ul>
 ]]></description>
-            <enclosure url="https://eivrad.com/evevoice/downloads/EveVoice-0.13.80-110.zip" length="5670455" type="application/octet-stream" sparkle:edSignature="O69G3SJJM3GjnU3FD5FGj48DVHcoIuST/vktOlsCGpdCSvc76WCp4S1I7lKI6nVqGPbmAChjzOOYvq432DyFCQ=="></enclosure>
+            <enclosure url="https://eivrad.com/evevoice/downloads/EveVoice-0.13.80-111.zip" length="5670480" type="application/octet-stream" sparkle:edSignature="0I8zW44hmUBaLS691ySVZ6Js2QwB7jgs7R1/JFiWHq13qlwgyAYOnbcLQaPXpxdYijKeQoX2I6G5zmBp9Rp5Cg=="></enclosure>
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: 1aTcMr5yFPfLMbLFwJ8+qOv42ZqTTsXdJZ2wtal69D0A9hqzMhnVvaeeM1LPd8XqA9JXbEYCq+QBy60Fb/SLDg==
-length: 2004
+edSignature: VvuauxrDmEFdsrKOCqu7cgAzv6CUs0q3rNh0VsS+f9xFxUnnAJgN90+eueHqqPVHkTHR2naKGBRKWRdny2u1Bg==
+length: 2185
 -->
