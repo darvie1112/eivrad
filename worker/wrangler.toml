@@ -16,6 +16,25 @@ type = "ratelimit"
 namespace_id = "1001"
 simple = { limit = 5, period = 60 }
 
+# 通知メールの日次上限（UTC の1日あたり。UTC 0時＝JST 9時に戻る）。
+# Resend Free の日次100通を Eve Voice のライセンス Worker と分け合う（2026-10-04 決定: フォーム 20 / ライセンス 80）。
+# 上限に達したら Resend を呼ばず、フォームに contact@eivrad.com への直接メールを案内する。
+# 0 にするとフォームからの送信を止め、全員にメールでの連絡を案内する。数字以外は既定の 20 として扱う。
+[vars]
+CONTACT_DAILY_MAIL_CAP = "20"
+
+# 日次上限を数える Durable Object（SQLite 版・src/counter.js の ContactMailCounter）。
+# KV は API トークンに権限がないため使わない。保存するのは日付（UTC）と件数だけで、氏名・メール・本文・IP は入れない。
+# カウンタが無い・壊れた場合は上限なしで送る（fail open）。問い合わせ窓口を閉じないため。
+[[durable_objects.bindings]]
+name = "CONTACT_COUNTER"
+class_name = "ContactMailCounter"
+
+# Durable Object のクラス作成。適用済みの tag は書き換えない。撤去するときは新しい tag で deleted_classes を足す。
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["ContactMailCounter"]
+
 # シークレットはここに書かない。wrangler secret put で投入すること。
 #   TURNSTILE_SECRET / RESEND_API_KEY / NOTIFY_TO / SLACK_WEBHOOK
 

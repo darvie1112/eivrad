@@ -15,8 +15,8 @@
 .contact-section .eiv-hint{color:var(--muted)}
 .contact-section .eiv-notice{display:grid;gap:13px;padding:24px 26px;color:var(--muted);font-size:11px;line-height:2.1;background:var(--soft)}
 .contact-section .eiv-notice strong,.contact-section .eiv-noscript b{font-weight:500;color:var(--ink)}
-.contact-section .eiv-notice a{text-decoration:underline;text-decoration-color:#b9bcae;color:var(--ink)}
-.contact-section .eiv-notice a:hover{text-decoration-color:var(--ink)}
+.contact-section .eiv-notice a,.contact-section .eiv-status a{text-decoration:underline;text-decoration-color:#b9bcae;color:var(--ink)}
+.contact-section .eiv-notice a:hover,.contact-section .eiv-status a:hover{text-decoration-color:var(--ink)}
 .contact-section .cf-turnstile{max-width:100%}
 .contact-section .eiv-submit{display:inline-flex;align-items:center;color:var(--paper);border:1px solid;padding-block:0;cursor:pointer}
 .contact-section .eiv-submit>span{font-size:18px;line-height:1}

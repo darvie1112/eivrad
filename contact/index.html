@@ -10,7 +10,7 @@
   <meta name="description" content="合同会社Eivradへのお問い合わせフォームです。事業・デジタルコンテンツ・アプリケーションに関するご相談を承っております。">
   <link rel="canonical" href="https://eivrad.com/contact/">
   <link rel="stylesheet" href="/assets/site.css?v=20260911c">
-  <link rel="stylesheet" href="/assets/contact.css?v=20260911c">
+  <link rel="stylesheet" href="/assets/contact.css?v=20261004a">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="ja_JP">
   <meta property="og:site_name" content="Eivrad LLC">
@@ -164,6 +164,22 @@
         origin: '送信元を確認できませんでした。恐れ入りますが、ページを再読み込みのうえお試しください。'
       };
 
+      // フォームの日次上限に達したときだけ、メールでの直接連絡を案内する。
+      // 特商法表記・プライバシーポリシーの問い合わせ窓口なので、上限でも受付は止めない。
+      // アドレスは HTML に平文で置かない（収集対策）。この状態のときだけ組み立てて表示する。
+      var showDailyLimit = function () {
+        var address = ['contact', 'eivrad.com'].join('@');
+        var link = document.createElement('a');
+        link.href = 'mailto:' + address;
+        link.textContent = address;
+        status.textContent = '';
+        status.append(
+          '本日はフォームの受付数が上限に達しました。お手数ですが ',
+          link,
+          ' へ直接メールでお送りください。原則として3営業日以内に回答いたします。個人情報の開示等のご請求も、こちらのメールで承ります。'
+        );
+      };
+
       // novalidate でネイティブ検証を切っているため、送信前に自前で検査する。
       // 検査しないと、ご用件が未選択のまま送られ「その他」として届いてしまう。
       var validate = function () {
@@ -211,7 +227,11 @@
             }
             button.disabled = false;
             status.className = 'eiv-status is-error';
-            status.textContent = MESSAGES[result && result.error] || '送信できませんでした。恐れ入りますが、時間をおいて再度お試しください。';
+            if (result && result.error === 'daily_limit') {
+              showDailyLimit();
+            } else {
+              status.textContent = MESSAGES[result && result.error] || '送信できませんでした。恐れ入りますが、時間をおいて再度お試しください。';
+            }
             if (window.turnstile) window.turnstile.reset();
             loadedAt = Date.now();
           })

@@ -2,7 +2,7 @@
  * eivrad.com お問い合わせフォーム受付 Worker
  *
  * ルート : eivrad.com/api/contact*
- * 経路   : ブラウザ -> (同一オリジン) Worker -> Turnstile 検証 -> Resend で通知
+ * 経路   : ブラウザ -> (同一オリジン) Worker -> Turnstile 検証 -> 日次枠の確保 -> Resend で通知
  *
  * 必要なシークレット (wrangler secret put <NAME>)
  *   TURNSTILE_SECRET  Turnstile の Secret Key
@@ -10,12 +10,24 @@
  *   NOTIFY_TO         通知先アドレス (contact@eivrad.com)
  *   SLACK_WEBHOOK     任意。メールが迷惑判定された場合の取りこぼし防止
  *
+ * wrangler.toml の設定
+ *   CONTACT_DAILY_MAIL_CAP  通知メールの日次上限（UTC の1日あたり。既定 20）
+ *   CONTACT_COUNTER         日次カウンタの Durable Object（counter.js の ContactMailCounter）
+ *
  * 設計上の約束
  *   - 通知メールの From は必ず自ドメイン。問い合わせ者は Reply-To に入れる。
  *     From に問い合わせ者を入れると au (p=reject) / docomo (sp=reject) からの通知が消える。
  *   - シークレット未設定時は fail closed（通してしまうより落とす）。
  *   - 自動返信は送らない。バックスキャッタ源になり送信者評価を落とすため。
+ *   - 日次上限に達したら Resend を呼ばず daily_limit を返す。フォーム側で contact@eivrad.com への
+ *     直接メールを案内する（特商法表記・プライバシーポリシーの問い合わせ窓口を閉じない）。
+ *   - 日次カウンタが無い・壊れた場合は fail open（上限なしで送る）。窓口を閉じるよりましなため。
  */
+
+import { ContactMailCounter, parseCap, reserveDailySlot, releaseDailySlot } from './counter.js';
+
+// Durable Object のクラスは main モジュールから export する必要がある
+export { ContactMailCounter };
 
 const ALLOWED_ORIGIN = 'https://eivrad.com';
 
@@ -115,7 +127,18 @@ export default {
       return json({ ok: false, error: 'too_many_links' }, 400);
     }
 
-    // (f) 通知メール
+    // (f) 日次上限の枠取り。ここまでの検査をすべて通った送信だけを数える。
+    //     上限なら Resend を呼ばない。カウンタが使えなければ slot は null で、上限なしで送る。
+    const cap = parseCap(env.CONTACT_DAILY_MAIL_CAP);
+    const slot = await reserveDailySlot(env, cap);
+    if (slot && !slot.ok) {
+      await notifyDailyLimit(env, `日次上限（${cap}通）`, slot.rejected);
+      return json({ ok: false, error: 'daily_limit' }, 503);
+    }
+    // 件数だけを出す（wrangler tail で今日の消費を見るため）。個人データは出さない。
+    if (slot) console.log(`contact: 日次枠 ${slot.used}/${cap} (${slot.day} UTC)`);
+
+    // (g) 通知メール
     const country = req.cf && req.cf.country ? req.cf.country : '-';
     const text = [
       `種別   : ${kind}`,
@@ -147,7 +170,21 @@ export default {
       }),
     }).catch(() => null);
 
-    // (g) Slack への保険通知。メールが隔離されても「届いたこと」に気づけるようにする。
+    // Resend が受け付けなかった1通は枠に数えない（確保した枠を返す）。
+    // 429 は Resend 側の送信枠切れ（日次・月次。毎秒の送信数制限でも返る）。利用者には daily_limit を返し、
+    // 直接メールを案内する。どの場合も、フォームで再送を繰り返させるより確実に届く。
+    if (!sent || !sent.ok) {
+      const quota = Boolean(sent) && sent.status === 429;
+      const counts = await releaseDailySlot(env, slot, quota);
+      if (quota) {
+        const detail = await sent.text().catch(() => '');
+        console.error('contact: Resend 送信枠超過', sent.status, detail.slice(0, 300));
+        await notifyDailyLimit(env, 'Resend の送信枠（429）', counts ? counts.rejected : null);
+        return json({ ok: false, error: 'daily_limit' }, 503);
+      }
+    }
+
+    // (h) Slack への保険通知。メールが隔離されても「届いたこと」に気づけるようにする。
     //     氏名・メール・本文は載せない。載せると Slack (米国) への個人データの越境移転となり、
     //     プライバシーポリシーへの記載と DPA の締結が別途必要になるため。
     //     中身はメール本文で読む。ここで欲しいのは「来た」という事実だけ。
@@ -170,3 +207,20 @@ export default {
     return json({ ok: true });
   },
 };
+
+/**
+ * 日次上限で断ったことを Slack に知らせる。1日1回（その日の最初の1件）だけ。
+ * カウンタが使えず件数が分からないとき（rejected = null）は毎回送る。
+ * 送るのは事実だけ。氏名・メール・本文・種別は載せない。
+ */
+async function notifyDailyLimit(env, reason, rejected) {
+  if (!env.SLACK_WEBHOOK) return;
+  if (rejected !== null && rejected !== undefined && rejected !== 1) return;
+  await fetch(env.SLACK_WEBHOOK, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text: `:warning: eivrad.com のお問い合わせフォームが${reason}に達したため、送信を受け付けませんでした。\nフォームでは contact@eivrad.com への直接メールを案内しています（フォームの枠は UTC 0時＝JST 9時に戻ります）。`,
+    }),
+  }).catch(() => null);
+}
