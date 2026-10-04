@@ -9,7 +9,13 @@ import { test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 
 import worker, { ContactMailCounter } from '../src/index.js';
-import { parseCap, utcDayKey, DEFAULT_DAILY_MAIL_CAP } from '../src/counter.js';
+import {
+  parseCap,
+  utcDayKey,
+  DEFAULT_DAILY_MAIL_CAP,
+  COUNTER_ALERT_INTERVAL_MS,
+  resetCounterAlert,
+} from '../src/counter.js';
 
 let DatabaseSync = null;
 try {
@@ -79,7 +85,7 @@ function installFetch({ turnstile = true, resend = () => new Response('{"id":"x"
     }
     if (url === 'https://api.resend.com/emails') {
       net.resend.push(JSON.parse(init.body));
-      return resend();
+      return resend(net.resend.length); // 何通目の呼び出しか（1 から）
     }
     if (url === 'https://hooks.slack.test/T/B/X') {
       net.slack.push(JSON.parse(init.body).text);
@@ -91,6 +97,7 @@ function installFetch({ turnstile = true, resend = () => new Response('{"id":"x"
 
 beforeEach(() => {
   installFetch();
+  resetCounterAlert();
   console.log = () => {};
   console.error = () => {};
 });
@@ -152,6 +159,23 @@ function setup({ cap = '2', at = '2026-10-04T05:00:00Z' } = {}) {
 
 const isArrivalNotice = (text) => text.includes('お問い合わせが1件届きました');
 const isLimitNotice = (text) => text.includes('送信を受け付けませんでした');
+const isFailureNotice = (text) => text.includes('メール通知に失敗しました');
+const isCounterAlert = (text) => text.includes('日次カウンタが使えないため');
+
+/** Resend の 429 応答（name は本文、retryAfter は retry-after ヘッダ） */
+const resend429 = (name, retryAfter) =>
+  new Response(name === undefined ? '{}' : JSON.stringify({ statusCode: 429, name, message: 'x' }), {
+    status: 429,
+    headers: retryAfter === undefined ? {} : { 'retry-after': String(retryAfter) },
+  });
+const resendOk = () => new Response('{"id":"x"}', { status: 200 });
+
+/** Slack に個人データ（氏名・メール・本文・IP）が載っていないこと */
+const assertNoPersonalData = () => {
+  for (const text of net.slack) {
+    for (const v of [...Object.values(PERSON), '203.0.113.7']) assert.ok(!text.includes(v), `Slack に個人データ: ${text}`);
+  }
+};
 
 // --- 上限値・日付キー --------------------------------------------------------------
 
@@ -176,11 +200,11 @@ test('日付キーは UTC（JST 8:59 は前日、JST 9:00 から当日）', () =
 
 test('カウンタ: 上限まで確保でき、超えた分は断って rejected を数える', needsSqlite, () => {
   const { counter } = setup();
-  assert.deepEqual(counter.reserve(2), { ok: true, day: '2026-10-04', cap: 2, used: 1, rejected: 0 });
-  assert.deepEqual(counter.reserve(2), { ok: true, day: '2026-10-04', cap: 2, used: 2, rejected: 0 });
-  assert.deepEqual(counter.reserve(2), { ok: false, day: '2026-10-04', cap: 2, used: 2, rejected: 1 });
-  assert.deepEqual(counter.reserve(2), { ok: false, day: '2026-10-04', cap: 2, used: 2, rejected: 2 });
-  assert.deepEqual(counter.status(), { ok: true, day: '2026-10-04', used: 2, rejected: 2 });
+  assert.deepEqual(counter.reserve(2), { ok: true, day: '2026-10-04', cap: 2, used: 1, rejected: 0, quota_429: 0 });
+  assert.deepEqual(counter.reserve(2), { ok: true, day: '2026-10-04', cap: 2, used: 2, rejected: 0, quota_429: 0 });
+  assert.deepEqual(counter.reserve(2), { ok: false, day: '2026-10-04', cap: 2, used: 2, rejected: 1, quota_429: 0 });
+  assert.deepEqual(counter.reserve(2), { ok: false, day: '2026-10-04', cap: 2, used: 2, rejected: 2, quota_429: 0 });
+  assert.deepEqual(counter.status(), { ok: true, day: '2026-10-04', used: 2, rejected: 2, quota_429: 0 });
 });
 
 test('カウンタ: 上限 0 はすべて断る', needsSqlite, () => {
@@ -193,10 +217,19 @@ test('カウンタ: 返した枠は再び使え、0 未満にはならない', n
   const { counter } = setup();
   const slot = counter.reserve(1);
   assert.equal(counter.reserve(1).ok, false);
-  assert.deepEqual(counter.release(slot.day, false), { ok: true, day: '2026-10-04', used: 0, rejected: 1 });
-  assert.deepEqual(counter.release(slot.day, false), { ok: true, day: '2026-10-04', used: 0, rejected: 1 });
+  assert.deepEqual(counter.release(slot.day, ''), { ok: true, day: '2026-10-04', used: 0, rejected: 1, quota_429: 0 });
+  assert.deepEqual(counter.release(slot.day, ''), { ok: true, day: '2026-10-04', used: 0, rejected: 1, quota_429: 0 });
   assert.equal(counter.reserve(1).ok, true);
-  assert.deepEqual(counter.release('not-a-day', false), { ok: false, error: 'day' });
+  assert.deepEqual(counter.release('not-a-day', ''), { ok: false, error: 'day' });
+});
+
+test('カウンタ: Resend の送信枠切れで返した枠は quota_429 に数え、rejected には足さない', needsSqlite, () => {
+  const { counter } = setup();
+  const slot = counter.reserve(5);
+  assert.deepEqual(counter.release(slot.day, 'quota'), { ok: true, day: '2026-10-04', used: 0, rejected: 0, quota_429: 1 });
+  // 知らない reason は数えない
+  const again = counter.reserve(5);
+  assert.deepEqual(counter.release(again.day, 'other'), { ok: true, day: '2026-10-04', used: 0, rejected: 0, quota_429: 1 });
 });
 
 test('カウンタ: UTC 0時で件数が戻り、0時をまたいだ返却は前日の枠を減らす', needsSqlite, () => {
@@ -209,9 +242,9 @@ test('カウンタ: UTC 0時で件数が戻り、0時をまたいだ返却は前
   assert.equal(next.ok, true);
   assert.equal(next.day, '2026-10-05');
 
-  counter.release(late.day, false);
-  assert.deepEqual(counter.counts('2026-10-04'), { used: 0, rejected: 1 });
-  assert.deepEqual(counter.counts('2026-10-05'), { used: 1, rejected: 0 });
+  counter.release(late.day, '');
+  assert.deepEqual(counter.counts('2026-10-04'), { used: 0, rejected: 1, quota_429: 0 });
+  assert.deepEqual(counter.counts('2026-10-05'), { used: 1, rejected: 0, quota_429: 0 });
 });
 
 test('カウンタ: 31日より古い行は消え、保存するのは日付と件数だけ', needsSqlite, () => {
@@ -225,7 +258,7 @@ test('カウンタ: 31日より古い行は消え、保存するのは日付と�
   assert.deepEqual(db.prepare('SELECT day FROM daily ORDER BY day').all().map((r) => r.day), ['2026-10-02', '2026-10-03']);
 
   const columns = db.prepare('PRAGMA table_info(daily)').all().map((c) => c.name);
-  assert.deepEqual(columns, ['day', 'used', 'rejected']);
+  assert.deepEqual(columns, ['day', 'used', 'rejected', 'quota_429']);
   assert.deepEqual(db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'").all().map((r) => r.name), ['daily']);
 });
 
@@ -235,10 +268,10 @@ test('カウンタ: fetch 窓口（reserve / release / status / 不明な経路�
   assert.equal(r1.ok, true);
   const r2 = await (await counter.fetch(new Request('https://counter/reserve?cap=1', { method: 'POST' }))).json();
   assert.equal(r2.ok, false);
-  const rel = await (await counter.fetch(new Request(`https://counter/release?day=${r1.day}&turned_away=1`, { method: 'POST' }))).json();
-  assert.deepEqual(rel, { ok: true, day: '2026-10-04', used: 0, rejected: 2 });
+  const rel = await (await counter.fetch(new Request(`https://counter/release?day=${r1.day}&reason=quota`, { method: 'POST' }))).json();
+  assert.deepEqual(rel, { ok: true, day: '2026-10-04', used: 0, rejected: 1, quota_429: 1 });
   const st = await (await counter.fetch(new Request('https://counter/status'))).json();
-  assert.deepEqual(st, { ok: true, day: '2026-10-04', used: 0, rejected: 2 });
+  assert.deepEqual(st, { ok: true, day: '2026-10-04', used: 0, rejected: 1, quota_429: 1 });
   assert.equal((await counter.fetch(new Request('https://counter/reserve'))).status, 404);
   assert.equal((await counter.fetch(new Request('https://counter/release?day=x', { method: 'POST' }))).status, 400);
 });
@@ -278,8 +311,8 @@ test('上限到達: Resend を呼ばず 503 daily_limit、Slack の上限通知�
   assert.equal(net.slack.length, 1);
   assert.ok(isLimitNotice(net.slack[0]));
   assert.ok(net.slack[0].includes('日次上限（2通）'));
-  for (const v of Object.values(PERSON)) assert.ok(!net.slack[0].includes(v), 'Slack に個人データを載せない');
-  assert.deepEqual(counter.status(), { ok: true, day: '2026-10-04', used: 2, rejected: 2 });
+  assertNoPersonalData();
+  assert.deepEqual(counter.status(), { ok: true, day: '2026-10-04', used: 2, rejected: 2, quota_429: 0 });
 });
 
 test('上限到達後も UTC 0時（JST 9時）を過ぎれば再び送れる', needsSqlite, async () => {
@@ -291,40 +324,47 @@ test('上限到達後も UTC 0時（JST 9時）を過ぎれば再び送れる', 
   assert.equal(net.resend.length, 2);
 });
 
-test('Resend が失敗（500）: 枠を返し、従来どおり 502 send_failed', needsSqlite, async () => {
+test('Resend が失敗（500）: 枠を返して 502 send_failed、Slack は「届いた」ではなく「通知に失敗」', needsSqlite, async () => {
   installFetch({ resend: () => new Response('{"message":"boom"}', { status: 500 }) });
   const { env, ns, counter } = setup({ cap: '1' });
   const res = await submit(env);
   assert.deepEqual(res, { status: 502, body: { ok: false, error: 'send_failed' } });
+  assert.equal(net.resend.length, 1, '429 以外は再送しない');
   assert.deepEqual(ns.calls, ['POST /reserve', 'POST /release']);
-  assert.deepEqual(counter.status(), { ok: true, day: '2026-10-04', used: 0, rejected: 0 });
-  assert.deepEqual(net.slack.map(isArrivalNotice), [true], 'Slack の保険通知は従来どおり');
+  assert.deepEqual(counter.status(), { ok: true, day: '2026-10-04', used: 0, rejected: 0, quota_429: 0 });
+  assert.equal(net.slack.length, 1);
+  assert.ok(isFailureNotice(net.slack[0]));
+  assert.ok(!isArrivalNotice(net.slack[0]), '失敗したのに「届きました」と送らない');
+  assert.ok(net.slack[0].includes('種別: 個人情報の開示等のご請求・Resend 500'));
+  assert.ok(net.slack[0].includes('直接メールを案内'));
+  assertNoPersonalData();
 
   // 返した枠で次の送信が通る
   installFetch();
   assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
 });
 
-test('Resend への通信が例外: 枠を返し、502 send_failed', needsSqlite, async () => {
+test('Resend への通信が例外: 枠を返し、502 send_failed、Slack に「通知に失敗」', needsSqlite, async () => {
   installFetch({ resend: () => { throw new TypeError('network down'); } });
   const { env, counter } = setup({ cap: '1' });
   const res = await submit(env);
   assert.deepEqual(res, { status: 502, body: { ok: false, error: 'send_failed' } });
   assert.equal(counter.status().used, 0);
+  assert.equal(net.slack.length, 1);
+  assert.ok(isFailureNotice(net.slack[0]) && net.slack[0].includes('Resend に接続できず'));
 });
 
-test('Resend が 429: 枠を返して 503 daily_limit、到着通知は出さず上限通知を1回', needsSqlite, async () => {
-  installFetch({
-    resend: () => new Response('{"name":"daily_quota_exceeded","message":"quota"}', { status: 429 }),
-  });
+test('Resend が 429 daily_quota_exceeded: 再送せず枠を返して 503 daily_limit、quota_429 に数え、上限通知を1回', needsSqlite, async () => {
+  installFetch({ resend: () => resend429('daily_quota_exceeded', 3600) });
   const { env, ns, counter } = setup({ cap: '20' });
   const first = await submit(env);
   assert.deepEqual(first, { status: 503, body: { ok: false, error: 'daily_limit' } });
+  assert.equal(net.resend.length, 1, '送信枠切れは再送しない');
   assert.deepEqual(ns.calls, ['POST /reserve', 'POST /release']);
-  assert.deepEqual(counter.status(), { ok: true, day: '2026-10-04', used: 0, rejected: 1 });
+  assert.deepEqual(counter.status(), { ok: true, day: '2026-10-04', used: 0, rejected: 0, quota_429: 1 });
   assert.equal(net.slack.length, 1);
   assert.ok(isLimitNotice(net.slack[0]));
-  assert.ok(net.slack[0].includes('Resend の送信枠（429）'));
+  assert.ok(net.slack[0].includes('Resend の送信枠（429 daily_quota_exceeded）'));
 
   const second = await submit(env);
   assert.equal(second.body.error, 'daily_limit');
@@ -332,10 +372,116 @@ test('Resend が 429: 枠を返して 503 daily_limit、到着通知は出さず
   assert.equal(net.slack.filter(isArrivalNotice).length, 0);
 });
 
-test('カウンタのバインディングが無い: fail open で従来どおり送る', async () => {
+test('Resend が 429 monthly_quota_exceeded も daily_limit（retry-after が無くても再送しない）', needsSqlite, async () => {
+  installFetch({ resend: () => resend429('monthly_quota_exceeded') });
+  const { env } = setup();
+  assert.deepEqual(await submit(env), { status: 503, body: { ok: false, error: 'daily_limit' } });
+  assert.equal(net.resend.length, 1);
+  assert.ok(net.slack[0].includes('429 monthly_quota_exceeded'));
+});
+
+test('Resend の送信枠切れ（429）の後でも、フォーム自身の上限に達した日の通知は消えない', needsSqlite, async () => {
+  installFetch({ resend: (n) => (n === 1 ? resend429('daily_quota_exceeded') : resendOk()) });
+  const { env, counter } = setup({ cap: '1' });
+  assert.equal((await submit(env)).body.error, 'daily_limit'); // Resend の 429（quota_429 = 1）
+  assert.deepEqual(await submit(env), { status: 200, body: { ok: true } }); // 枠 1/1
+  assert.equal((await submit(env)).body.error, 'daily_limit'); // フォームの上限（rejected = 1）
+  assert.deepEqual(counter.status(), { ok: true, day: '2026-10-04', used: 1, rejected: 1, quota_429: 1 });
+  const limits = net.slack.filter(isLimitNotice);
+  assert.equal(limits.length, 2);
+  assert.ok(limits[0].includes('Resend の送信枠'));
+  assert.ok(limits[1].includes('日次上限（1通）'));
+});
+
+test('Resend が 429 rate_limit_exceeded: retry-after だけ待って1回だけ再送し、通れば成功', needsSqlite, async () => {
+  installFetch({ resend: (n) => (n === 1 ? resend429('rate_limit_exceeded', 0) : resendOk()) });
+  const { env, ns, counter } = setup({ cap: '1' });
+  assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
+  assert.equal(net.resend.length, 2);
+  assert.deepEqual(net.resend[0], net.resend[1], '同じ内容を再送する');
+  assert.deepEqual(ns.calls, ['POST /reserve'], '枠は1つだけ使う');
+  assert.deepEqual(counter.status(), { ok: true, day: '2026-10-04', used: 1, rejected: 0, quota_429: 0 });
+  assert.deepEqual(net.slack.map(isArrivalNotice), [true]);
+});
+
+test('Resend の毎秒の制限が再送後も続く: send_failed（直接メールの案内）で、上限の件数には数えない', needsSqlite, async () => {
+  installFetch({ resend: () => resend429('rate_limit_exceeded', 0) });
+  const { env, counter } = setup({ cap: '2' });
+  assert.deepEqual(await submit(env), { status: 502, body: { ok: false, error: 'send_failed' } });
+  assert.equal(net.resend.length, 2, '再送は1回だけ');
+  assert.deepEqual(counter.status(), { ok: true, day: '2026-10-04', used: 0, rejected: 0, quota_429: 0 });
+  assert.equal(net.slack.length, 1);
+  assert.ok(isFailureNotice(net.slack[0]));
+  assert.ok(net.slack[0].includes('Resend 429 rate_limit_exceeded・1回再送しても同じ'));
+  assert.ok(!isLimitNotice(net.slack[0]), '「上限に達した」とは送らない');
+
+  // その後に本当に上限へ達したら、上限の通知が出る
+  installFetch();
+  await submit(env);
+  await submit(env);
+  assert.equal((await submit(env)).body.error, 'daily_limit');
+  assert.equal(net.slack.filter(isLimitNotice).length, 1);
+});
+
+test('Resend の毎秒の制限で retry-after が長すぎる: 待たずに send_failed', needsSqlite, async () => {
+  installFetch({ resend: () => resend429('rate_limit_exceeded', 60) });
+  const { env } = setup();
+  assert.deepEqual(await submit(env), { status: 502, body: { ok: false, error: 'send_failed' } });
+  assert.equal(net.resend.length, 1);
+  assert.ok(net.slack[0].includes('待ち時間が長いため再送せず'));
+});
+
+test('name の無い 429: retry-after が長ければ送信枠切れ、無ければ既定の1秒待って再送', needsSqlite, async () => {
+  installFetch({ resend: () => resend429(undefined, 7200) });
+  const quota = setup();
+  assert.deepEqual(await submit(quota.env), { status: 503, body: { ok: false, error: 'daily_limit' } });
+  assert.equal(net.resend.length, 1);
+  assert.equal(quota.counter.status().quota_429, 1);
+
+  installFetch({ resend: (n) => (n === 1 ? resend429(undefined) : resendOk()) });
+  const rate = setup();
+  const started = Date.now();
+  assert.deepEqual(await submit(rate.env), { status: 200, body: { ok: true } });
+  assert.equal(net.resend.length, 2);
+  assert.ok(Date.now() - started >= 900, '既定の待ち時間（1秒）');
+});
+
+test('カウンタのバインディングが無い: fail open で送り、Slack に警告（個人データなし）', async () => {
   const env = baseEnv({ CONTACT_DAILY_MAIL_CAP: '0' });
   assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
   assert.equal(net.resend.length, 1);
+  const alerts = net.slack.filter(isCounterAlert);
+  assert.equal(alerts.length, 1);
+  assert.ok(alerts[0].includes('上限なしで送信しています'));
+  assert.ok(alerts[0].includes('バインディング CONTACT_COUNTER が未設定'));
+  assertNoPersonalData();
+});
+
+test('カウンタの警告は isolate ごとに最短10分に1回', async () => {
+  const realNow = Date.now;
+  let now = Date.parse('2026-10-04T05:00:00Z');
+  Date.now = () => now;
+  try {
+    const env = baseEnv();
+    await submit(env);
+    await submit(env);
+    now += COUNTER_ALERT_INTERVAL_MS - 1;
+    await submit(env);
+    assert.equal(net.slack.filter(isCounterAlert).length, 1);
+    now += 1;
+    await submit(env);
+    assert.equal(net.slack.filter(isCounterAlert).length, 2);
+    assert.equal(net.resend.length, 4, '警告を出しても送信は止めない');
+  } finally {
+    Date.now = realNow;
+  }
+});
+
+test('SLACK_WEBHOOK が無ければ、カウンタの警告は出さずに送る', async () => {
+  const env = baseEnv();
+  delete env.SLACK_WEBHOOK;
+  assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
+  assert.equal(net.slack.length, 0);
 });
 
 test('カウンタが例外を投げる・異常応答: fail open で送る', async () => {
@@ -352,10 +498,13 @@ test('カウンタが例外を投げる・異常応答: fail open で送る', as
   assert.deepEqual(await submit(baseEnv({ CONTACT_COUNTER: throwsOnGet })), { status: 200, body: { ok: true } });
 
   assert.equal(net.resend.length, 4);
+  const alerts = net.slack.filter(isCounterAlert);
+  assert.equal(alerts.length, 1, '同じ isolate では10分に1回');
+  assert.ok(alerts[0].includes('応答しない・異常な応答'));
 });
 
-test('カウンタなしで Resend が 429: daily_limit を返し、件数不明なので毎回 Slack に知らせる', async () => {
-  installFetch({ resend: () => new Response('{}', { status: 429 }) });
+test('カウンタなしで Resend が送信枠切れ: daily_limit を返し、件数不明なので毎回 Slack に知らせる', async () => {
+  installFetch({ resend: () => resend429('daily_quota_exceeded') });
   const env = baseEnv();
   assert.equal((await submit(env)).body.error, 'daily_limit');
   assert.equal((await submit(env)).body.error, 'daily_limit');

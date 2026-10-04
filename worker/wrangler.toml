@@ -25,12 +25,13 @@ CONTACT_DAILY_MAIL_CAP = "20"
 
 # 日次上限を数える Durable Object（SQLite 版・src/counter.js の ContactMailCounter）。
 # KV は API トークンに権限がないため使わない。保存するのは日付（UTC）と件数だけで、氏名・メール・本文・IP は入れない。
-# カウンタが無い・壊れた場合は上限なしで送る（fail open）。問い合わせ窓口を閉じないため。
+# カウンタが無い・壊れた場合は上限なしで送り（fail open。問い合わせを届けることを優先）、Slack に警告する（isolate ごとに10分に1回まで）。
 [[durable_objects.bindings]]
 name = "CONTACT_COUNTER"
 class_name = "ContactMailCounter"
 
 # Durable Object のクラス作成。適用済みの tag は書き換えない。撤去するときは新しい tag で deleted_classes を足す。
+# マイグレーションをまたぐ wrangler rollback は Cloudflare に断られる（v1 を入れる最初の配信は rollback で戻せない。README「戻し方」）。
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["ContactMailCounter"]

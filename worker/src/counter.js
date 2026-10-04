@@ -9,8 +9,9 @@
  *   - 保存するのは日付キー（UTC の YYYY-MM-DD）と件数だけ。氏名・メール・本文・IP は渡さない。
  *   - オブジェクトは全リクエストで1個（名前 COUNTER_NAME）。1個の Durable Object は要求を
  *     1件ずつ処理し、SQL API は同期なので、「読む→判定→足す」の間に他の送信が割り込まない。
- *   - 呼び出し側（index.js）はカウンタが使えないとき fail open にする。法定の問い合わせ窓口を
- *     カウンタの故障で閉じないため。
+ *   - 呼び出し側（index.js）はカウンタが使えないとき fail open にする（届けることを優先する）。
+ *     その間は上限が効かず、ライセンスメールと共有の Resend 枠を食いうるので、Slack に警告を送る
+ *     （takeCounterAlert で isolate ごとに10分に1回まで）。
  */
 
 export const DEFAULT_DAILY_MAIL_CAP = 20;
@@ -20,6 +21,12 @@ export const COUNTER_NAME = 'resend-daily';
 
 /** これより古い日の行は消す（件数しか無いが、溜め込む理由も無い） */
 const RETENTION_DAYS = 31;
+
+/** カウンタが使えないことを Slack に知らせる最短の間隔（isolate ごと） */
+export const COUNTER_ALERT_INTERVAL_MS = 10 * 60 * 1000;
+
+/** release の reason。Resend の送信枠切れ（429 daily/monthly_quota_exceeded）で利用者に断った */
+export const RELEASE_QUOTA = 'quota';
 
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -47,42 +54,50 @@ export class ContactMailCounter {
       'CREATE TABLE IF NOT EXISTS daily (' +
         'day TEXT PRIMARY KEY, ' +
         'used INTEGER NOT NULL DEFAULT 0, ' +
-        'rejected INTEGER NOT NULL DEFAULT 0)',
+        'rejected INTEGER NOT NULL DEFAULT 0, ' +
+        'quota_429 INTEGER NOT NULL DEFAULT 0)',
     );
   }
 
-  /** その日の件数。used = 確保済みの枠（送信済み＋送信中）、rejected = 上限で断った件数 */
+  /**
+   * その日の件数。
+   *   used      = 確保済みの枠（送信済み＋送信中）
+   *   rejected  = このフォームの日次上限で断った件数
+   *   quota_429 = Resend の送信枠切れ（429）で断った件数。rejected とは分けて数える
+   *              （Slack の「1日1回」の通知を理由ごとに出すため）
+   */
   counts(day) {
-    const rows = this.sql.exec('SELECT used, rejected FROM daily WHERE day = ?', day).toArray();
-    if (!rows.length) return { used: 0, rejected: 0 };
-    return { used: Number(rows[0].used), rejected: Number(rows[0].rejected) };
+    const rows = this.sql.exec('SELECT used, rejected, quota_429 FROM daily WHERE day = ?', day).toArray();
+    if (!rows.length) return { used: 0, rejected: 0, quota_429: 0 };
+    return { used: Number(rows[0].used), rejected: Number(rows[0].rejected), quota_429: Number(rows[0].quota_429) };
   }
 
   /** 今日の枠を1通ぶん確保する。残っていなければ rejected を1つ進めて断る */
   reserve(cap) {
     const day = utcDayKey(this.now());
     this.sql.exec('INSERT INTO daily (day) VALUES (?) ON CONFLICT(day) DO NOTHING', day);
-    const { used, rejected } = this.counts(day);
+    const { used, rejected, quota_429 } = this.counts(day);
     if (used >= cap) {
       this.sql.exec('UPDATE daily SET rejected = rejected + 1 WHERE day = ?', day);
-      return { ok: false, day, cap, used, rejected: rejected + 1 };
+      return { ok: false, day, cap, used, rejected: rejected + 1, quota_429 };
     }
     this.sql.exec('UPDATE daily SET used = used + 1 WHERE day = ?', day);
     this.prune(day);
-    return { ok: true, day, cap, used: used + 1, rejected };
+    return { ok: true, day, cap, used: used + 1, rejected, quota_429 };
   }
 
   /**
    * 確保した枠を返す（Resend が受け付けなかった1通は数えない）。
    * day は確保したときの日付。0時をまたいでも、翌日の枠を減らさない。
-   * turnedAway は Resend の 429 で利用者に断った場合。rejected を1つ進める。
+   * reason が RELEASE_QUOTA（Resend の送信枠切れの 429 で利用者に断った）なら quota_429 を1つ進める。
+   * rejected（このフォームの上限で断った件数）には足さない。
    */
-  release(day, turnedAway) {
+  release(day, reason) {
     if (!DAY_RE.test(String(day || ''))) return { ok: false, error: 'day' };
     this.sql.exec('UPDATE daily SET used = MAX(used - 1, 0) WHERE day = ?', day);
-    if (turnedAway) {
+    if (reason === RELEASE_QUOTA) {
       this.sql.exec('INSERT INTO daily (day) VALUES (?) ON CONFLICT(day) DO NOTHING', day);
-      this.sql.exec('UPDATE daily SET rejected = rejected + 1 WHERE day = ?', day);
+      this.sql.exec('UPDATE daily SET quota_429 = quota_429 + 1 WHERE day = ?', day);
     }
     return { ok: true, day, ...this.counts(day) };
   }
@@ -105,7 +120,7 @@ export class ContactMailCounter {
     if (route === 'POST /reserve') {
       result = this.reserve(parseCap(url.searchParams.get('cap')));
     } else if (route === 'POST /release') {
-      result = this.release(url.searchParams.get('day'), url.searchParams.get('turned_away') === '1');
+      result = this.release(url.searchParams.get('day'), url.searchParams.get('reason') || '');
     } else if (route === 'GET /status') {
       result = this.status();
     } else {
@@ -145,13 +160,13 @@ export const reserveDailySlot = async (env, cap) => {
 
 /**
  * reserveDailySlot で確保した枠を返す。確保していなければ何もしない。
- * 戻り値はその日の件数（取れなければ null）。
+ * reason は RELEASE_QUOTA か ''。戻り値はその日の件数（取れなければ null）。
  */
-export const releaseDailySlot = async (env, slot, turnedAway = false) => {
+export const releaseDailySlot = async (env, slot, reason = '') => {
   if (!slot || !slot.ok || !env.CONTACT_COUNTER) return null;
   try {
     const query = new URLSearchParams({ day: slot.day });
-    if (turnedAway) query.set('turned_away', '1');
+    if (reason) query.set('reason', reason);
     const res = await stubOf(env).fetch(`https://counter/release?${query}`, { method: 'POST' });
     if (!res.ok) throw new Error(`status ${res.status}`);
     return await res.json();
@@ -159,4 +174,22 @@ export const releaseDailySlot = async (env, slot, turnedAway = false) => {
     console.error('contact: 日次カウンタの枠を返せませんでした', errorText(err));
     return null;
   }
+};
+
+/**
+ * カウンタが使えない（fail open で上限なしに送っている）ことを Slack に知らせてよいか。
+ * isolate ごとのモジュール変数で、最短 COUNTER_ALERT_INTERVAL_MS に1回へ間引く。
+ * isolate が入れ替われば数え直すので、間隔は「最短」であって厳密な1回ではない。
+ */
+const counterAlert = { lastAt: null };
+
+export const takeCounterAlert = (now) => {
+  if (counterAlert.lastAt !== null && now - counterAlert.lastAt < COUNTER_ALERT_INTERVAL_MS) return false;
+  counterAlert.lastAt = now;
+  return true;
+};
+
+/** テスト用。間引きの記録を消す */
+export const resetCounterAlert = () => {
+  counterAlert.lastAt = null;
 };

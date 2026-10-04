@@ -159,24 +159,26 @@
         too_fast: '送信が速すぎました。恐れ入りますが、もう一度お試しください。',
         invalid: 'ご入力の内容をご確認ください。メールアドレスの形式、または本文が短すぎる可能性がございます。',
         too_many_links: 'URL が多い送信はお受けできません。恐れ入りますが、本文を調整のうえお試しください。',
-        send_failed: '送信処理に失敗いたしました。恐れ入りますが、時間をおいて再度お試しください。',
         rate_limited: '短時間に送信が集中しております。恐れ入りますが、しばらく経ってからお試しください。',
         origin: '送信元を確認できませんでした。恐れ入りますが、ページを再読み込みのうえお試しください。'
       };
 
-      // フォームの日次上限に達したときだけ、メールでの直接連絡を案内する。
-      // 特商法表記・プライバシーポリシーの問い合わせ窓口なので、上限でも受付は止めない。
+      // フォームの日次上限に達したとき（daily_limit）と、送信できなかったとき（send_failed・通信の失敗など）は、
+      // メールでの直接連絡を案内する。特商法表記・プライバシーポリシーの問い合わせ窓口なので、受付は止めない。
       // アドレスは HTML に平文で置かない（収集対策）。この状態のときだけ組み立てて表示する。
-      var showDailyLimit = function () {
+      // メールの件名には、選ばれたご用件（決まった選択肢の値だけ）を入れる。氏名・メール・本文は入れない。
+      var showDirectMail = function (lead) {
         var address = ['contact', 'eivrad.com'].join('@');
+        var kind = subjectField && subjectField.selectedIndex > 0 ? subjectField.value : 'お問い合わせ';
         var link = document.createElement('a');
-        link.href = 'mailto:' + address;
+        link.href = 'mailto:' + address + '?subject=' + encodeURIComponent('【' + kind + '】');
         link.textContent = address;
         status.textContent = '';
         status.append(
-          '本日はフォームの受付数が上限に達しました。お手数ですが ',
+          lead + 'お手数ですが ',
           link,
-          ' へ直接メールでお送りください。原則として3営業日以内に回答いたします。個人情報の開示等のご請求も、こちらのメールで承ります。'
+          ' へ直接メールでお送りください（件名にご用件をお書き添えください）。原則として3営業日以内に回答いたします。' +
+            '個人情報の開示等のご請求も、件名を「個人情報の開示等のご請求」として、こちらのメールで承ります。'
         );
       };
 
@@ -228,9 +230,12 @@
             button.disabled = false;
             status.className = 'eiv-status is-error';
             if (result && result.error === 'daily_limit') {
-              showDailyLimit();
+              showDirectMail('本日はフォームの受付数が上限に達しました。');
+            } else if (result && Object.prototype.hasOwnProperty.call(MESSAGES, result.error)) {
+              status.textContent = MESSAGES[result.error];
             } else {
-              status.textContent = MESSAGES[result && result.error] || '送信できませんでした。恐れ入りますが、時間をおいて再度お試しください。';
+              // send_failed（メールの通知に失敗）と、想定外の応答
+              showDirectMail('送信できませんでした。');
             }
             if (window.turnstile) window.turnstile.reset();
             loadedAt = Date.now();
@@ -238,7 +243,7 @@
           .catch(function () {
             button.disabled = false;
             status.className = 'eiv-status is-error';
-            status.textContent = '通信に失敗いたしました。恐れ入りますが、時間をおいて再度お試しください。';
+            showDirectMail('通信に失敗し、送信できませんでした。');
             if (window.turnstile) window.turnstile.reset();
             loadedAt = Date.now();
           });
