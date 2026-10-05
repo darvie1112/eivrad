@@ -1,9 +1,11 @@
-// お問い合わせ Worker の日次上限まわりのテスト（追加の npm パッケージなし）
+// お問い合わせ Worker の日次上限まわりと、Cloudflare Email Sending → Resend の予備のテスト（追加の npm パッケージなし）
 //
-//   node --test --disable-warning=ExperimentalWarning worker/test/
+//   node --test --disable-warning=ExperimentalWarning worker/test/contact.test.mjs
 //
 // 外部への通信はしない。fetch は差し替え、Turnstile / Resend / Slack 以外の宛先は失敗させる。
+// send_email 束縛（env.CONTACT_EMAIL）は偽物で、env のメソッドとして呼ばれなければ TypeError を投げる（本番の workerd と同じ）。
 // Durable Object の SQL は node:sqlite（Node 22.5 以降）で本物の SQLite に流す。
+// workerd（Miniflare）で束ねた Worker を動かす確認は workerd.test.mjs（miniflare の場所を渡したときだけ動く）。
 
 import { test, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
@@ -16,6 +18,18 @@ import {
   COUNTER_ALERT_INTERVAL_MS,
   resetCounterAlert,
 } from '../src/counter.js';
+import {
+  CF_COUNTER_NAME,
+  CF_SEND_TIMEOUT_MS,
+  DEFAULT_CF_DAILY_CAP,
+  FALLBACK_ALERT_INTERVAL_MS,
+  FROM,
+  contactSubject,
+  failureCode,
+  parseProvider,
+  resetFallbackAlert,
+  setCloudflareTimeoutForTest,
+} from '../src/cfmail.js';
 
 let DatabaseSync = null;
 try {
@@ -98,6 +112,8 @@ function installFetch({ turnstile = true, resend = () => new Response('{"id":"x"
 beforeEach(() => {
   installFetch();
   resetCounterAlert();
+  resetFallbackAlert();
+  setCloudflareTimeoutForTest();
   console.log = () => {};
   console.error = () => {};
 });
@@ -545,4 +561,422 @@ test('既存の検査で落ちた送信はカウンタに触れない', needsSql
   assert.deepEqual(await submit(noSecret.env), { status: 503, body: { ok: false, error: 'send_failed' } });
   assert.deepEqual(noSecret.ns.calls, []);
   assert.equal(net.resend.length, 0);
+});
+
+// --- Cloudflare Email Sending（CONTACT_MAIL_PROVIDER = "cloudflare"）→ 送れなければ Resend --------------------
+
+/**
+ * env.CONTACT_EMAIL（send_email 束縛）の代わり。behavior(message, 何通目) の戻り値・例外をそのまま send が返す・投げる
+ * （同期で投げれば同期の例外）。send は env のメソッドとして呼ばれたときだけ動く。取り出して呼ぶと、本番の workerd と
+ * 同じく TypeError（Illegal invocation）を投げる。
+ */
+function fakeBinding(behavior = async () => ({ messageId: '<m1@send.eivrad.com>' })) {
+  const binding = {
+    calls: [],
+    send(message) {
+      if (this !== binding) throw new TypeError('Illegal invocation');
+      binding.calls.push(message);
+      return behavior(message, binding.calls.length);
+    },
+  };
+  return binding;
+}
+
+/** env.CONTACT_COUNTER の代わり。本物の Durable Object と同じく、名前ごとに別の ContactMailCounter を持つ */
+function namedCounters(clock) {
+  const objects = new Map();
+  const ns = {
+    calls: [],
+    names: [],
+    of(name) {
+      if (!objects.has(name)) objects.set(name, new ContactMailCounter(sqliteStorage().ctx, {}, clock.now));
+      return objects.get(name);
+    },
+    idFromName(name) {
+      ns.names.push(name);
+      return { name };
+    },
+    get(id) {
+      return {
+        fetch: async (url, init) => {
+          ns.calls.push(`${id.name} ${(init && init.method) || 'GET'} ${new URL(url).pathname}`);
+          return ns.of(id.name).fetch(new Request(url, init));
+        },
+      };
+    },
+  };
+  return ns;
+}
+
+function cfSetup({ cap = '20', cfCap = '100', provider = 'cloudflare', at = '2026-10-04T05:00:00Z', binding = fakeBinding() } = {}) {
+  const clock = clockAt(at);
+  const ns = namedCounters(clock);
+  const env = baseEnv({
+    CONTACT_DAILY_MAIL_CAP: cap,
+    CONTACT_CF_DAILY_CAP: cfCap,
+    CONTACT_MAIL_PROVIDER: provider,
+    CONTACT_COUNTER: ns,
+    CONTACT_EMAIL: binding,
+  });
+  return { clock, ns, env, binding };
+}
+
+const isFallbackNotice = (text) => text.includes('Cloudflare Email Sending で送れなかったため');
+const isCfCapNotice = (text) => text.includes('Cloudflare 経路の日次上限');
+const SUBJECT_RE = /^\[お問い合わせ\/個人情報の開示等のご請求\] \d{2}\/\d{2} \d{2}:\d{2} 受付$/;
+
+/** Cloudflare のエラー（本番の束縛と同じく Error に code。message には問い合わせ者のアドレスと氏名を入れておく） */
+const cfError = (code) => Object.assign(new Error(`delivery for ${PERSON.email} (${PERSON.name}) failed`), { code });
+
+test('送り方の読み取り: "cloudflare" だけ Cloudflare、無い・不正な値は "resend"', () => {
+  assert.equal(parseProvider('cloudflare'), 'cloudflare');
+  assert.equal(parseProvider(' Cloudflare '), 'cloudflare');
+  for (const v of ['resend', undefined, null, '', ' ', 'sendgrid', 'cf', 'cloudflare_all', 'cloudflare,resend']) {
+    assert.equal(parseProvider(v), 'resend', `parseProvider(${JSON.stringify(v)})`);
+  }
+  assert.equal(DEFAULT_CF_DAILY_CAP, 100);
+  assert.equal(parseCap(undefined, DEFAULT_CF_DAILY_CAP), 100);
+  assert.equal(parseCap('abc', DEFAULT_CF_DAILY_CAP), 100);
+  assert.equal(parseCap('0', DEFAULT_CF_DAILY_CAP), 0);
+  assert.equal(parseCap('7', DEFAULT_CF_DAILY_CAP), 7);
+  assert.equal(CF_COUNTER_NAME, 'cf-daily');
+  assert.ok(CF_SEND_TIMEOUT_MS > 0 && CF_SEND_TIMEOUT_MS <= 10000, '時間切れは短く（10秒以内）');
+});
+
+test('理由のコード: E_… の形だけを通し、TypeError は E_TYPE_ERROR、それ以外は E_UNKNOWN（message は見ない）', () => {
+  assert.equal(failureCode(cfError('E_RECIPIENT_SUPPRESSED')), 'E_RECIPIENT_SUPPRESSED');
+  assert.equal(failureCode({ code: 'E_INTERNAL_SERVER_ERROR' }), 'E_INTERNAL_SERVER_ERROR');
+  assert.equal(failureCode(new TypeError('Illegal invocation')), 'E_TYPE_ERROR');
+  for (const bad of [new Error('x'), cfError(`E_X ${PERSON.email}`), cfError('e_lower'), cfError(''), 'E_STRING', null, undefined, 42]) {
+    assert.equal(failureCode(bad), 'E_UNKNOWN');
+  }
+});
+
+test('件名: 種別と受付の時刻（日本時間）だけで、氏名を入れない', () => {
+  assert.equal(contactSubject('その他', Date.parse('2026-10-04T05:07:00Z')), '[お問い合わせ/その他] 10/04 14:07 受付');
+  assert.equal(contactSubject('その他', Date.parse('2026-10-04T15:30:00Z')), '[お問い合わせ/その他] 10/05 00:30 受付');
+  assert.equal(contactSubject('その他', Date.parse('2026-12-31T15:00:00Z')), '[お問い合わせ/その他] 01/01 00:00 受付');
+});
+
+test('偽の束縛は、env から取り出して呼ぶと TypeError（本番の Illegal invocation と同じ）', () => {
+  const binding = fakeBinding();
+  const { send } = binding;
+  assert.throws(() => send({}), TypeError);
+  assert.equal(binding.calls.length, 0);
+});
+
+test('Cloudflare: 束縛で1通送り、Resend も Resend の日次枠も使わない（差出人・宛先・Reply-To・件名・本文）', needsSqlite, async () => {
+  const { env, binding, ns } = cfSetup();
+  assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
+  assert.equal(binding.calls.length, 1);
+  const m = binding.calls[0];
+  assert.deepEqual(Object.keys(m).sort(), ['from', 'replyTo', 'subject', 'text', 'to'], 'html・headers・cc・bcc は渡さない');
+  assert.deepEqual(m.from, { name: 'Eivrad お問い合わせ', email: 'form@send.eivrad.com' });
+  assert.deepEqual(m.from, { ...FROM });
+  assert.equal(m.to, 'notify@example.test', '宛先は NOTIFY_TO');
+  assert.equal(m.replyTo, PERSON.email, '問い合わせ者は Reply-To');
+  assert.match(m.subject, SUBJECT_RE);
+  assert.ok(!m.subject.includes(PERSON.name), '件名に氏名を入れない');
+  assert.ok(m.text.includes(`お名前 : ${PERSON.name}`));
+  assert.ok(m.text.includes(`メール : ${PERSON.email}`));
+  assert.ok(m.text.includes(PERSON.message));
+  assert.equal(net.resend.length, 0, 'Resend は呼ばない');
+  assert.deepEqual(ns.calls, ['cf-daily POST /reserve'], 'Resend の日次枠（resend-daily）には触れない');
+  assert.deepEqual(ns.of('cf-daily').status(), { ok: true, day: '2026-10-04', used: 1, rejected: 0, quota_429: 0 });
+  assert.deepEqual(net.slack.map(isArrivalNotice), [true], 'Slack は従来どおり「届きました」だけ');
+  assertNoPersonalData();
+});
+
+test('Cloudflare の失敗はどれも Resend に回す（各エラーコード・同期の例外・TypeError・コードなし・Error 以外）', needsSqlite, async () => {
+  const cases = [
+    ...[
+      'E_VALIDATION_ERROR',
+      'E_FIELD_MISSING',
+      'E_SENDER_NOT_VERIFIED',
+      'E_SENDER_DOMAIN_NOT_AVAILABLE',
+      'E_RECIPIENT_NOT_ALLOWED',
+      'E_RECIPIENT_SUPPRESSED',
+      'E_CONTENT_TOO_LARGE',
+      'E_DELIVERY_FAILED',
+      'E_RATE_LIMIT_EXCEEDED',
+      'E_DAILY_LIMIT_EXCEEDED',
+      'E_INTERNAL_SERVER_ERROR',
+      'E_HEADER_NOT_ALLOWED',
+    ].map((code) => [code, 'reject', async () => { throw cfError(code); }]),
+    ['E_SENDER_NOT_VERIFIED', '同期の例外', () => { throw cfError('E_SENDER_NOT_VERIFIED'); }],
+    ['E_TYPE_ERROR', '同期の TypeError', () => { throw new TypeError(`Illegal invocation ${PERSON.email}`); }],
+    ['E_TYPE_ERROR', 'TypeError の reject', async () => { throw new TypeError('x'); }],
+    ['E_UNKNOWN', 'code なし', async () => { throw new Error(`no code ${PERSON.email}`); }],
+    ['E_UNKNOWN', '形のおかしい code', async () => { throw cfError(`E_BAD ${PERSON.email}`); }],
+    ['E_UNKNOWN', '文字列を投げる', async () => { throw `string ${PERSON.email}`; }],
+    ['E_UNKNOWN', 'null を投げる', async () => { throw null; }],
+    ['E_INTERNAL_SERVER_ERROR', 'Error でない object', async () => { throw { code: 'E_INTERNAL_SERVER_ERROR', message: PERSON.email }; }],
+  ];
+  for (const [code, how, behavior] of cases) {
+    const label = `${code}（${how}）`;
+    installFetch();
+    resetFallbackAlert();
+    const { env, binding, ns } = cfSetup({ binding: fakeBinding(behavior) });
+    assert.deepEqual(await submit(env), { status: 200, body: { ok: true } }, label);
+    assert.equal(binding.calls.length, 1, label);
+    assert.equal(net.resend.length, 1, `Resend で1通: ${label}`);
+    assert.equal(net.resend[0].subject, binding.calls[0].subject, `同じ件名: ${label}`);
+    assert.equal(net.resend[0].text, binding.calls[0].text, `同じ本文: ${label}`);
+    assert.equal(net.resend[0].reply_to, PERSON.email, label);
+    assert.equal(net.resend[0].from, 'Eivrad お問い合わせ <form@send.eivrad.com>', label);
+    assert.deepEqual(ns.calls, ['cf-daily POST /reserve', 'cf-daily POST /release', 'resend-daily POST /reserve'], label);
+    assert.equal(ns.of('cf-daily').status().used, 0, `受け付けられなかった1通は Cloudflare の枠に数えない: ${label}`);
+    assert.equal(ns.of('resend-daily').status().used, 1, label);
+    const fallback = net.slack.filter(isFallbackNotice);
+    assert.equal(fallback.length, 1, label);
+    assert.ok(fallback[0].includes(`（${code}）`), `理由のコード: ${label} → ${fallback[0]}`);
+    assert.equal(net.slack.filter(isArrivalNotice).length, 1, label);
+    assertNoPersonalData();
+  }
+});
+
+test('Cloudflare が時間切れ: 結果不明として Resend に回し、Cloudflare の枠は数えたまま（二重に届くことは許す）', needsSqlite, async () => {
+  setCloudflareTimeoutForTest(30);
+  const { env, binding, ns } = cfSetup({ binding: fakeBinding(() => new Promise(() => {})) });
+  const started = Date.now();
+  assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
+  assert.ok(Date.now() - started < 2000, '時間切れで待つのをやめる');
+  assert.equal(binding.calls.length, 1);
+  assert.equal(net.resend.length, 1);
+  assert.deepEqual(ns.calls, ['cf-daily POST /reserve', 'resend-daily POST /reserve'], '時間切れは枠を返さない');
+  assert.equal(ns.of('cf-daily').status().used, 1);
+  assert.ok(net.slack.filter(isFallbackNotice)[0].includes('（E_TIMEOUT）'));
+  assert.equal(net.slack.filter(isArrivalNotice).length, 1);
+  assertNoPersonalData();
+});
+
+test('CONTACT_DAILY_MAIL_CAP = "0" はフォームを止める: Cloudflare も Resend も呼ばず daily_limit', needsSqlite, async () => {
+  const { env, binding, ns } = cfSetup({ cap: '0' });
+  assert.deepEqual(await submit(env), { status: 503, body: { ok: false, error: 'daily_limit' } });
+  assert.deepEqual(await submit(env), { status: 503, body: { ok: false, error: 'daily_limit' } });
+  assert.equal(binding.calls.length, 0, 'Cloudflare を呼ばない');
+  assert.equal(net.resend.length, 0, 'Resend を呼ばない');
+  assert.ok(!ns.calls.some((c) => c.startsWith('cf-daily')), 'Cloudflare の枠に触れない');
+  assert.equal(net.slack.length, 1);
+  assert.ok(isLimitNotice(net.slack[0]) && net.slack[0].includes('日次上限（0通）'));
+  assert.equal(net.slack.filter(isFallbackNotice).length, 0);
+});
+
+test('Cloudflare 経路の日次枠（cf-daily）: 上限で Resend 経路に回し、通知は1日1回、UTC 0時で戻る', needsSqlite, async () => {
+  const { env, binding, ns, clock } = cfSetup({ cfCap: '2', cap: '20', at: '2026-10-04T23:50:00Z' });
+  for (let i = 0; i < 2; i += 1) assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
+  assert.equal(binding.calls.length, 2);
+  assert.equal(net.resend.length, 0);
+
+  assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
+  assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
+  assert.equal(binding.calls.length, 2, '上限の後は Cloudflare を呼ばない');
+  assert.equal(net.resend.length, 2, '上限の後は Resend');
+  const capNotices = net.slack.filter(isCfCapNotice);
+  assert.equal(capNotices.length, 1, '上限の通知は1日1回');
+  assert.ok(capNotices[0].includes('Cloudflare 経路の日次上限（2通）'));
+  assert.ok(capNotices[0].includes('フォームの日次上限 20通'));
+  assert.equal(net.slack.filter(isFallbackNotice).length, 0, '上限は「送れなかった」の通知にしない');
+  assert.deepEqual(ns.of('cf-daily').status(), { ok: true, day: '2026-10-04', used: 2, rejected: 2, quota_429: 0 });
+  assert.equal(ns.of('resend-daily').status().used, 2);
+
+  clock.set('2026-10-05T00:00:01Z'); // JST 9:00
+  assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
+  assert.equal(binding.calls.length, 3, 'UTC 0時を過ぎれば Cloudflare に戻る');
+  assert.equal(net.resend.length, 2);
+  assertNoPersonalData();
+});
+
+test('CONTACT_CF_DAILY_CAP = "0" は Cloudflare を使わない（Resend だけ・通知なし）', needsSqlite, async () => {
+  const { env, binding, ns } = cfSetup({ cfCap: '0' });
+  assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
+  assert.equal(binding.calls.length, 0);
+  assert.equal(net.resend.length, 1);
+  assert.deepEqual(ns.calls, ['resend-daily POST /reserve']);
+  assert.deepEqual(net.slack.map(isArrivalNotice), [true]);
+});
+
+test('Cloudflare 経路の日次カウンタが使えない: fail open で Cloudflare から送り、Slack に警告（10分に1回）', async () => {
+  const noCounter = cfSetup().env;
+  delete noCounter.CONTACT_COUNTER;
+  assert.deepEqual(await submit(noCounter), { status: 200, body: { ok: true } });
+  assert.equal(noCounter.CONTACT_EMAIL.calls.length, 1);
+  assert.equal(net.resend.length, 0);
+  const alerts = net.slack.filter(isCounterAlert);
+  assert.equal(alerts.length, 1);
+  assert.ok(alerts[0].includes('Cloudflare 経路の日次カウンタが使えないため（バインディング CONTACT_COUNTER が未設定）'));
+
+  for (const broken of [
+    { idFromName: () => ({}), get: () => ({ fetch: async () => { throw new Error('DO down'); } }) },
+    { idFromName: () => ({}), get: () => ({ fetch: async () => new Response('err', { status: 500 }) }) },
+    { idFromName: () => { throw new Error('bad ns'); }, get: () => null },
+  ]) {
+    const { env, binding } = cfSetup();
+    env.CONTACT_COUNTER = broken;
+    assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
+    assert.equal(binding.calls.length, 1, 'カウンタが壊れていても Cloudflare で送る');
+  }
+  assert.equal(net.resend.length, 0);
+  assert.equal(net.slack.filter(isCounterAlert).length, 1, '同じ isolate では10分に1回');
+  assert.equal(net.slack.filter(isArrivalNotice).length, 4);
+  assertNoPersonalData();
+});
+
+test('カウンタが使えず Cloudflare も失敗: Resend へ fail open で送り、警告は1回', async () => {
+  const { env, binding } = cfSetup({ binding: fakeBinding(async () => { throw cfError('E_INTERNAL_SERVER_ERROR'); }) });
+  delete env.CONTACT_COUNTER;
+  assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
+  assert.equal(binding.calls.length, 1);
+  assert.equal(net.resend.length, 1);
+  assert.equal(net.slack.filter(isCounterAlert).length, 1);
+  assert.equal(net.slack.filter(isFallbackNotice).length, 1);
+  assertNoPersonalData();
+});
+
+test('CONTACT_MAIL_PROVIDER が "resend"・無い・不正な値: 束縛を呼ばず、従来どおり Resend だけ', needsSqlite, async () => {
+  for (const provider of ['resend', undefined, '', 'sendgrid', 'cf', 'cloudflare_all']) {
+    installFetch();
+    const { env, binding, ns } = cfSetup({ provider });
+    if (provider === undefined) delete env.CONTACT_MAIL_PROVIDER;
+    assert.deepEqual(await submit(env), { status: 200, body: { ok: true } }, String(provider));
+    assert.equal(binding.calls.length, 0, `束縛を呼ばない: ${provider}`);
+    assert.equal(net.resend.length, 1);
+    assert.match(net.resend[0].subject, SUBJECT_RE);
+    assert.deepEqual(ns.calls, ['resend-daily POST /reserve'], `Cloudflare の枠に触れない: ${provider}`);
+    assert.deepEqual(net.slack.map(isArrivalNotice), [true], `「送れなかった」の通知も出さない: ${provider}`);
+  }
+});
+
+test('件名に氏名を入れない（Cloudflare・Resend とも同じ件名。時刻は日本時間）', needsSqlite, async () => {
+  const realNow = Date.now;
+  Date.now = () => Date.parse('2026-10-04T05:07:00Z'); // JST 14:07
+  try {
+    const viaCf = cfSetup();
+    await submit(viaCf.env);
+    assert.equal(viaCf.binding.calls[0].subject, '[お問い合わせ/個人情報の開示等のご請求] 10/04 14:07 受付');
+
+    const viaResend = cfSetup({ provider: 'resend' });
+    await submit(viaResend.env, { kind: 'その他' });
+    assert.equal(net.resend[0].subject, '[お問い合わせ/その他] 10/04 14:07 受付');
+
+    for (const subject of [viaCf.binding.calls[0].subject, net.resend[0].subject]) {
+      assert.ok(!subject.includes(PERSON.name) && !subject.includes('試験') && !subject.includes('様'), subject);
+    }
+    assert.ok(net.resend[0].text.includes(`お名前 : ${PERSON.name}`), '氏名は本文にだけ書く');
+  } finally {
+    Date.now = realNow;
+  }
+});
+
+test('Cloudflare も Resend も失敗: 502 send_failed、Slack の失敗通知に両方の理由（コードだけ）', needsSqlite, async () => {
+  installFetch({ resend: () => new Response('{"message":"boom"}', { status: 500 }) });
+  const { env, ns } = cfSetup({ binding: fakeBinding(async () => { throw cfError('E_INTERNAL_SERVER_ERROR'); }) });
+  assert.deepEqual(await submit(env), { status: 502, body: { ok: false, error: 'send_failed' } });
+  assert.equal(net.resend.length, 1);
+  assert.equal(ns.of('resend-daily').status().used, 0, 'Resend の枠も返す');
+  assert.equal(ns.of('cf-daily').status().used, 0);
+  const failures = net.slack.filter(isFailureNotice);
+  assert.equal(failures.length, 1);
+  assert.ok(failures[0].includes('種別: 個人情報の開示等のご請求・Cloudflare E_INTERNAL_SERVER_ERROR → Resend 500'), failures[0]);
+  assert.equal(net.slack.filter(isArrivalNotice).length, 0);
+  assertNoPersonalData();
+});
+
+test('Cloudflare が失敗し、Resend の日次上限・送信枠切れに当たる: daily_limit（直接メールの案内）', needsSqlite, async () => {
+  const failing = () => fakeBinding(async () => { throw cfError('E_SENDER_NOT_VERIFIED'); });
+  const { env, binding } = cfSetup({ cap: '1', binding: failing() });
+  assert.deepEqual(await submit(env), { status: 200, body: { ok: true } }); // Resend の枠 1/1
+  assert.deepEqual(await submit(env), { status: 503, body: { ok: false, error: 'daily_limit' } });
+  assert.equal(binding.calls.length, 2, 'Cloudflare は毎回先に試す');
+  assert.equal(net.resend.length, 1);
+  assert.equal(net.slack.filter(isLimitNotice).length, 1);
+
+  installFetch({ resend: () => resend429('daily_quota_exceeded') });
+  const quota = cfSetup({ binding: failing() });
+  assert.deepEqual(await submit(quota.env), { status: 503, body: { ok: false, error: 'daily_limit' } });
+  assert.ok(net.slack.some((t) => t.includes('Resend の送信枠（429 daily_quota_exceeded）')));
+  assertNoPersonalData();
+});
+
+test('「Resend に回した」通知は isolate ごとに最短10分に1回（送信はその都度 Resend で行う）', needsSqlite, async () => {
+  const realNow = Date.now;
+  let now = Date.parse('2026-10-04T05:00:00Z');
+  Date.now = () => now;
+  try {
+    const { env } = cfSetup({ binding: fakeBinding(async () => { throw cfError('E_RECIPIENT_NOT_ALLOWED'); }) });
+    await submit(env);
+    await submit(env);
+    now += FALLBACK_ALERT_INTERVAL_MS - 1;
+    await submit(env);
+    assert.equal(net.slack.filter(isFallbackNotice).length, 1);
+    now += 1;
+    await submit(env);
+    assert.equal(net.slack.filter(isFallbackNotice).length, 2);
+    assert.equal(net.resend.length, 4);
+    assert.equal(net.slack.filter(isArrivalNotice).length, 4, '「届きました」は毎回');
+  } finally {
+    Date.now = realNow;
+  }
+});
+
+test('"cloudflare" なのに束縛が無い: E_BINDING_MISSING として Resend に回す（Cloudflare の枠に触れない）', needsSqlite, async () => {
+  const { env, ns } = cfSetup();
+  delete env.CONTACT_EMAIL;
+  assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
+  assert.equal(net.resend.length, 1);
+  assert.deepEqual(ns.calls, ['resend-daily POST /reserve']);
+  assert.ok(net.slack.filter(isFallbackNotice)[0].includes('（E_BINDING_MISSING）'));
+});
+
+test('SLACK_WEBHOOK が無くても Cloudflare の失敗は Resend で送る', needsSqlite, async () => {
+  const { env } = cfSetup({ binding: fakeBinding(async () => { throw cfError('E_DELIVERY_FAILED'); }) });
+  delete env.SLACK_WEBHOOK;
+  assert.deepEqual(await submit(env), { status: 200, body: { ok: true } });
+  assert.equal(net.resend.length, 1);
+  assert.equal(net.slack.length, 0);
+});
+
+test('既存の検査で落ちた送信は Cloudflare も呼ばない（改行の注入も含む）', needsSqlite, async () => {
+  const cases = [
+    [{ company_url: 'https://spam.example' }, 200, true],
+    [{ t: '100' }, 400, 'too_fast'],
+    [{ kind: '' }, 400, 'invalid'],
+    [{ kind: 'その他\r\nBcc: evil@example.test' }, 400, 'invalid'],
+    [{ email: 'not-an-email' }, 400, 'invalid'],
+    [{ email: 'taro@example.test\r\nBcc: evil@example.test' }, 400, 'invalid'],
+    [{ message: '短い' }, 400, 'invalid'],
+    [{ message: 'https://a.example https://b.example https://c.example 本文' }, 400, 'too_many_links'],
+  ];
+  for (const [overrides, status, expected] of cases) {
+    const { env, ns, binding } = cfSetup();
+    const res = await submit(env, overrides);
+    assert.equal(res.status, status, JSON.stringify(overrides));
+    if (expected === true) assert.equal(res.body.ok, true);
+    else assert.equal(res.body.error, expected);
+    assert.equal(binding.calls.length, 0, `束縛を呼ばない: ${JSON.stringify(overrides)}`);
+    assert.deepEqual(ns.calls, []);
+  }
+  installFetch({ turnstile: false });
+  const captcha = cfSetup();
+  assert.deepEqual(await submit(captcha.env), { status: 400, body: { ok: false, error: 'captcha' } });
+  assert.equal(captcha.binding.calls.length, 0);
+
+  installFetch();
+  const limited = cfSetup();
+  limited.env.RATE_LIMITER = { limit: async () => ({ success: false }) };
+  assert.deepEqual(await submit(limited.env), { status: 429, body: { ok: false, error: 'rate_limited' } });
+  assert.equal(limited.binding.calls.length, 0);
+
+  const noSecret = cfSetup();
+  delete noSecret.env.RESEND_API_KEY;
+  assert.deepEqual(await submit(noSecret.env), { status: 503, body: { ok: false, error: 'send_failed' } });
+  assert.equal(noSecret.binding.calls.length, 0, 'RESEND_API_KEY が無ければ（予備が無いので）Cloudflare でも送らない');
+
+  // 氏名の改行は1行にまとめ、本文にだけ入る（件名・Reply-To には入らない）
+  const crlf = cfSetup();
+  assert.deepEqual(await submit(crlf.env, { name: '試験\r\nBcc: evil@example.test' }), { status: 200, body: { ok: true } });
+  const m = crlf.binding.calls[0];
+  assert.ok(m.text.includes('お名前 : 試験 Bcc: evil@example.test'));
+  assert.ok(!/[\r\n]/.test(m.subject) && !m.subject.includes('evil'));
+  assert.equal(m.replyTo, PERSON.email);
 });

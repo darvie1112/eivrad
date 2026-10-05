@@ -2,16 +2,23 @@
  * eivrad.com お問い合わせフォーム受付 Worker
  *
  * ルート : eivrad.com/api/contact*
- * 経路   : ブラウザ -> (同一オリジン) Worker -> Turnstile 検証 -> 日次枠の確保 -> Resend で通知
+ * 経路   : ブラウザ -> (同一オリジン) Worker -> Turnstile 検証
+ *          -> Cloudflare Email Sending で通知（CONTACT_MAIL_PROVIDER = "cloudflare" のとき。Cloudflare 経路の日次枠つき）
+ *          -> 送れなければ（または "resend" なら）日次枠の確保 -> Resend で通知
  *
  * 必要なシークレット (wrangler secret put <NAME>)
  *   TURNSTILE_SECRET  Turnstile の Secret Key
- *   RESEND_API_KEY    Resend の API キー
- *   NOTIFY_TO         通知先アドレス (contact@eivrad.com)
+ *   RESEND_API_KEY    Resend の API キー（Cloudflare 経路を使うときも予備として必須）
+ *   NOTIFY_TO         通知先アドレス (contact@eivrad.com。束縛 CONTACT_EMAIL の destination_address と同じであること)
  *   SLACK_WEBHOOK     任意。メールが迷惑判定された場合の取りこぼし防止
  *
  * wrangler.toml の設定
- *   CONTACT_DAILY_MAIL_CAP  通知メールの日次上限（UTC の1日あたり。既定 20）
+ *   CONTACT_DAILY_MAIL_CAP  通知メールの日次上限（Resend 経路。UTC の1日あたり。既定 20）。0 はフォームを止める（Cloudflare 経路も含む）
+ *   CONTACT_MAIL_PROVIDER   "cloudflare"（Cloudflare を先に使い、送れなければ Resend）/ "resend"（Resend だけ）。
+ *                           無い・それ以外の値は "resend"。コードを変えずに Resend だけへ戻すためのスイッチ
+ *   CONTACT_CF_DAILY_CAP    Cloudflare 経路の日次上限（UTC の1日あたり。既定 100。オブジェクト cf-daily で数える）。
+ *                           達したら Resend 経路へ回す。0 なら Cloudflare を使わない
+ *   CONTACT_EMAIL           send_email 束縛（宛先 contact@eivrad.com・差出人 form@send.eivrad.com に限定。cfmail.js）
  *   CONTACT_COUNTER         日次カウンタの Durable Object（counter.js の ContactMailCounter）
  *
  * 設計上の約束
@@ -26,6 +33,10 @@
  *     その間はライセンスメールと共有の Resend 枠を食いうるので、Slack に警告する（isolate ごとに10分に1回まで）。
  *   - Resend の 429 は本文の name で分ける。送信枠切れ（daily/monthly_quota_exceeded）は daily_limit。
  *     毎秒の送信数制限（rate_limit_exceeded）は retry-after だけ待って1回だけ再送し、それでも駄目なら send_failed。
+ *   - Cloudflare Email Sending で送れなかったとき（どのエラーコードでも・同期の例外・TypeError・時間切れ・束縛なし・
+ *     Cloudflare 経路の日次上限）は、同じ件名と本文で従来の Resend 経路に回す。自分宛てなので二重に届くことは許す。
+ *     Resend に回したことは Slack に理由のコードだけで知らせる（isolate ごとに10分に1回。上限は1日1回）。
+ *   - 件名に氏名を入れない（Cloudflare の分析データに件名が残るため）。氏名・メール・本文はメールの本文にだけ書く。
  */
 
 import {
@@ -36,6 +47,16 @@ import {
   releaseDailySlot,
   takeCounterAlert,
 } from './counter.js';
+import {
+  CF_COUNTER_NAME,
+  CODE_BINDING_MISSING,
+  CODE_TIMEOUT,
+  DEFAULT_CF_DAILY_CAP,
+  contactSubject,
+  parseProvider,
+  sendViaCloudflare,
+  takeFallbackAlert,
+} from './cfmail.js';
 
 // Durable Object のクラスは main モジュールから export する必要がある
 export { ContactMailCounter };
@@ -71,7 +92,7 @@ const json = (body, status = 200) =>
     },
   });
 
-/** ヘッダに入れる値から改行を除去する（件名インジェクション対策） */
+/** ヘッダに入れる値から改行を除去する（件名・Reply-To のインジェクション対策） */
 const oneLine = (value, max) => String(value).replace(/[\r\n\t]+/g, ' ').trim().slice(0, max);
 
 export default {
@@ -145,21 +166,7 @@ export default {
       return json({ ok: false, error: 'too_many_links' }, 400);
     }
 
-    // (f) 日次上限の枠取り。ここまでの検査をすべて通った送信だけを数える。
-    //     上限なら Resend を呼ばない。カウンタが使えなければ slot は null で、上限なしで送る（Slack に警告）。
-    const cap = parseCap(env.CONTACT_DAILY_MAIL_CAP);
-    const slot = await reserveDailySlot(env, cap);
-    if (!slot) {
-      await notifyCounterUnavailable(env);
-    } else if (!slot.ok) {
-      await notifyDailyLimit(env, `日次上限（${cap}通）`, slot.rejected);
-      return json({ ok: false, error: 'daily_limit' }, 503);
-    } else {
-      // 件数だけを出す（wrangler tail で今日の消費を見るため）。個人データは出さない。
-      console.log(`contact: 日次枠 ${slot.used}/${cap} (${slot.day} UTC)`);
-    }
-
-    // (g) 通知メール
+    // (f) 通知メールの中身（Cloudflare と Resend で同じ）。件名に氏名を入れない
     const country = req.cf && req.cf.country ? req.cf.country : '-';
     const text = [
       `種別   : ${kind}`,
@@ -175,12 +182,64 @@ export default {
       'このメールは eivrad.com のお問い合わせフォームから送信されました。',
       'そのまま返信すると、お問い合わせ者へ届きます。',
     ].join('\n');
+    const subject = contactSubject(kind, Date.now());
+    const cap = parseCap(env.CONTACT_DAILY_MAIL_CAP);
 
+    // (g) Cloudflare Email Sending（CONTACT_MAIL_PROVIDER = "cloudflare" のとき）。送れたらここで終わり、
+    //     Resend の日次枠も Resend も使わない。送れなければ cfWhy に理由のコードを残して (h) の Resend 経路へ。
+    //     CONTACT_DAILY_MAIL_CAP = "0"（フォームを止める）のときは Cloudflare も呼ばず、(h) で daily_limit になる。
+    let cfWhy = '';
+    const cfCap = parseCap(env.CONTACT_CF_DAILY_CAP, DEFAULT_CF_DAILY_CAP);
+    if (parseProvider(env.CONTACT_MAIL_PROVIDER) === 'cloudflare' && cap > 0 && cfCap > 0) {
+      if (!env.CONTACT_EMAIL) {
+        cfWhy = CODE_BINDING_MISSING;
+      } else {
+        // Cloudflare 経路の日次枠（オブジェクト cf-daily）。カウンタが使えなければ上限なしで送る（Slack に警告）。
+        const cfSlot = await reserveDailySlot(env, cfCap, CF_COUNTER_NAME);
+        if (!cfSlot) {
+          await notifyCounterUnavailable(env, 'cloudflare');
+        } else if (!cfSlot.ok) {
+          cfWhy = 'cf_daily_cap';
+          await notifyCloudflareCap(env, cfCap, cap, cfSlot.rejected);
+        } else {
+          console.log(`contact: Cloudflare 枠 ${cfSlot.used}/${cfCap} (${cfSlot.day} UTC)`);
+        }
+        if (!cfWhy) {
+          const viaCf = await sendViaCloudflare(env, { to: env.NOTIFY_TO, replyTo: email, subject, text });
+          if (viaCf.ok) {
+            console.log('contact: Cloudflare Email Sending で送信', viaCf.messageId || '-');
+            await notifyArrival(env, kind);
+            return json({ ok: true });
+          }
+          cfWhy = viaCf.code;
+          // 受け付けられなかった1通は Cloudflare の枠に数えない。時間切れは送られたかもしれないので数えたままにする。
+          if (viaCf.code !== CODE_TIMEOUT) await releaseDailySlot(env, cfSlot);
+          // コードだけを出す（e.message には問い合わせ者のアドレスが入りうる）
+          console.error('contact: Cloudflare Email Sending で送れず、Resend に回します', viaCf.code);
+        }
+      }
+      if (cfWhy !== 'cf_daily_cap') await notifyCloudflareFallback(env, cfWhy);
+    }
+
+    // (h) Resend の日次上限の枠取り。ここまでの検査をすべて通った送信だけを数える。
+    //     上限なら Resend を呼ばない。カウンタが使えなければ slot は null で、上限なしで送る（Slack に警告）。
+    const slot = await reserveDailySlot(env, cap);
+    if (!slot) {
+      await notifyCounterUnavailable(env, 'resend');
+    } else if (!slot.ok) {
+      await notifyDailyLimit(env, `日次上限（${cap}通）`, slot.rejected);
+      return json({ ok: false, error: 'daily_limit' }, 503);
+    } else {
+      // 件数だけを出す（wrangler tail で今日の消費を見るため）。個人データは出さない。
+      console.log(`contact: 日次枠 ${slot.used}/${cap} (${slot.day} UTC)`);
+    }
+
+    // (i) Resend で通知メール
     const mail = JSON.stringify({
       from: 'Eivrad お問い合わせ <form@send.eivrad.com>',
       to: [env.NOTIFY_TO],
       reply_to: email,
-      subject: `[お問い合わせ/${kind}] ${name} 様`,
+      subject,
       text,
     });
 
@@ -214,18 +273,12 @@ export default {
         : sent
           ? `Resend ${sent.status}`
           : 'Resend に接続できず';
-      await notifySendFailed(env, kind, why);
+      await notifySendFailed(env, kind, cfWhy ? `Cloudflare ${cfWhy} → ${why}` : why);
       return json({ ok: false, error: 'send_failed' }, 502);
     }
 
-    // (h) Slack への保険通知。メールが隔離されても「届いたこと」に気づけるようにする。
-    //     氏名・メール・本文は載せない。載せると Slack (米国) への個人データの越境移転となり、
-    //     プライバシーポリシーへの記載と DPA の締結が別途必要になるため。
-    //     中身はメール本文で読む。ここで欲しいのは「来た」という事実だけ。
-    await postSlack(
-      env,
-      `:mailbox_with_mail: eivrad.com にお問い合わせが1件届きました（種別: ${kind}）\ncontact@eivrad.com をご確認ください。`,
-    );
+    // (j) Slack への保険通知（Cloudflare で送れたときも同じ。notifyArrival）
+    await notifyArrival(env, kind);
 
     return json({ ok: true });
   },
@@ -275,6 +328,19 @@ async function readResend429(res) {
   };
 }
 
+/**
+ * Slack への保険通知。メールが隔離されても「届いたこと」に気づけるようにする。
+ * 氏名・メール・本文は載せない。載せると Slack (米国) への個人データの越境移転となり、
+ * プライバシーポリシーへの記載と DPA の締結が別途必要になるため。
+ * 中身はメール本文で読む。ここで欲しいのは「来た」という事実だけ。
+ */
+async function notifyArrival(env, kind) {
+  await postSlack(
+    env,
+    `:mailbox_with_mail: eivrad.com にお問い合わせが1件届きました（種別: ${kind}）\ncontact@eivrad.com をご確認ください。`,
+  );
+}
+
 /** Slack に1行送る（任意の設定。失敗しても利用者への応答は変えない） */
 async function postSlack(env, text) {
   if (!env.SLACK_WEBHOOK) return;
@@ -313,12 +379,53 @@ async function notifySendFailed(env, kind, why) {
 }
 
 /**
- * 日次カウンタが使えず、上限なしで送っていることを Slack に知らせる。isolate ごとに最短10分に1回。
+ * Cloudflare Email Sending で送れず Resend に回したことを Slack に知らせる。isolate ごとに最短10分に1回。
+ * 載せるのは理由のコード（E_…）だけ。氏名・メール・本文・e.message は載せない。
+ * 送れたかどうかは、続く「届きました」か「通知に失敗」の通知で分かる。
+ */
+async function notifyCloudflareFallback(env, code) {
+  if (!env.SLACK_WEBHOOK || !takeFallbackAlert(Date.now())) return;
+  await postSlack(
+    env,
+    `:warning: eivrad.com のお問い合わせフォーム: 通知メールを Cloudflare Email Sending で送れなかったため（${code}）、Resend で送っています。\n` +
+      'Resend の1日100通はライセンスメールと共有のため、この間はフォームの日次上限（Resend 経路）が効きます。' +
+      'E_SENDER_NOT_VERIFIED・E_SENDER_DOMAIN_NOT_AVAILABLE は send.eivrad.com の Email Sending の登録、' +
+      'E_RECIPIENT_NOT_ALLOWED は束縛の宛先と NOTIFY_TO の食い違いか宛先の確認、E_RECIPIENT_SUPPRESSED は送信停止のリスト、' +
+      'E_TIMEOUT は二重に届くことがあります、E_BINDING_MISSING は束縛 CONTACT_EMAIL を確認してください。' +
+      'Resend だけに戻すときは CONTACT_MAIL_PROVIDER を "resend" にして配信します（この通知は最短10分に1回）。',
+  );
+}
+
+/**
+ * Cloudflare 経路の日次上限に達し、Resend に回し始めたことを Slack に知らせる。その日の最初の1件だけ（rejected が 1）。
+ * カウンタの件数が読めなければ毎回送る。載せるのは上限の数だけ。
+ */
+async function notifyCloudflareCap(env, cfCap, cap, count) {
+  if (count !== null && count !== undefined && count !== 1) return;
+  await postSlack(
+    env,
+    `:warning: eivrad.com のお問い合わせフォーム: Cloudflare 経路の日次上限（${cfCap}通）に達したため、以降は Resend（フォームの日次上限 ${cap}通）で送っています。\n` +
+      'Cloudflare 経路の枠は UTC 0時＝JST 9時に戻ります。スパムが Turnstile を抜けていないか確認してください。',
+  );
+}
+
+/**
+ * 日次カウンタが使えず、上限なしで送っていることを Slack に知らせる。isolate ごとに最短10分に1回（経路をまたいで共有）。
+ * route は 'resend'（Resend 経路の resend-daily）か 'cloudflare'（Cloudflare 経路の cf-daily）。
  * Workers Logs は無効なので、これが無いと wrangler tail を開いている間しか気づけない。
  */
-async function notifyCounterUnavailable(env) {
+async function notifyCounterUnavailable(env, route) {
   if (!env.SLACK_WEBHOOK || !takeCounterAlert(Date.now())) return;
   const why = env.CONTACT_COUNTER ? '応答しない・異常な応答' : 'バインディング CONTACT_COUNTER が未設定';
+  if (route === 'cloudflare') {
+    await postSlack(
+      env,
+      `:rotating_light: eivrad.com のお問い合わせフォーム: Cloudflare 経路の日次カウンタが使えないため（${why}）、Cloudflare 経路は上限なしで送信しています。\n` +
+        'Cloudflare の送信枠はライセンスメール（eve-voice-commerce）と同じアカウントのため、続くとライセンスメールが Resend に回るおそれがあります。' +
+        '`wrangler tail eivrad-contact` で原因を確認してください（この通知は最短10分に1回）。',
+    );
+    return;
+  }
   await postSlack(
     env,
     `:rotating_light: eivrad.com のお問い合わせフォーム: 日次カウンタが使えないため（${why}）、上限なしで送信しています。\n` +

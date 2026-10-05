@@ -16,12 +16,29 @@ type = "ratelimit"
 namespace_id = "1001"
 simple = { limit = 5, period = 60 }
 
-# 通知メールの日次上限（UTC の1日あたり。UTC 0時＝JST 9時に戻る）。
+# 通知メールの日次上限（Resend 経路。UTC の1日あたり。UTC 0時＝JST 9時に戻る）。
 # Resend Free の日次100通を Eve Voice のライセンス Worker と分け合う（2026-10-04 決定: フォーム 20 / ライセンス 80）。
 # 上限に達したら Resend を呼ばず、フォームに contact@eivrad.com への直接メールを案内する。
-# 0 にするとフォームからの送信を止め、全員にメールでの連絡を案内する。数字以外は既定の 20 として扱う。
+# 0 にするとフォームからの送信を止め（Cloudflare 経路も呼ばない）、全員にメールでの連絡を案内する。数字以外は既定の 20 として扱う。
 [vars]
 CONTACT_DAILY_MAIL_CAP = "20"
+# 通知メールの送り方（2026-10-05）。"cloudflare" = Cloudflare Email Sending（下の束縛 CONTACT_EMAIL）で送り、
+# 送れなければ（どのエラーでも・時間切れでも）Resend（上の日次上限つき）に回す。
+# "resend" = 従来どおり Resend だけ（束縛は呼ばない）。無い・それ以外の値も "resend" として扱う。
+# Resend だけに戻すときは、コードを変えずにここを "resend" にして配信する（worker/README.md「戻し方」）。
+CONTACT_MAIL_PROVIDER = "cloudflare"
+# Cloudflare 経路の日次上限（UTC の1日あたり）。Durable Object の別オブジェクト cf-daily で数える（マイグレーション不要）。
+# 達したら Resend 経路（上の 20 通）に回す。0 なら Cloudflare を使わない。数字以外は既定の 100 として扱う。
+# 普段の件数（1日数件）より十分に大きく、Turnstile を抜けたスパムがライセンスメールと同じアカウントの送信枠を食い尽くさない値。
+CONTACT_CF_DAILY_CAP = "100"
+
+# Cloudflare Email Sending の送信束縛。宛先は contact@eivrad.com（Email Routing の確認済みの宛先）だけ、
+# 差出人は form@send.eivrad.com（Email Sending に登録した send.eivrad.com）だけに絞る。
+# 宛先が確認されていない・送信ドメインが未登録の間は送信が例外になり、Resend に回る（Slack に理由のコード）。
+[[send_email]]
+name = "CONTACT_EMAIL"
+destination_address = "contact@eivrad.com"
+allowed_sender_addresses = ["form@send.eivrad.com"]
 
 # 日次上限を数える Durable Object（SQLite 版・src/counter.js の ContactMailCounter）。
 # KV は API トークンに権限がないため使わない。保存するのは日付（UTC）と件数だけで、氏名・メール・本文・IP は入れない。
@@ -38,6 +55,7 @@ new_sqlite_classes = ["ContactMailCounter"]
 
 # シークレットはここに書かない。wrangler secret put で投入すること。
 #   TURNSTILE_SECRET / RESEND_API_KEY / NOTIFY_TO / SLACK_WEBHOOK
+#   NOTIFY_TO は束縛 CONTACT_EMAIL の destination_address と同じ contact@eivrad.com であること（違うと毎回 Resend に回る）。
 
 # 実行ログ（Workers Logs）を使わない。問い合わせの本文・メールアドレス・IP を Cloudflare の
 # ログに残さない（2026-10-02・ゲッコー天気のポリシーの保存期間に合わせる）。

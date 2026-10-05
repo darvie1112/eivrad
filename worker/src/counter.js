@@ -4,11 +4,13 @@
  * Resend Free の送信枠（1日100通・UTC 0時＝JST 9時に戻る）を Eve Voice のライセンス Worker と
  * 分け合うため、このフォームが Resend を呼んでよい通数を UTC の1日ごとに数える。
  * 2026-10-04 の決定: フォーム 20 通 / ライセンスメール 80 通。
+ * 2026-10-05 から、Cloudflare Email Sending の経路も同じクラスの別オブジェクト（名前 CF_COUNTER_NAME = 'cf-daily'。
+ * cfmail.js）で数える。Durable Object は名前ごとに別の実体なので、表は同じ形のまま、マイグレーションは要らない。
  *
  * 設計上の約束
  *   - 保存するのは日付キー（UTC の YYYY-MM-DD）と件数だけ。氏名・メール・本文・IP は渡さない。
- *   - オブジェクトは全リクエストで1個（名前 COUNTER_NAME）。1個の Durable Object は要求を
- *     1件ずつ処理し、SQL API は同期なので、「読む→判定→足す」の間に他の送信が割り込まない。
+ *   - オブジェクトは経路ごとに1個（Resend は名前 COUNTER_NAME、Cloudflare は 'cf-daily'）。1個の Durable Object は
+ *     要求を1件ずつ処理し、SQL API は同期なので、「読む→判定→足す」の間に他の送信が割り込まない。
  *   - 呼び出し側（index.js）はカウンタが使えないとき fail open にする（届けることを優先する）。
  *     その間は上限が効かず、ライセンスメールと共有の Resend 枠を食いうるので、Slack に警告を送る
  *     （takeCounterAlert で isolate ごとに10分に1回まで）。
@@ -16,7 +18,7 @@
 
 export const DEFAULT_DAILY_MAIL_CAP = 20;
 
-/** 全リクエストで共有する Durable Object の名前（idFromName に渡す） */
+/** Resend 経路の全リクエストで共有する Durable Object の名前（idFromName に渡す） */
 export const COUNTER_NAME = 'resend-daily';
 
 /** これより古い日の行は消す（件数しか無いが、溜め込む理由も無い） */
@@ -34,11 +36,14 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 /** UTC の日付キー。Resend の日次枠と同じく UTC 0時で切り替わる */
 export const utcDayKey = (ms) => new Date(ms).toISOString().slice(0, 10);
 
-/** 上限値を読む。0 以上の整数でなければ既定値。0 はフォームからの送信を止める（全員にメールを案内） */
-export const parseCap = (raw) => {
-  if (raw === undefined || raw === null || String(raw).trim() === '') return DEFAULT_DAILY_MAIL_CAP;
+/**
+ * 上限値を読む。0 以上の整数でなければ既定値（fallback。省略時は DEFAULT_DAILY_MAIL_CAP）。
+ * CONTACT_DAILY_MAIL_CAP の 0 はフォームからの送信を止める（Cloudflare 経路も含めて。全員にメールを案内）。
+ */
+export const parseCap = (raw, fallback = DEFAULT_DAILY_MAIL_CAP) => {
+  if (raw === undefined || raw === null || String(raw).trim() === '') return fallback;
   const n = Number(raw);
-  return Number.isInteger(n) && n >= 0 ? n : DEFAULT_DAILY_MAIL_CAP;
+  return Number.isInteger(n) && n >= 0 ? n : fallback;
 };
 
 export class ContactMailCounter {
@@ -130,36 +135,37 @@ export class ContactMailCounter {
   }
 }
 
-const stubOf = (env) => env.CONTACT_COUNTER.get(env.CONTACT_COUNTER.idFromName(COUNTER_NAME));
+const stubOf = (env, name) => env.CONTACT_COUNTER.get(env.CONTACT_COUNTER.idFromName(name));
 
 const errorText = (err) => String((err && err.message) || err).slice(0, 200);
 
 /**
- * 今日の枠を1通ぶん確保する（index.js から呼ぶ）。
- * 戻り値: { ok: true, day, ... } 確保できた / { ok: false, rejected, ... } 上限 /
+ * 今日の枠を1通ぶん確保する（index.js から呼ぶ）。name はオブジェクトの名前（既定は Resend 経路の COUNTER_NAME）。
+ * 戻り値: { ok: true, day, ..., counter } 確保できた / { ok: false, rejected, ..., counter } 上限 /
  *         null カウンタが使えない（呼び出し側は上限なしで送る = fail open）
+ * counter はオブジェクトの名前（releaseDailySlot が同じオブジェクトへ返すため）。
  */
-export const reserveDailySlot = async (env, cap) => {
+export const reserveDailySlot = async (env, cap, name = COUNTER_NAME) => {
   if (!env.CONTACT_COUNTER) {
-    console.error('contact: 日次カウンタ（CONTACT_COUNTER）が未設定のため、上限なしで送信します');
+    console.error(`contact: 日次カウンタ（CONTACT_COUNTER・${name}）が未設定のため、上限なしで送信します`);
     return null;
   }
   try {
-    const res = await stubOf(env).fetch(`https://counter/reserve?cap=${cap}`, { method: 'POST' });
+    const res = await stubOf(env, name).fetch(`https://counter/reserve?cap=${cap}`, { method: 'POST' });
     if (!res.ok) throw new Error(`status ${res.status}`);
     const body = await res.json();
     if (!body || typeof body.ok !== 'boolean' || !DAY_RE.test(String(body.day || ''))) {
       throw new Error('unexpected response');
     }
-    return body;
+    return { ...body, counter: name };
   } catch (err) {
-    console.error('contact: 日次カウンタに接続できないため、上限なしで送信します', errorText(err));
+    console.error(`contact: 日次カウンタ（${name}）に接続できないため、上限なしで送信します`, errorText(err));
     return null;
   }
 };
 
 /**
- * reserveDailySlot で確保した枠を返す。確保していなければ何もしない。
+ * reserveDailySlot で確保した枠を、確保したのと同じオブジェクト（slot.counter）へ返す。確保していなければ何もしない。
  * reason は RELEASE_QUOTA か ''。戻り値はその日の件数（取れなければ null）。
  */
 export const releaseDailySlot = async (env, slot, reason = '') => {
@@ -167,7 +173,7 @@ export const releaseDailySlot = async (env, slot, reason = '') => {
   try {
     const query = new URLSearchParams({ day: slot.day });
     if (reason) query.set('reason', reason);
-    const res = await stubOf(env).fetch(`https://counter/release?${query}`, { method: 'POST' });
+    const res = await stubOf(env, slot.counter || COUNTER_NAME).fetch(`https://counter/release?${query}`, { method: 'POST' });
     if (!res.ok) throw new Error(`status ${res.status}`);
     return await res.json();
   } catch (err) {
