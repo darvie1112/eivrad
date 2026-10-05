@@ -9,7 +9,7 @@
  * 設計上の約束
  *   - 宛先はこのファイルの NOTIFY_ADDRESS（contact@eivrad.com）に固定する。束縛は wrangler.toml で
  *     allowed_sender_addresses = [form@send.eivrad.com] だけに絞り、宛先の制限（destination_address・
- *     allowed_destination_addresses）は付けない（付けると確認済みの宛先が要る）。束縛が宛先を絞らないので、
+ *     allowed_destination_addresses）は付けない（付けると確認済みの宛先が要ると文書にある・未確認）。束縛が宛先を絞らないので、
  *     宛先を決めるのはコードだけ: sendViaCloudflare は呼び出し側から宛先を受け取らず、to には常に NOTIFY_ADDRESS を入れ、
  *     cc・bcc・headers は渡さない。secret NOTIFY_TO が NOTIFY_ADDRESS と違えば束縛を呼ばない（E_NOTIFY_TO_MISMATCH）。
  *   - 束縛は必ず env のメソッドとして呼ぶ（env.CONTACT_EMAIL.send(...)）。取り出して呼ぶと workerd では

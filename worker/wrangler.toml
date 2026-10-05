@@ -35,7 +35,7 @@ CONTACT_CF_DAILY_CAP = "100"
 
 # Cloudflare Email Sending の送信束縛。差出人は form@send.eivrad.com（Email Sending に登録した send.eivrad.com）だけに絞る。
 # 宛先の制限（destination_address・allowed_destination_addresses）は付けない（2026-10-05 決定: Email Routing を使わず、
-# contact@eivrad.com を確認済みの宛先にしないため。宛先の制限を付けると確認済みの宛先が要る）。
+# contact@eivrad.com を確認済みの宛先にしないため。宛先の制限を付けると確認済みの宛先が要ると Cloudflare の文書にある・未確認）。
 # 宛先はコードが contact@eivrad.com に固定する（src/cfmail.js の NOTIFY_ADDRESS。cc・bcc は使わない）。
 # 送信ドメインが使えない・送れない間は送信が例外になり、Resend に回る（Slack に理由のコード）。
 [[send_email]]

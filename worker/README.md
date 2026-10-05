@@ -93,7 +93,7 @@ dry-run の束縛の一覧では `env.CONTACT_EMAIL (unrestricted - senders: for
   `E_TYPE_ERROR` など。受け付けなかったことが確実とは言えないもの）。理由はコード（`E_…`）だけを記録・Slack に出し、
   例外の `message` は出さない（問い合わせ者のアドレスが入りうるため）。
 - **Cloudflare の経路の宛先はコードで `contact@eivrad.com` に固定する。** 束縛 `CONTACT_EMAIL` は差出人しか絞らない（宛先の制限を
-  付けると確認済みの宛先が要るため。Email Routing は使わない）。このため `src/cfmail.js` の `sendViaCloudflare` は呼び出し側から
+  付けると確認済みの宛先が要ると Cloudflare の文書にある（未確認）。Email Routing は使わない）。このため `src/cfmail.js` の `sendViaCloudflare` は呼び出し側から
   宛先を受け取らず、`to` には常に `NOTIFY_ADDRESS`（`contact@eivrad.com`）の文字列1つを入れ、`cc`・`bcc`・`headers` は渡さない。
   secret `NOTIFY_TO` がそれと違えば束縛を呼ばない（`E_NOTIFY_TO_MISMATCH` で Resend に回り、Resend は今までどおり `NOTIFY_TO` へ送る）。
   問い合わせ者のアドレスは `replyTo` にだけ入る。
@@ -169,7 +169,7 @@ dry-run の束縛の一覧では `env.CONTACT_EMAIL (unrestricted - senders: for
 2. 何も送らないうちに、`send.eivrad.com` の Email preview をオフにする（問い合わせの本文を Cloudflare に残さない）。
    Drop suppressed recipients はオフのまま（送信停止の宛先は `E_RECIPIENT_SUPPRESSED` で断られ、Resend に回る）。**2026-10-05 に済み。**
 3. **Email Routing は使わない。** `eivrad.com` の Email Routing を有効にしない・`contact@eivrad.com` を Destination Addresses に足さない
-   （2026-10-05 決定。apex の MX を ConoHa のまま守るため）。束縛にも宛先の制限を付けない（付けると確認済みの宛先が要る）。
+   （2026-10-05 決定。apex の MX を ConoHa のまま守るため）。束縛にも宛先の制限を付けない（付けると確認済みの宛先が要ると文書にある。未確認）。
    Cloudflare の経路の通知は、確認済みの宛先ではないので Email Sending の送信枠に数える（Workers Paid が要る。ドキュメントの記述）。
    宛先の制限の無い束縛で、確認していない宛先へ実際に送れるかは配信の後の1通で確かめる（送れなければ `E_RECIPIENT_NOT_ALLOWED` などで
    毎回 Resend に回る）。
@@ -177,7 +177,7 @@ dry-run の束縛の一覧では `env.CONTACT_EMAIL (unrestricted - senders: for
 ### 配信の後の確認
 
 - 自分宛てに1件送り、届いたメールの「メッセージのソースを表示」で `Authentication-Results:` が
-  `dkim=pass header.d=send.eivrad.com`・`spf=pass`（`cf-bounce.send.eivrad.com`）・`dmarc=pass` であること、
+  `dkim=pass header.d=send.eivrad.com`・`dmarc=pass` であること（転送の後の Gmail では SPF は pass にならないのが普通なので見ない）、
   件名に氏名が無く Reply-To が入力したアドレスであること、日本語の差出人名と件名が化けないことを確かめる。
   通知は ConoHa（`contact@eivrad.com`）から Gmail へ転送されて届くので、転送の後の Gmail で見て `dkim=pass` が残っていること
   （`_dmarc.send.eivrad.com` が `p=reject` なので、DKIM が転送で壊れると隔離ではなく拒否で消える）。
@@ -186,8 +186,8 @@ dry-run の束縛の一覧では `env.CONTACT_EMAIL (unrestricted - senders: for
 - **Resend の予備の経路も、転送の後に `dkim=pass`・`dmarc=pass` であることを確かめる。** `_dmarc.send.eivrad.com` が `p=reject`（rua なし）に
   なったので、Resend から `form@send.eivrad.com` で送る予備の通知も、ConoHa から Gmail への転送で DKIM が壊れると拒否で消え、
   集計レポートでも気づけない。Resend 経路の通知（Slack に「Cloudflare Email Sending で送れなかったため（E_…）、Resend で送っています」が
-  出た回の通知）が届いたら、Gmail の「メッセージのソースを表示」で `dkim=pass header.d=send.eivrad.com`・`spf=pass`
-  （`bounce.send.eivrad.com`）・`dmarc=pass` を見る。まだ1通も無ければ、2026-10-05 の登録より後に Resend から `contact@eivrad.com` に
+  出た回の通知）が届いたら、Gmail の「メッセージのソースを表示」で `dkim=pass header.d=send.eivrad.com`・`dmarc=pass` を見る
+  （転送の後の SPF は見ない）。まだ1通も無ければ、2026-10-05 の登録より後に Resend から `contact@eivrad.com` に
   届いたメール（切り替え前の版のフォーム通知など）で見る。どちらも無いうちは、Cloudflare に切り替える配信の前に、今の版
   （Resend だけで送る版）のフォームから自分宛てに1件送って確かめておく（Resend の枠を1通使う）。`dkim=fail`・`dmarc=fail` なら、
   Resend に回った通知は届かないので、開発側に伝える（ConoHa の転送のしかたを見直す）。
@@ -328,7 +328,7 @@ rollback は断られる。カウンタを撤去する配信（`v2`）も同じ�
 2. **カウンタを撤去する（最後の手段）:** 開発側が次の形のコミットを用意し、`deploy-contact-worker.zsh --remove-counter <コミット>` で配信する。
    1. `src/index.js` から `counter.js` の利用（import・export・枠の確保と返却・カウンタの警告）を外し、`src/counter.js` を削除する。
    2. `wrangler.toml` から `[[durable_objects.bindings]]` を消し、`[vars]` の `CONTACT_DAILY_MAIL_CAP` と `CONTACT_CF_DAILY_CAP` も消す
-      （Cloudflare の経路は上限なしになる。`CONTACT_MAIL_PROVIDER` と send_email 束縛は残してよい）。
+      （Cloudflare の経路は上限なしになる。`CONTACT_MAIL_PROVIDER` と send_email 束縛、`src/cfmail.js` の宛先の固定は残す。`--remove-counter` のゲートがこれらを確かめる）。
    3. `[[migrations]]` の `v1` は残したまま、`tag = "v2"`・`deleted_classes = ["ContactMailCounter"]` を追記する。
    消えるのは日付と件数の記録だけ。**撤去するとフォームの上限もなくなり、20/80 の配分は守られない**（Resend の 429 だけが歯止めで、
    そのときは直接メールを案内する）。なるべく 1. で直し、撤去したら早めにカウンタを入れ直す。
