@@ -4,6 +4,7 @@
 //
 // 外部への通信はしない。fetch は差し替え、Turnstile / Resend / Slack 以外の宛先は失敗させる。
 // send_email 束縛（env.CONTACT_EMAIL）は偽物で、env のメソッドとして呼ばれなければ TypeError を投げる（本番の workerd と同じ）。
+// 束縛は差出人しか絞らない（宛先の制限なし）ので、宛先が contact@eivrad.com に固定されていることもここで確かめる。
 // Durable Object の SQL は node:sqlite（Node 22.5 以降）で本物の SQLite に流す。
 // workerd（Miniflare）で束ねた Worker を動かす確認は workerd.test.mjs（miniflare の場所を渡したときだけ動く）。
 
@@ -21,15 +22,20 @@ import {
 import {
   CF_COUNTER_NAME,
   CF_SEND_TIMEOUT_MS,
+  CODE_NOTIFY_TO_MISMATCH,
   DEFAULT_CF_DAILY_CAP,
   FALLBACK_ALERT_INTERVAL_MS,
   FROM,
+  NOTIFY_ADDRESS,
   contactSubject,
   failureCode,
+  isNotifyAddress,
   parseProvider,
   resetFallbackAlert,
+  sendViaCloudflare,
   setCloudflareTimeoutForTest,
 } from '../src/cfmail.js';
+import { readFileSync } from 'node:fs';
 
 let DatabaseSync = null;
 try {
@@ -612,6 +618,7 @@ function cfSetup({ cap = '20', cfCap = '100', provider = 'cloudflare', at = '202
   const clock = clockAt(at);
   const ns = namedCounters(clock);
   const env = baseEnv({
+    NOTIFY_TO: NOTIFY_ADDRESS, // 本番の secret と同じ contact@eivrad.com（Cloudflare の経路はこれと同じときだけ使う）
     CONTACT_DAILY_MAIL_CAP: cap,
     CONTACT_CF_DAILY_CAP: cfCap,
     CONTACT_MAIL_PROVIDER: provider,
@@ -673,7 +680,8 @@ test('Cloudflare: 束縛で1通送り、Resend も Resend の日次枠も使わ�
   assert.deepEqual(Object.keys(m).sort(), ['from', 'replyTo', 'subject', 'text', 'to'], 'html・headers・cc・bcc は渡さない');
   assert.deepEqual(m.from, { name: 'Eivrad お問い合わせ', email: 'form@send.eivrad.com' });
   assert.deepEqual(m.from, { ...FROM });
-  assert.equal(m.to, 'notify@example.test', '宛先は NOTIFY_TO');
+  assert.equal(m.to, 'contact@eivrad.com', '宛先はコードで固定した contact@eivrad.com（文字列1つ）');
+  assert.equal(NOTIFY_ADDRESS, 'contact@eivrad.com');
   assert.equal(m.replyTo, PERSON.email, '問い合わせ者は Reply-To');
   assert.match(m.subject, SUBJECT_RE);
   assert.ok(!m.subject.includes(PERSON.name), '件名に氏名を入れない');
@@ -926,6 +934,91 @@ test('"cloudflare" なのに束縛が無い: E_BINDING_MISSING として Resend 
   assert.equal(net.resend.length, 1);
   assert.deepEqual(ns.calls, ['resend-daily POST /reserve']);
   assert.ok(net.slack.filter(isFallbackNotice)[0].includes('（E_BINDING_MISSING）'));
+});
+
+// --- 宛先の固定（束縛は差出人しか絞らないので、宛先はコードだけが決める） --------------------------------
+
+test('通知の宛先: NOTIFY_TO が contact@eivrad.com のときだけ（前後の空白・大文字小文字は問わない）', () => {
+  for (const ok of ['contact@eivrad.com', ' Contact@Eivrad.COM ', 'contact@eivrad.com\n']) {
+    assert.equal(isNotifyAddress(ok), true, JSON.stringify(ok));
+  }
+  for (const bad of [
+    undefined,
+    null,
+    '',
+    'notify@example.test',
+    'contact@eivrad.co',
+    'xcontact@eivrad.com',
+    'contact@eivrad.com.evil.test',
+    'contact@eivrad.com, evil@example.test',
+    'contact@eivrad.com\r\nBcc: evil@example.test',
+    '<contact@eivrad.com>',
+    ['contact@eivrad.com'],
+    { email: 'contact@eivrad.com' },
+  ]) {
+    assert.equal(isNotifyAddress(bad), false, JSON.stringify(bad));
+  }
+});
+
+test('sendViaCloudflare は呼び出し側の宛先・cc・bcc・headers を使わず、contact@eivrad.com だけに送る', async () => {
+  const binding = fakeBinding();
+  const env = { CONTACT_EMAIL: binding, NOTIFY_TO: ' Contact@Eivrad.com ' };
+  const res = await sendViaCloudflare(env, {
+    to: 'evil@example.test',
+    cc: 'evil@example.test',
+    bcc: ['evil@example.test'],
+    headers: { Bcc: 'evil@example.test' },
+    replyTo: PERSON.email,
+    subject: 's',
+    text: 't',
+  });
+  assert.equal(res.ok, true);
+  assert.equal(binding.calls.length, 1);
+  const m = binding.calls[0];
+  assert.deepEqual(Object.keys(m).sort(), ['from', 'replyTo', 'subject', 'text', 'to']);
+  assert.equal(m.to, 'contact@eivrad.com');
+  assert.ok(!JSON.stringify(m).includes('evil'), JSON.stringify(m));
+
+  // NOTIFY_TO が違えば、束縛を呼ばない（宛先を NOTIFY_TO に変えて送ることもしない）
+  const other = fakeBinding();
+  const mismatch = await sendViaCloudflare({ CONTACT_EMAIL: other, NOTIFY_TO: 'evil@example.test' }, { replyTo: PERSON.email, subject: 's', text: 't' });
+  assert.deepEqual(mismatch, { ok: false, code: CODE_NOTIFY_TO_MISMATCH });
+  assert.equal(other.calls.length, 0);
+});
+
+test('NOTIFY_TO が contact@eivrad.com でない: 束縛を呼ばず E_NOTIFY_TO_MISMATCH で Resend（NOTIFY_TO 宛て）に回す', needsSqlite, async () => {
+  for (const notifyTo of ['notify@example.test', 'contact@eivrad.com, evil@example.test', 'contact@eivrad.co', 'contact@eivrad.com\r\nBcc: evil@example.test']) {
+    installFetch();
+    resetFallbackAlert();
+    const { env, binding, ns } = cfSetup();
+    env.NOTIFY_TO = notifyTo;
+    assert.deepEqual(await submit(env), { status: 200, body: { ok: true } }, notifyTo);
+    assert.equal(binding.calls.length, 0, `束縛を呼ばない: ${notifyTo}`);
+    assert.equal(net.resend.length, 1);
+    assert.deepEqual(net.resend[0].to, [notifyTo], 'Resend の経路は今までどおり NOTIFY_TO へ');
+    assert.deepEqual(ns.calls, ['resend-daily POST /reserve'], 'Cloudflare の枠に触れない');
+    const fallback = net.slack.filter(isFallbackNotice);
+    assert.equal(fallback.length, 1);
+    assert.ok(fallback[0].includes('（E_NOTIFY_TO_MISMATCH）'), fallback[0]);
+    assertNoPersonalData();
+  }
+});
+
+test('wrangler.toml の send_email 束縛は差出人だけを絞り、宛先の制限（destination_address 等）を付けない', () => {
+  const toml = readFileSync(new URL('../wrangler.toml', import.meta.url), 'utf8');
+  const blocks = toml.split(/^(?=\[)/m).filter((b) => b.startsWith('[[send_email]]'));
+  assert.equal(blocks.length, 1, 'send_email 束縛は1つ');
+  const keys = blocks[0]
+    .split('\n')
+    .slice(1)
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith('#'))
+    .map((l) => l.split('=')[0].trim());
+  assert.deepEqual(keys.sort(), ['allowed_sender_addresses', 'name']);
+  assert.match(blocks[0], /^name = "CONTACT_EMAIL"$/m);
+  assert.match(blocks[0], /^allowed_sender_addresses = \["form@send\.eivrad\.com"\]$/m);
+  assert.ok(!/^\s*(destination_address|allowed_destination_addresses)\s*=/m.test(toml), '宛先の制限は付けない');
+  assert.equal(FROM.email, 'form@send.eivrad.com', 'コードの差出人と束縛の差出人が同じ');
 });
 
 test('SLACK_WEBHOOK が無くても Cloudflare の失敗は Resend で送る', needsSqlite, async () => {

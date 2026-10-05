@@ -22,18 +22,19 @@ Worker のコードはこのディレクトリにあるが、**設定値は Clou
 | Worker ルート | `eivrad.com/api/contact*` | フォームの送信先 |
 | Worker シークレット | `TURNSTILE_SECRET` | Turnstile の Secret Key |
 | Worker シークレット | `RESEND_API_KEY` | Resend の API キー |
-| Worker シークレット | `NOTIFY_TO` | 通知先。`contact@eivrad.com`（下の束縛 `CONTACT_EMAIL` の宛先と同じであること。違うと毎回 Resend に回る） |
+| Worker シークレット | `NOTIFY_TO` | 通知先。`contact@eivrad.com` であること（Cloudflare の経路の宛先はコードで `contact@eivrad.com` に固定している。違うと Cloudflare を使わず、毎回 Resend で `NOTIFY_TO` に送る。Slack に `E_NOTIFY_TO_MISMATCH`） |
 | Worker シークレット | `SLACK_WEBHOOK` | 任意。取りこぼし防止の保険通知 |
-| Worker 変数（`wrangler.toml` の `[vars]`） | `CONTACT_DAILY_MAIL_CAP` | Resend で送る通知メールの日次上限。`"20"`。`"0"` はフォームを止める（Cloudflare も呼ばない） |
+| Worker 変数（`wrangler.toml` の `[vars]`） | `CONTACT_DAILY_MAIL_CAP` | Resend で送る通知メールの日次上限。`"20"`。`"0"` はフォームを止める（Cloudflare も呼ばない。ただし日次カウンタが使えないときは止まらず、Resend から上限なしで送る） |
 | Worker 変数（`wrangler.toml` の `[vars]`） | `CONTACT_MAIL_PROVIDER` | 送り方。`"cloudflare"`（Cloudflare が主・Resend が予備）／`"resend"`（Resend だけ）。無い・不正な値は `"resend"` |
 | Worker 変数（`wrangler.toml` の `[vars]`） | `CONTACT_CF_DAILY_CAP` | Cloudflare で送る通知メールの日次上限。`"100"`。`"0"` は Cloudflare を使わない |
-| send_email 束縛（`wrangler.toml`） | `CONTACT_EMAIL` | Cloudflare Email Sending。宛先 `contact@eivrad.com`・差出人 `form@send.eivrad.com` だけに限定 |
+| send_email 束縛（`wrangler.toml`） | `CONTACT_EMAIL` | Cloudflare Email Sending。差出人 `form@send.eivrad.com` だけに限定（`allowed_sender_addresses`）。宛先の制限（`destination_address`・`allowed_destination_addresses`）は付けず、宛先はコード（`src/cfmail.js` の `NOTIFY_ADDRESS`）が `contact@eivrad.com` に固定 |
 | Durable Object（`wrangler.toml`） | `CONTACT_COUNTER` → クラス `ContactMailCounter` | 日次カウンタ（SQLite 版・マイグレーション `v1`）。オブジェクト名 `resend-daily`（Resend の経路）と `cf-daily`（Cloudflare の経路） |
 | Turnstile | サイト名 `eivrad.com` | Site Key は `contact/index.html` に直書き（公開情報） |
-| Cloudflare Email Sending | ドメイン `send.eivrad.com` | Cloudflare の送信元（`form@send.eivrad.com`）。apex の `eivrad.com` は登録しない。Email preview はオフ |
-| Cloudflare Email Routing | 確認済みの宛先 `contact@eivrad.com` | 束縛の宛先。`eivrad.com` の Email Routing 自体は有効にしない（MX を ConoHa のままにする） |
+| Cloudflare Email Sending | ドメイン `send.eivrad.com` | Cloudflare の送信元（`form@send.eivrad.com`）。2026-10-05 に登録済み（状態 enabled）。apex の `eivrad.com` は登録しない。Email preview はオフ、Drop suppressed recipients はオフ |
+| Cloudflare Email Routing | 使わない | 2026-10-05 決定。`eivrad.com` の Email Routing を有効にせず、`contact@eivrad.com` を確認済みの宛先（Destination Addresses）にもしない（apex の MX を ConoHa のまま守るため。確認済みの宛先なら無料になる送信枠の得より、MX に触れる危険を重く見た）。このため束縛に宛先の制限は付けられない |
 | Resend | ドメイン `send.eivrad.com` | 予備の送信元（同じ `form@send.eivrad.com`）。ルートドメインとは分離している |
-| DNS | `_dmarc.eivrad.com` | `p=quarantine` + `rua`。rua が唯一の可視化手段 |
+| DNS | `_dmarc.eivrad.com` | `p=quarantine` + `rua`。apex（ConoHa から出すメール）の DMARC。rua の集計レポートが唯一の可視化手段だが、`send.eivrad.com` の分はもう届かない（下の行） |
+| DNS | `_dmarc.send.eivrad.com` | `"v=DMARC1; p=reject;"`（rua なし）。2026-10-05 に Cloudflare Email Sending の登録で作られ、ロックされていて編集できない。これより前は無く、親の `p=quarantine` と rua を継承していた。`send.eivrad.com` から出るメール（この通知の Cloudflare 経路・Resend の予備経路の両方と、Eve Voice のライセンスメール）は、DMARC で失敗すると隔離ではなく拒否で消え、集計レポートも届かない（[配信の後の確認](#配信の後の確認)で転送の後の `dmarc=pass` を確かめる） |
 | DNS | `cf-bounce.send.eivrad.com`・`cf-bounce._domainkey.send.eivrad.com` | Cloudflare Email Sending の登録で作られる MX・SPF・DKIM（Resend の `bounce.send.eivrad.com`・`resend._domainkey.send.eivrad.com` とは別名） |
 
 **シークレットの値をこのリポジトリに書かないこと。**
@@ -74,6 +75,9 @@ CONTACT_NODE_MODULES=<miniflare の入った node_modules> CONTACT_WORKER_BUNDLE
 
 `workerd.test.mjs` は `CONTACT_NODE_MODULES` が無ければ省略になる。`deploy-contact-worker.zsh` は EveVoice の
 `Commerce/node_modules`（wrangler 4.129.0 と同じ miniflare）と dry-run の `index.js` を渡して実行し、省略を合格にしない。
+互換日付（`compatibility_date`）・`[vars]`・send_email 束縛・Durable Object・レート制限は、その node_modules の wrangler で
+`wrangler.toml` から読む（`wrangler dev` と同じ変換。テストの中に写しを持たない。`.dev.vars`・`.env` は読み込まない）。
+dry-run の束縛の一覧では `env.CONTACT_EMAIL (unrestricted - senders: form@send.eivrad.com)` と出る（宛先の制限が無いことの表示）。
 
 ## 設計上の約束（変更する前に読むこと）
 
@@ -83,9 +87,16 @@ CONTACT_NODE_MODULES=<miniflare の入った node_modules> CONTACT_WORKER_BUNDLE
   届いた問い合わせの通知を自分で消すことになる。
 - **件名に氏名を入れない。** 件名は `[お問い合わせ/<種別>] MM/DD HH:MM 受付`（日本時間）。Cloudflare の分析データには
   件名が残り、オフにできないため。氏名・メール・本文はメールの本文にだけ書く。
-- **Cloudflare で送れなかったら、どの理由でも Resend に回す。** 自分宛ての通知なので、時間切れの後に両方から届く
-  （二重になる）ことは許し、届かないことを避ける。理由はコード（`E_…`）だけを記録・Slack に出し、
+- **Cloudflare で送れなかったら、どの理由でも Resend に回す。** 自分宛ての通知なので、両方から届く（二重になる）ことは許し、
+  届かないことを避ける。二重になりうるのは、Cloudflare が実は受け付けていたかもしれない場合のすべて: 8秒の時間切れ（`E_TIMEOUT`）と、
+  結果の分からないエラー（`E_INTERNAL_SERVER_ERROR`・`E_DELIVERY_FAILED`・`E_UNKNOWN`（コードの無い例外・Error 以外が投げられた場合）・
+  `E_TYPE_ERROR` など。受け付けなかったことが確実とは言えないもの）。理由はコード（`E_…`）だけを記録・Slack に出し、
   例外の `message` は出さない（問い合わせ者のアドレスが入りうるため）。
+- **Cloudflare の経路の宛先はコードで `contact@eivrad.com` に固定する。** 束縛 `CONTACT_EMAIL` は差出人しか絞らない（宛先の制限を
+  付けると確認済みの宛先が要るため。Email Routing は使わない）。このため `src/cfmail.js` の `sendViaCloudflare` は呼び出し側から
+  宛先を受け取らず、`to` には常に `NOTIFY_ADDRESS`（`contact@eivrad.com`）の文字列1つを入れ、`cc`・`bcc`・`headers` は渡さない。
+  secret `NOTIFY_TO` がそれと違えば束縛を呼ばない（`E_NOTIFY_TO_MISMATCH` で Resend に回り、Resend は今までどおり `NOTIFY_TO` へ送る）。
+  問い合わせ者のアドレスは `replyTo` にだけ入る。
 - **send_email 束縛は env のメソッドとして呼ぶ（`env.CONTACT_EMAIL.send(...)`）。** 取り出して呼ぶと本番の workerd では
   `Illegal invocation` になりうる（EveVoice の `Commerce/src/mail.ts` の前例）。単体テストの偽の束縛は、取り出して呼ばれると
   `TypeError` を投げる。
@@ -115,13 +126,17 @@ CONTACT_NODE_MODULES=<miniflare の入った node_modules> CONTACT_WORKER_BUNDLE
 ### 決めたこと（2026-10-05）
 
 - `CONTACT_MAIL_PROVIDER = "cloudflare"` のとき、通知メールはまず Cloudflare Email Sending（send_email 束縛 `CONTACT_EMAIL`）で送る。
-  宛先は Email Routing の確認済みの宛先 `contact@eivrad.com` だけに、差出人は `form@send.eivrad.com` だけに束縛で限定している。
+  差出人は束縛で `form@send.eivrad.com` だけに、宛先はコードで `contact@eivrad.com` だけに限定している（束縛には宛先の制限を付けない）。
   Cloudflare で送れれば、Resend の1日100通（ライセンスメールと共有）も、Resend の日次枠（20通）も使わない。
+- Email Routing は使わず、`contact@eivrad.com` を確認済みの宛先にしない（2026-10-05 決定）。Cloudflare のドキュメントでは、確認済みの宛先への
+  送信は無料で送信枠に数えないが、それ以外の宛先への送信は Email Sending の送信枠（月の枠・1日の上限）に数え、Workers Paid が要る。
+  このため Cloudflare で送る通知もアカウントの送信枠を使う（ライセンスメールと同じアカウント。だから `CONTACT_CF_DAILY_CAP` で数える）。
 - Cloudflare で送れなければ、同じ件名・本文で従来の Resend の経路（日次枠 20通 → Resend → 429 の読み分け）に回す。
   回す理由: Cloudflare のどのエラーコードでも、同期の例外・`TypeError`（コードなし）・8秒の時間切れ・束縛が無い・
   Cloudflare の経路の日次上限（`CONTACT_CF_DAILY_CAP`、既定 100 通）。
-- `CONTACT_DAILY_MAIL_CAP = "0"` は今までどおりフォームを止める非常手段で、Cloudflare も呼ばない（日次カウンタが動いていれば
-  全員に `daily_limit` で直接メールを案内する。カウンタ自体が使えないときは、今までどおり fail open で Resend から送る）。
+- `CONTACT_DAILY_MAIL_CAP = "0"` は今までどおりフォームを止める非常手段で、Cloudflare も呼ばない。**ただし完全な停止ではない:**
+  止まるのは日次カウンタ（Durable Object）が動いているときだけで、全員に `daily_limit` で直接メールを案内する。
+  カウンタが使えない（束縛が無い・応答しない）ときは、今までどおり fail open で Resend から上限なしで送る（Slack にカウンタの警告）。
 - `CONTACT_MAIL_PROVIDER = "resend"`（または無い・不正な値）なら、束縛を呼ばず、今までの Resend だけの動きに戻る。
   コードを変えずに `wrangler.toml` のこの値だけで戻せる。
 - `RESEND_API_KEY` が無ければ（予備が無いので）今までどおり fail closed で、Cloudflare でも送らない。
@@ -129,35 +144,53 @@ CONTACT_NODE_MODULES=<miniflare の入った node_modules> CONTACT_WORKER_BUNDLE
 ### 流れ
 
 1. 既存の検査（Origin・シークレット・honeypot・time-trap・IP レート制限・Turnstile・入力検証）をすべて通った送信だけが先へ進む。
-2. `CONTACT_MAIL_PROVIDER = "cloudflare"`・`CONTACT_DAILY_MAIL_CAP` が 1 以上・`CONTACT_CF_DAILY_CAP` が 1 以上なら、
-   Durable Object のオブジェクト `cf-daily` で今日（UTC）の Cloudflare の枠を1つ確保し、`env.CONTACT_EMAIL.send()` で送る。
+2. `CONTACT_MAIL_PROVIDER = "cloudflare"`・`CONTACT_DAILY_MAIL_CAP` が 1 以上・`CONTACT_CF_DAILY_CAP` が 1 以上・束縛がある・
+   `NOTIFY_TO` が `contact@eivrad.com` なら、Durable Object のオブジェクト `cf-daily` で今日（UTC）の Cloudflare の枠を1つ確保し、
+   `env.CONTACT_EMAIL.send()` で `contact@eivrad.com` に送る（束縛が無ければ `E_BINDING_MISSING`、`NOTIFY_TO` が違えば
+   `E_NOTIFY_TO_MISMATCH` で、枠に触れずに 3. へ）。
    - 受け付けられたら Slack に「届きました」を出して `200` を返す。
    - 枠が残っていなければ Cloudflare を呼ばずに 3. へ（Slack に「Cloudflare 経路の日次上限」をその日の最初の1件だけ）。
-   - 失敗したら、確保した枠を返して 3. へ（時間切れだけは送られたかもしれないので返さない）。Slack に
+   - 失敗したら、確保した枠を返して 3. へ（時間切れだけは送られたかもしれないので返さない。結果の分からないエラーは返す）。Slack に
      「Cloudflare Email Sending で送れなかったため（E_…）、Resend で送っています」（isolate ごとに最短10分に1回）。
+     時間切れと結果の分からないエラーでは、Cloudflare からも届いて二重になることがある。
    - `cf-daily` が使えなければ上限なしで Cloudflare から送り（fail open）、Slack に警告する（カウンタの警告と共通で10分に1回）。
 3. Resend の経路は[日次上限](#日次上限フォーム-20-通日)の流れのまま。両方とも失敗したときの Slack の失敗通知には、
    `Cloudflare E_… → Resend 500` のように両方の理由を載せる。
 
 ### 前提となるダッシュボードの作業（運用者）
 
-配信の前に済ませる。済んでいなくても配信はでき、その間は毎回 `E_SENDER_…` や `E_RECIPIENT_NOT_ALLOWED` で Resend に回る
-（Slack に理由のコードが出る）。
+配信の前に済ませる。済んでいなくても配信はでき、その間は毎回 `E_SENDER_…` などで Resend に回る（Slack に理由のコードが出る）。
 
 1. Compute > Email Service > Email Sending で `send.eivrad.com` だけを登録する（`eivrad.com` は選ばない）。作られる記録は
    `cf-bounce.send.eivrad.com`（MX・SPF）・`cf-bounce._domainkey.send.eivrad.com`（DKIM）・`_dmarc.send.eivrad.com` だけで、
    apex の MX・SPF・`_dmarc.eivrad.com`・Resend の記録が変わらないこと。
+   **2026-10-05 に済み:** 状態 enabled。足されたのは MX・TXT `cf-bounce.send.eivrad.com`、TXT `cf-bounce._domainkey.send.eivrad.com`、
+   TXT `_dmarc.send.eivrad.com` = `"v=DMARC1; p=reject;"`（ロックされていて編集できない・rua なし）だけで、apex の MX・SPF・`_dmarc.eivrad.com` は前と同じ。
 2. 何も送らないうちに、`send.eivrad.com` の Email preview をオフにする（問い合わせの本文を Cloudflare に残さない）。
-3. Email Routing の Destination Addresses で `contact@eivrad.com` を追加し、確認メールのリンクを開く。
-   `eivrad.com` の Email Routing を有効にする・MX を足す画面が出たら、そこで止める（ConoHa の受信を守るため）。
+   Drop suppressed recipients はオフのまま（送信停止の宛先は `E_RECIPIENT_SUPPRESSED` で断られ、Resend に回る）。**2026-10-05 に済み。**
+3. **Email Routing は使わない。** `eivrad.com` の Email Routing を有効にしない・`contact@eivrad.com` を Destination Addresses に足さない
+   （2026-10-05 決定。apex の MX を ConoHa のまま守るため）。束縛にも宛先の制限を付けない（付けると確認済みの宛先が要る）。
+   Cloudflare の経路の通知は、確認済みの宛先ではないので Email Sending の送信枠に数える（Workers Paid が要る。ドキュメントの記述）。
+   宛先の制限の無い束縛で、確認していない宛先へ実際に送れるかは配信の後の1通で確かめる（送れなければ `E_RECIPIENT_NOT_ALLOWED` などで
+   毎回 Resend に回る）。
 
 ### 配信の後の確認
 
 - 自分宛てに1件送り、届いたメールの「メッセージのソースを表示」で `Authentication-Results:` が
   `dkim=pass header.d=send.eivrad.com`・`spf=pass`（`cf-bounce.send.eivrad.com`）・`dmarc=pass` であること、
   件名に氏名が無く Reply-To が入力したアドレスであること、日本語の差出人名と件名が化けないことを確かめる。
+  通知は ConoHa（`contact@eivrad.com`）から Gmail へ転送されて届くので、転送の後の Gmail で見て `dkim=pass` が残っていること
+  （`_dmarc.send.eivrad.com` が `p=reject` なので、DKIM が転送で壊れると隔離ではなく拒否で消える）。
 - Slack には「届きました」だけが出て、「Cloudflare Email Sending で送れなかったため」が出ないこと。
   Resend の Emails に新しい送信が無いこと。
+- **Resend の予備の経路も、転送の後に `dkim=pass`・`dmarc=pass` であることを確かめる。** `_dmarc.send.eivrad.com` が `p=reject`（rua なし）に
+  なったので、Resend から `form@send.eivrad.com` で送る予備の通知も、ConoHa から Gmail への転送で DKIM が壊れると拒否で消え、
+  集計レポートでも気づけない。Resend 経路の通知（Slack に「Cloudflare Email Sending で送れなかったため（E_…）、Resend で送っています」が
+  出た回の通知）が届いたら、Gmail の「メッセージのソースを表示」で `dkim=pass header.d=send.eivrad.com`・`spf=pass`
+  （`bounce.send.eivrad.com`）・`dmarc=pass` を見る。まだ1通も無ければ、2026-10-05 の登録より後に Resend から `contact@eivrad.com` に
+  届いたメール（切り替え前の版のフォーム通知など）で見る。どちらも無いうちは、Cloudflare に切り替える配信の前に、今の版
+  （Resend だけで送る版）のフォームから自分宛てに1件送って確かめておく（Resend の枠を1通使う）。`dkim=fail`・`dmarc=fail` なら、
+  Resend に回った通知は届かないので、開発側に伝える（ConoHa の転送のしかたを見直す）。
 - **Cloudflare が受け付けた後の不達は、この Worker からは見えない。** 受け付けた時点で「届きました」を出すため、
   その後に ConoHa が拒否した・再試行が尽きた場合は、Slack とメールの件数の食い違いでしか気づけない（Email preview がオフなので
   本文も取り戻せない）。切り替えてから7日間は、Cloudflare の Email Sending の Activity log の Bounced・Failed を毎日見て、
@@ -271,7 +304,8 @@ Resend Free（アカウント1つ・1日100通・月3,000通）を2つの Worker
   （12回失敗すると運用者の対応が要り、その通知メールも 429 で出ない）。上げるなら、同じ日の Commerce の上限と合わせて
   100 以内に収まるよう Commerce 側を下げるか、先に Resend のプランを上げる。
 - **下げる・止めるのは安全。** `"0"` にするとフォームからの送信を止め（Cloudflare の経路も呼ばない）、全員に直接メールを案内する
-  （Resend も Cloudflare も使えないときの非常手段）。
+  （Resend も Cloudflare も使えないときの非常手段）。ただし止まるのは日次カウンタが動いているときだけで、カウンタが使えないときは
+  fail open で Resend から上限なしで送る（今までと同じ動き。完全に止めたいときの手段にはならない）。
   ただし `deploy-contact-worker.zsh` は上限 `"20"` を前提に確かめるので、値を変えるときは開発側がスクリプトの `CAP` も合わせる。
 - **Cloudflare の経路の上限（`CONTACT_CF_DAILY_CAP`、`"100"`）** は、普段の件数（1日数件）より十分に大きく、Turnstile を抜けた
   スパムがライセンスメールと同じ Cloudflare アカウントの送信枠を食い尽くさないための値。変えるときは開発側がスクリプトの `CF_CAP` も
@@ -304,7 +338,7 @@ rollback は断られる。カウンタを撤去する配信（`v2`）も同じ�
 ## 動作確認
 
 ```sh
-# 認証設定
+# 認証設定（_dmarc.send.eivrad.com は "v=DMARC1; p=reject;" が正しい。2026-10-05 の登録から）
 for r in "MX eivrad.com" "TXT eivrad.com" "TXT _dmarc.eivrad.com" \
          "TXT resend._domainkey.send.eivrad.com" \
          "MX cf-bounce.send.eivrad.com" "TXT cf-bounce.send.eivrad.com" \
@@ -314,11 +348,14 @@ for r in "MX eivrad.com" "TXT eivrad.com" "TXT _dmarc.eivrad.com" \
 
 フォームから自分宛に1件送り、届いた通知の「メッセージのソースを表示」で
 `Authentication-Results:` を確認する。**`dkim=pass` かつ `dmarc=pass` が合格条件。**
-（Cloudflare から届いたものは `header.d=send.eivrad.com`・`smtp.mailfrom` が `cf-bounce.send.eivrad.com`。
-ConoHa から転送された後も `dkim=pass` が残ること。）
+（Cloudflare から届いたものは `header.d=send.eivrad.com`・`smtp.mailfrom` が `cf-bounce.send.eivrad.com`、Resend から届いたものは
+`smtp.mailfrom` が `bounce.send.eivrad.com`。どちらも ConoHa から転送された後も `dkim=pass` が残ること。`_dmarc.send.eivrad.com` が
+`p=reject` なので、`dmarc=fail` のメールは隔離ではなく拒否で消える。）
 
 日次上限の動き（上限到達・Resend 失敗時の枠の返却・429 の読み分けと再送・Slack の通知・カウンタ故障時の fail open と警告・
 UTC 0時の切り替わり）と、Cloudflare の経路（成功・各エラーコード／同期の例外／TypeError／時間切れで Resend に回る・
-`cf-daily` の上限・上限 0 で両方止まる・`"resend"` で束縛を呼ばない・件名に氏名が無い・Slack に個人データが無い）は
-`worker/test/contact.test.mjs` で、束ねた Worker が workerd で束縛を呼べることは `worker/test/workerd.test.mjs` で確認する。
+`cf-daily` の上限・上限 0 で両方止まる・`"resend"` で束縛を呼ばない・宛先が `contact@eivrad.com` に固定され `NOTIFY_TO` が違えば
+束縛を呼ばない・`wrangler.toml` の束縛に宛先の制限が無い・件名に氏名が無い・Slack に個人データが無い）は
+`worker/test/contact.test.mjs` で、束ねた Worker が workerd で束縛を呼べること（設定は `wrangler.toml` から読む）は
+`worker/test/workerd.test.mjs` で確認する。
 本番に送って試さないこと（Resend の枠を使う）。

@@ -9,16 +9,18 @@
  * 必要なシークレット (wrangler secret put <NAME>)
  *   TURNSTILE_SECRET  Turnstile の Secret Key
  *   RESEND_API_KEY    Resend の API キー（Cloudflare 経路を使うときも予備として必須）
- *   NOTIFY_TO         通知先アドレス (contact@eivrad.com。束縛 CONTACT_EMAIL の destination_address と同じであること)
+ *   NOTIFY_TO         通知先アドレス (contact@eivrad.com。Cloudflare の経路の宛先はコードで contact@eivrad.com に固定
+ *                     しているので、違うと Cloudflare を使わず Resend だけで NOTIFY_TO に送る。cfmail.js の NOTIFY_ADDRESS)
  *   SLACK_WEBHOOK     任意。メールが迷惑判定された場合の取りこぼし防止
  *
  * wrangler.toml の設定
- *   CONTACT_DAILY_MAIL_CAP  通知メールの日次上限（Resend 経路。UTC の1日あたり。既定 20）。0 はフォームを止める（Cloudflare 経路も含む）
+ *   CONTACT_DAILY_MAIL_CAP  通知メールの日次上限（Resend 経路。UTC の1日あたり。既定 20）。0 はフォームを止める（Cloudflare 経路も
+ *                           呼ばない）。ただし日次カウンタが使えないときは fail open で、Resend から上限なしで送る（完全な停止ではない）
  *   CONTACT_MAIL_PROVIDER   "cloudflare"（Cloudflare を先に使い、送れなければ Resend）/ "resend"（Resend だけ）。
  *                           無い・それ以外の値は "resend"。コードを変えずに Resend だけへ戻すためのスイッチ
  *   CONTACT_CF_DAILY_CAP    Cloudflare 経路の日次上限（UTC の1日あたり。既定 100。オブジェクト cf-daily で数える）。
  *                           達したら Resend 経路へ回す。0 なら Cloudflare を使わない
- *   CONTACT_EMAIL           send_email 束縛（宛先 contact@eivrad.com・差出人 form@send.eivrad.com に限定。cfmail.js）
+ *   CONTACT_EMAIL           send_email 束縛（差出人 form@send.eivrad.com だけに限定。宛先の制限は付けず、宛先はコードで固定。cfmail.js）
  *   CONTACT_COUNTER         日次カウンタの Durable Object（counter.js の ContactMailCounter）
  *
  * 設計上の約束
@@ -34,8 +36,10 @@
  *   - Resend の 429 は本文の name で分ける。送信枠切れ（daily/monthly_quota_exceeded）は daily_limit。
  *     毎秒の送信数制限（rate_limit_exceeded）は retry-after だけ待って1回だけ再送し、それでも駄目なら send_failed。
  *   - Cloudflare Email Sending で送れなかったとき（どのエラーコードでも・同期の例外・TypeError・時間切れ・束縛なし・
- *     Cloudflare 経路の日次上限）は、同じ件名と本文で従来の Resend 経路に回す。自分宛てなので二重に届くことは許す。
+ *     NOTIFY_TO が contact@eivrad.com でない・Cloudflare 経路の日次上限）は、同じ件名と本文で従来の Resend 経路に回す。
+ *     自分宛てなので二重に届くことは許す（時間切れと、結果の分からないエラーのとき。cfmail.js）。
  *     Resend に回したことは Slack に理由のコードだけで知らせる（isolate ごとに10分に1回。上限は1日1回）。
+ *   - Cloudflare の経路の宛先は contact@eivrad.com だけ。束縛は差出人しか絞らないので、宛先はコード（cfmail.js）が決める。
  *   - 件名に氏名を入れない（Cloudflare の分析データに件名が残るため）。氏名・メール・本文はメールの本文にだけ書く。
  */
 
@@ -50,9 +54,11 @@ import {
 import {
   CF_COUNTER_NAME,
   CODE_BINDING_MISSING,
+  CODE_NOTIFY_TO_MISMATCH,
   CODE_TIMEOUT,
   DEFAULT_CF_DAILY_CAP,
   contactSubject,
+  isNotifyAddress,
   parseProvider,
   sendViaCloudflare,
   takeFallbackAlert,
@@ -187,12 +193,16 @@ export default {
 
     // (g) Cloudflare Email Sending（CONTACT_MAIL_PROVIDER = "cloudflare" のとき）。送れたらここで終わり、
     //     Resend の日次枠も Resend も使わない。送れなければ cfWhy に理由のコードを残して (h) の Resend 経路へ。
-    //     CONTACT_DAILY_MAIL_CAP = "0"（フォームを止める）のときは Cloudflare も呼ばず、(h) で daily_limit になる。
+    //     CONTACT_DAILY_MAIL_CAP = "0"（フォームを止める）のときは Cloudflare も呼ばず、(h) で daily_limit になる
+    //     （日次カウンタが使えないときだけは、(h) が fail open で Resend から送る。今までと同じ動き）。
+    //     宛先は cfmail.js が contact@eivrad.com に固定する。NOTIFY_TO がそれと違えば束縛を呼ばず、(h) で NOTIFY_TO に送る。
     let cfWhy = '';
     const cfCap = parseCap(env.CONTACT_CF_DAILY_CAP, DEFAULT_CF_DAILY_CAP);
     if (parseProvider(env.CONTACT_MAIL_PROVIDER) === 'cloudflare' && cap > 0 && cfCap > 0) {
       if (!env.CONTACT_EMAIL) {
         cfWhy = CODE_BINDING_MISSING;
+      } else if (!isNotifyAddress(env.NOTIFY_TO)) {
+        cfWhy = CODE_NOTIFY_TO_MISMATCH;
       } else {
         // Cloudflare 経路の日次枠（オブジェクト cf-daily）。カウンタが使えなければ上限なしで送る（Slack に警告）。
         const cfSlot = await reserveDailySlot(env, cfCap, CF_COUNTER_NAME);
@@ -205,14 +215,14 @@ export default {
           console.log(`contact: Cloudflare 枠 ${cfSlot.used}/${cfCap} (${cfSlot.day} UTC)`);
         }
         if (!cfWhy) {
-          const viaCf = await sendViaCloudflare(env, { to: env.NOTIFY_TO, replyTo: email, subject, text });
+          const viaCf = await sendViaCloudflare(env, { replyTo: email, subject, text });
           if (viaCf.ok) {
             console.log('contact: Cloudflare Email Sending で送信', viaCf.messageId || '-');
             await notifyArrival(env, kind);
             return json({ ok: true });
           }
           cfWhy = viaCf.code;
-          // 受け付けられなかった1通は Cloudflare の枠に数えない。時間切れは送られたかもしれないので数えたままにする。
+          // 失敗した1通は Cloudflare の枠に数えない（結果の分からないエラーも返す）。時間切れだけは送られたかもしれないので数えたままにする。
           if (viaCf.code !== CODE_TIMEOUT) await releaseDailySlot(env, cfSlot);
           // コードだけを出す（e.message には問い合わせ者のアドレスが入りうる）
           console.error('contact: Cloudflare Email Sending で送れず、Resend に回します', viaCf.code);
@@ -390,8 +400,10 @@ async function notifyCloudflareFallback(env, code) {
     `:warning: eivrad.com のお問い合わせフォーム: 通知メールを Cloudflare Email Sending で送れなかったため（${code}）、Resend で送っています。\n` +
       'Resend の1日100通はライセンスメールと共有のため、この間はフォームの日次上限（Resend 経路）が効きます。' +
       'E_SENDER_NOT_VERIFIED・E_SENDER_DOMAIN_NOT_AVAILABLE は send.eivrad.com の Email Sending の登録、' +
-      'E_RECIPIENT_NOT_ALLOWED は束縛の宛先と NOTIFY_TO の食い違いか宛先の確認、E_RECIPIENT_SUPPRESSED は送信停止のリスト、' +
-      'E_TIMEOUT は二重に届くことがあります、E_BINDING_MISSING は束縛 CONTACT_EMAIL を確認してください。' +
+      'E_NOTIFY_TO_MISMATCH は secret NOTIFY_TO（contact@eivrad.com であること）、' +
+      'E_RECIPIENT_NOT_ALLOWED は束縛に宛先の制限が付いていないか・アカウントが任意の宛先に送れる状態か、' +
+      'E_RECIPIENT_SUPPRESSED は送信停止のリスト、E_BINDING_MISSING は束縛 CONTACT_EMAIL を確認してください。' +
+      'E_TIMEOUT・E_INTERNAL_SERVER_ERROR・E_DELIVERY_FAILED・E_UNKNOWN など結果の分からないときは、同じ通知が二重に届くことがあります。' +
       'Resend だけに戻すときは CONTACT_MAIL_PROVIDER を "resend" にして配信します（この通知は最短10分に1回）。',
   );
 }
