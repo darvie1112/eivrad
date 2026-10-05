@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-sG6EQKMhkSZA2Edb8EeANiKRaPU/7N9kYc9mVgzaQVI='; connect-src https://api.eivrad.com http://localhost:8787; img-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex,nofollow">
+  <script>(function(){var k='evThanksSession',q=location.search,s=null;try{s=new URLSearchParams(q).get('session_id')}catch(e){}if(s!==null){var ok=/^cs_(live|test)_[A-Za-z0-9]{10,200}$/.test(s);try{if(ok)sessionStorage.setItem(k,s);else sessionStorage.removeItem(k)}catch(e){}if(ok)window.__evThanksSession=s}if(q||location.hash){try{history.replaceState(null,'',location.pathname)}catch(e){}}})();</script>
+  <meta name="theme-color" content="#fafaf7">
+  <meta name="format-detection" content="telephone=no,email=no,address=no">
+  <title>ありがとうございます｜Eve Voice｜合同会社Eivrad</title>
+  <link rel="icon" href="/favicon.png?v=20260911b" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20260911b" sizes="180x180">
+  <link rel="stylesheet" href="/assets/site.css?v=20260911c">
+  <link rel="stylesheet" href="/assets/eve-voice.css?v=20261003a">
+  <link rel="stylesheet" href="/assets/eve-voice-thanks.css?v=20261005a">
+  <script src="/assets/site.js" defer></script>
+  <script src="/assets/eve-voice-thanks.js?v=20261005a" defer></script>
+</head>
+<body id="top" class="ev-page evt-page" data-ev-thanks="v1">
+  <a class="skip-link" href="#main">本文へスキップ</a>
+  <header class="site-header">
+    <div class="header-inner container">
+      <a class="wordmark" href="/" aria-label="Eivrad ホーム"><img src="/assets/eivrad-logo.png" width="1254" height="1254" alt="Eivrad" fetchpriority="high"></a>
+      <button class="menu-toggle" aria-expanded="false" aria-controls="primary-nav" aria-label="メニューを開く"><span></span><span></span></button>
+      <nav class="primary-nav" id="primary-nav" aria-label="メインナビゲーション">
+        <a href="/evevoice/#features">Features<span>できること</span></a>
+        <a href="/evevoice/#price">Price<span>価格</span></a>
+        <a href="/evevoice/#help">FAQ<span>よくあるご質問</span></a>
+        <a class="nav-contact" href="/contact/?subject=evevoice">Contact <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="evt-main container">
+    <div class="evt-intro">
+      <p class="eyebrow">THANK YOU</p>
+      <h1>ありがとうございます</h1>
+      <p class="evt-lead" id="evt-lead">Eve Voice をお買い上げいただき、ありがとうございます。</p>
+    </div>
+
+    <section class="evt-card" aria-labelledby="evt-dest-title">
+      <h2 id="evt-dest-title">ライセンスキーの送信先</h2>
+      <p class="evt-address" id="evt-address" translate="no" hidden></p>
+      <noscript><p class="evt-noscript">送信先の表示には JavaScript が必要です。</p></noscript>
+      <div class="evt-status" id="evt-status" role="status" aria-live="polite"><p>ライセンスキーは、決済のときにご入力のメールアドレスへ自動でお送りしています（通常は数分以内）。</p></div>
+      <p class="evt-window" id="evt-window" hidden></p>
+      <div class="evt-actions">
+        <button type="button" class="evt-button" id="evt-retry" hidden>もう一度確かめる</button>
+        <a class="evt-button evt-button--primary" id="evt-contact" href="/contact/?subject=evevoice" hidden>お問い合わせフォームへ <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+
+    <section class="evt-check" id="evt-check" aria-labelledby="evt-check-title" hidden>
+      <h2 id="evt-check-title">メールアドレスに誤りはありませんか</h2>
+      <p>1文字でも違っていると、キーは届きません。別の方のアドレスだった場合は、その方にキーが届いてしまいます。</p>
+      <p class="evt-typo" id="evt-typo" hidden></p>
+      <a class="evt-button evt-button--primary" id="evt-report" href="/contact/?subject=evevoice">メールアドレスの誤りを連絡する <span aria-hidden="true">↗</span></a>
+      <p class="evt-note" id="evt-report-note"></p>
+    </section>
+
+    <div class="evt-columns">
+      <section aria-labelledby="evt-missing-title">
+        <h2 id="evt-missing-title">メールが見当たらないとき</h2>
+        <ul class="evt-list">
+          <li>迷惑メールフォルダやプロモーションのタブをご確認ください。</li>
+          <li id="evt-receipt">Stripe からの領収書のメールも、同じアドレスに届きます。</li>
+          <li>30分を過ぎても見当たらない場合は、<a id="evt-missing-contact" href="/contact/?subject=evevoice">お問い合わせください</a><span id="evt-missing-ref"></span>。</li>
+          <li>キーを紛失したときは、アプリの「ライセンス」の欄の「キーを再送」から、同じアドレスへ再送できます。</li>
+        </ul>
+      </section>
+      <section aria-labelledby="evt-next-title">
+        <h2 id="evt-next-title">次にすること</h2>
+        <ol class="evt-steps">
+          <li><a href="/evevoice/#price">アプリを入手する</a><span>体験版と同じアプリです</span></li>
+          <li><a href="/evevoice/#faq-activate">届いたキーを登録する</a></li>
+        </ol>
+      </section>
+    </div>
+
+    <p class="evt-footnote">このページは、送信先の確認のために、当社のサーバー（api.eivrad.com）から注文の状態を読み取ります。カード番号・金額などの決済の情報やライセンスキーは表示しません。</p>
+  </main>
+  <footer class="site-footer container"><div class="footer-top"><a class="wordmark" href="/" aria-label="Eivrad ホーム"><img src="/assets/eivrad-logo.png" width="1254" height="1254" loading="lazy" alt="Eivrad"></a><p>Little ideas. Lasting experiences.</p><a class="back-top" href="#top">BACK TO TOP <span aria-hidden="true">↑</span></a></div><div class="footer-bottom"><span>© 2026 Eivrad LLC</span><div class="footer-legal"><a href="/evevoice/">Eve Voice について</a><a href="/gecko-weather/">ゲッコー天気について</a><a href="/privacy.html">プライバシーポリシー</a><a href="/tokushoho.html">特定商取引法に基づく表記</a><a href="/evevoice/terms.html">Eve Voice 利用規約</a><a href="/gecko-weather/privacy.html">ゲッコー天気 プライバシー</a><a href="/gecko-weather/terms.html">ゲッコー天気 利用規約</a></div><span>TOKYO, JAPAN</span></div></footer>
+</body>
+</html>

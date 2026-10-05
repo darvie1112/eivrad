@@ -148,6 +148,26 @@
         subjectField.value = supportSubjects[requestedSubject];
       }
 
+      // Eve Voice の購入完了ページの「メールアドレスの誤りを連絡する」から来たときだけ、
+      // # 以下のお問い合わせ番号（英数字8文字・支払いの番号の末尾）を本文のひな形に入れる。
+      // # 以下はサーバーにも Referer にも送られない。氏名・メールアドレスは URL から一切入れない。
+      // ご用件が「Eve Voice について」で、本文が空のときだけ入れる（入力済みの本文は変えない）。
+      var messageField = document.getElementById('f-message');
+      var orderRef = /^#ref=([A-Za-z0-9]{8})$/.exec(window.location.hash);
+      if (orderRef && subjectField && subjectField.value === 'Eve Voice について' &&
+          messageField && !messageField.value) {
+        messageField.value = [
+          '【ライセンスキーの送信先のメールアドレスの誤り】',
+          'お問い合わせ番号: ' + orderRef[1],
+          '決済のおおよその日時:',
+          'お支払い方法（カードの下4桁、または Apple Pay）:',
+          '（正しいメールアドレスは、上の「メールアドレス」の欄にご入力ください）'
+        ].join('\n');
+      }
+      if (/^#ref=/.test(window.location.hash) && window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+
       // 絶対時刻ではなく「描画からの経過ミリ秒」を送る。
       // 絶対時刻だと利用者の時計がずれているだけで弾いてしまう。
       var loadedAt = Date.now();
