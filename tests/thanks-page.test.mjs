@@ -2,7 +2,7 @@
 //
 //   node --test tests/thanks-page.test.mjs        # リポジトリのルートで
 //
-// 外部への通信はしない。fetch・タイマー・DOM は偽物に差し替える。
+// 外部への通信はしない。fetch・タイマー・DOM は偽物に差し替える（tests/serve-sandbox.mjs の確認だけ 127.0.0.1 の空き番号で待ち受ける）。
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -89,10 +89,14 @@ test('editDistance: 入れ替えは1回', () => {
   assert.equal(T.editDistance('', 'abc'), 3);
 });
 
-test('contactHref: 英数字8文字の番号だけ # 以下に付け、それ以外は付けない', () => {
+test('contactHref・reportHref: 英数字8文字の番号だけ # 以下に付ける。誤りの連絡だけ #addr=（無料は &f=1）、ほかは #ref=', () => {
   assert.equal(T.contactHref(REF), `${CONTACT}#ref=${REF}`);
+  assert.equal(T.reportHref(REF, false), `${CONTACT}#addr=${REF}`);
+  assert.equal(T.reportHref(REF, true), `${CONTACT}#addr=${REF}&f=1`);
   for (const bad of [null, undefined, '', 'abc', 'Ab3dEf7h9', 'Ab3d-f7h', 'Ab3dEf7 ', '<script>', 'taro@x.jp', 12345678]) {
     assert.equal(T.contactHref(bad), CONTACT, String(bad));
+    assert.equal(T.reportHref(bad, false), CONTACT, String(bad));
+    assert.equal(T.reportHref(bad, true), CONTACT, String(bad));
   }
 });
 
@@ -149,6 +153,7 @@ test('view: 状態ごとの文言・ボタン・確認欄', () => {
   let v = T.view({ kind: 'loading' });
   assert.deepEqual(v.messages, [T.TEXT.loading]);
   assert.equal(v.check, null);
+  assert.equal(v.lead, 'Eve Voice をご注文いただき、ありがとうございます。', '応答の前は有料・無料のどちらにも合う文');
 
   for (const kind of ['noid', 'notfound']) {
     v = T.view({ kind });
@@ -157,18 +162,25 @@ test('view: 状態ごとの文言・ボタン・確認欄', () => {
     assert.equal(v.address, null);
     assert.equal(v.check, null);
     assert.equal(v.retry, false);
+    assert.equal(v.lead, T.TEXT.leadDefault);
   }
+  assert.match(T.view({ kind: 'notfound' }).messages[0], /^決済の完了から30日を過ぎた場合/);
+  assert.match(T.view({ kind: 'noid' }).messages[0], /^ご注文の情報は、ご注文の直後に開いたこのページでだけ表示します/);
 
   v = T.view({ kind: 'unavailable' });
   assert.deepEqual(v.messages, ['ただいま送信先を確認できません。', T.TEXT.generic]);
   assert.equal(v.retry, true);
+  assert.equal(v.lead, T.TEXT.leadDefault);
 
   v = T.view({ kind: 'order', order: order(), address: 'taro@example.com', full: true });
-  assert.deepEqual(v.messages, ['送信の準備をしています…（通常は1分以内に送ります）']);
+  assert.deepEqual(v.messages, ['送信の準備をしています…（通常は数分以内にお送りします）']);
   assert.equal(v.windowNote, 'セキュリティのため、メールアドレスの全体は決済の完了から60分間だけ表示します。');
-  assert.equal(v.check.href, `${CONTACT}#ref=${REF}`);
-  assert.match(v.check.note, /^お問い合わせ番号（Ab3dEf7h）がフォームに入ります。/);
-  assert.match(v.check.note, /カードの下4桁/);
+  assert.equal(v.check.href, `${CONTACT}#addr=${REF}`, '誤りの連絡だけ #addr=');
+  assert.match(v.check.note, /^お問い合わせフォームが新しいタブで開き、お問い合わせ番号（Ab3dEf7h）とご記入の欄が入ります。/);
+  // ご本人の確認は、決済の日時とカードの番号の下4桁の両方。Apple Pay でも「その旨」で済ませる逃げ道を作らない。
+  assert.match(v.check.note, /決済の日時（何時何分ごろ）と、お支払いに使ったカードの番号の下4桁の両方/);
+  assert.match(v.check.note, /Apple Pay などでお支払いの場合も、ウォレットのアプリでそのカードの詳細に表示される、カードの番号の下4桁です。デバイスアカウント番号ではありません/);
+  assert.doesNotMatch(v.check.note, /その旨|または Apple Pay|おおよその/);
   assert.equal(v.check.typo, null);
   assert.equal(v.retry, false);
   assert.equal(v.lead, 'Eve Voice をお買い上げいただき、ありがとうございます。');
@@ -198,8 +210,15 @@ test('view: 状態ごとの文言・ボタン・確認欄', () => {
   v = T.view({ kind: 'order', order: order({ status: 'failed', reason: 'not_issued', free: true }), address: 'taro@example.com', full: true });
   assert.equal(v.lead, 'Eve Voice の無料ライセンスをお申し込みいただき、ありがとうございます。');
   assert.match(v.messages[0], /お申し込みを確認のうえ/);
-  assert.doesNotMatch(v.check.note, /カード/);
+  assert.doesNotMatch(v.check.note, /カード|決済/);
+  assert.match(v.check.note, /ご本人の確認のため、お申し込みの日時（何時何分ごろ）を本文にお書きください。/);
+  assert.equal(v.check.href, `${CONTACT}#addr=${REF}&f=1`, '無料の誤りの連絡は &f=1');
+  assert.equal(v.contact, `${CONTACT}#ref=${REF}`, '送れなかった旨の問い合わせは #ref=（誤りのひな形を入れない）');
   assert.equal(v.free, true);
+
+  // 無料のキーは1日の上限で翌日以降になることがある
+  v = T.view({ kind: 'order', order: order({ free: true }), address: 'taro@example.com', full: true });
+  assert.deepEqual(v.messages, ['送信の準備をしています…（お申し込みが多い日は、翌日以降のお届けになることがあります）']);
 
   v = T.view({ kind: 'order', order: order({ status: 'failed', reason: 'no_address', shortRef: null }), address: null, full: false });
   assert.equal(v.check, null);
@@ -321,7 +340,8 @@ test('準備中 → 送信済み: 確かめ直して表示が変わり、全体�
   assert.equal(h.el('evt-address').hidden, false);
   assert.match(h.text('evt-status'), /送信の準備をしています/);
   assert.equal(h.el('evt-check').hidden, false);
-  assert.equal(h.el('evt-report').getAttribute('href'), `${CONTACT}#ref=${REF}`);
+  // 誤りの連絡のボタンだけ #addr=、「見当たらない場合は、お問い合わせください」は #ref=（番号の1行だけ）
+  assert.equal(h.el('evt-report').getAttribute('href'), `${CONTACT}#addr=${REF}`);
   assert.equal(h.el('evt-missing-contact').getAttribute('href'), `${CONTACT}#ref=${REF}`);
   assert.equal(h.text('evt-missing-ref'), `（お問い合わせ番号 ${REF}）`);
   assert.match(h.text('evt-window'), /60分間だけ表示します/);
@@ -520,13 +540,13 @@ test('head の順番: charset → viewport → CSP → referrer → robots → �
     'link や script src はインラインスクリプトより後');
 });
 
-test('CSP: インラインスクリプトの sha256 が一致し、接続先は api.eivrad.com（と手元の確認用）だけ', () => {
+test('CSP: インラインスクリプトの sha256 が一致し、接続先は api.eivrad.com だけ', () => {
   assert.ok(CSP);
   assert.equal(inlineScripts.length, 1, 'インラインスクリプトは1つだけ');
   const digest = createHash('sha256').update(inlineScripts[0][1], 'utf8').digest('base64');
   const directives = Object.fromEntries(CSP.split(';').map((d) => d.trim().split(/\s+/)).map(([k, ...v]) => [k, v]));
   assert.deepEqual(directives['script-src'], ["'self'", `'sha256-${digest}'`]);
-  assert.deepEqual(directives['connect-src'], ['https://api.eivrad.com', 'http://localhost:8787']);
+  assert.deepEqual(directives['connect-src'], ['https://api.eivrad.com'], '公開する CSP に手元の localhost を入れない（tests/serve-sandbox.mjs が手元でだけ足す）');
   assert.deepEqual(directives['default-src'], ["'self'"]);
   assert.deepEqual(directives['style-src'], ["'self'"]);
   assert.deepEqual(directives['img-src'], ["'self'"]);
@@ -583,7 +603,7 @@ test('HTML: 要素の入れ子が閉じていて、aria の参照先と見出し
 });
 
 function runInline(location, { storageThrows = false } = {}) {
-  const store = new Map([['evThanksSession', 'cs_live_OLDOLDOLDOLDOLD']]);
+  const store = new Map([['evThanksSession', JSON.stringify({ id: 'cs_live_OLDOLDOLDOLDOLD', at: 1 })]]);
   const calls = [];
   const storage = {
     getItem: (k) => { if (storageThrows) throw new Error('blocked'); return store.get(k) ?? null; },
@@ -599,9 +619,13 @@ function runInline(location, { storageThrows = false } = {}) {
   return { store, calls, window };
 }
 
-test('インラインスクリプト: 有効な ID だけを sessionStorage に移し、アドレスバーからクエリを消す', () => {
+test('インラインスクリプト: 有効な ID だけを {id, at} の形で sessionStorage に移し、アドレスバーからクエリを消す', () => {
+  const before = Date.now();
   let r = runInline({ search: `?session_id=${LIVE_ID}&utm_source=stripe`, hash: '', pathname: '/evevoice/thanks/' });
-  assert.equal(r.store.get('evThanksSession'), LIVE_ID);
+  const saved = JSON.parse(r.store.get('evThanksSession'));
+  assert.deepEqual(Object.keys(saved).sort(), ['at', 'id']);
+  assert.equal(saved.id, LIVE_ID);
+  assert.ok(saved.at >= before && saved.at <= Date.now(), '保存した時刻');
   assert.equal(r.window.__evThanksSession, LIVE_ID);
   assert.deepEqual(r.calls, [[null, '', '/evevoice/thanks/']]);
 
@@ -615,72 +639,291 @@ test('インラインスクリプト: 有効な ID だけを sessionStorage に�
   assert.equal(r.calls.length, 1);
 
   r = runInline({ search: '', hash: '', pathname: '/evevoice/thanks/' });
-  assert.equal(r.store.get('evThanksSession'), 'cs_live_OLDOLDOLDOLDOLD', '再読み込みでは残す');
+  assert.equal(JSON.parse(r.store.get('evThanksSession')).id, 'cs_live_OLDOLDOLDOLDOLD', '再読み込みでは残す（期限は readSessionId が見る）');
   assert.equal(r.calls.length, 0);
 
   r = runInline({ search: '', hash: '#x', pathname: '/evevoice/thanks/' });
   assert.equal(r.calls.length, 1);
 });
 
-test('readSessionId: window の値を優先し、無ければ sessionStorage', () => {
-  assert.equal(T.readSessionId({ __evThanksSession: LIVE_ID }), LIVE_ID);
-  assert.equal(T.readSessionId({ __evThanksSession: 'bad' }), null);
-  assert.equal(T.readSessionId({ sessionStorage: { getItem: () => TEST_ID } }), TEST_ID);
-  assert.equal(T.readSessionId({ sessionStorage: { getItem: () => { throw new Error('blocked'); } } }), null);
-  assert.equal(T.readSessionId({}), null);
+function fakeStorage(initial) {
+  const store = new Map(initial === undefined ? [] : [['evThanksSession', initial]]);
+  const removed = [];
+  return {
+    store, removed,
+    sessionStorage: {
+      getItem: (k) => store.get(k) ?? null,
+      removeItem: (k) => { removed.push(k); store.delete(k); },
+    },
+  };
+}
+
+test('readSessionId: window の値を優先し、無ければ sessionStorage の {id, at}（保存から60分以内）。古い・形の違うものは捨てて消す', () => {
+  const now = 1_800_000_000_000;
+  const saved = (id, at) => JSON.stringify({ id, at });
+  assert.equal(T.readSessionId({ __evThanksSession: LIVE_ID }, now), LIVE_ID);
+  assert.equal(T.readSessionId({ __evThanksSession: 'bad' }, now), null);
+  assert.equal(T.STORAGE_TTL_MS, 60 * 60 * 1000);
+
+  let s = fakeStorage(saved(TEST_ID, now - 59 * 60 * 1000));
+  assert.equal(T.readSessionId({ sessionStorage: s.sessionStorage }, now), TEST_ID);
+  assert.deepEqual(s.removed, [], '期限内なら残す（再読み込みで表示し直せる）');
+
+  for (const [label, raw] of [
+    ['60分を過ぎた', saved(TEST_ID, now - 60 * 60 * 1000)],
+    ['時計が5分より大きく戻った', saved(TEST_ID, now + 6 * 60 * 1000)],
+    ['以前の形（ID だけの文字列）', TEST_ID],
+    ['時刻が無い', JSON.stringify({ id: TEST_ID })],
+    ['ID が不正', saved('cs_live_bad id', now)],
+    ['JSON でない', '{'],
+    ['null', 'null'],
+  ]) {
+    s = fakeStorage(raw);
+    assert.equal(T.readSessionId({ sessionStorage: s.sessionStorage }, now), null, label);
+    assert.deepEqual(s.removed, ['evThanksSession'], `${label}: sessionStorage からも消す`);
+  }
+  s = fakeStorage(saved(TEST_ID, now + 4 * 60 * 1000));
+  assert.equal(T.readSessionId({ sessionStorage: s.sessionStorage }, now), TEST_ID, '時計の小さなずれは受け付ける');
+
+  s = fakeStorage();
+  assert.equal(T.readSessionId({ sessionStorage: s.sessionStorage }, now), null);
+  assert.deepEqual(s.removed, []);
+  assert.equal(T.readSessionId({ sessionStorage: { getItem: () => { throw new Error('blocked'); } } }, now), null);
+  assert.equal(T.readSessionId({}, now), null);
+  // forgetStoredId は、使えない sessionStorage でも投げない
+  T.forgetStoredId({ sessionStorage: { removeItem: () => { throw new Error('blocked'); } } });
+  T.forgetStoredId({});
 });
 
-// --- お問い合わせフォームの番号の差し込み ----------------------------------------------------
+test('sessionStorage の ID: ページのリンクで eivrad.com のほかのページへ移るとき、全体の表示の期限が来たときに消す', async () => {
+  const h = harness({ responses: [ok({ status: 'sent', fullSeconds: 60, pollAfter: null })] });
+  let forgotten = 0;
+  h.env.forgetStoredId = () => { forgotten += 1; };
+  await h.start();
+  const click = (href, inner = false) => {
+    const link = { getAttribute: (k) => (k === 'href' ? href : null) };
+    const target = inner ? { closest: (sel) => (sel === 'a[href]' ? link : null) } : { closest: () => link };
+    h.env.document.fire('click', { target });
+  };
+  for (const href of ['#top', '#main', '//evil.example/', 'https://eivrad.com/']) click(href);
+  h.env.document.fire('click', { target: { closest: () => null } }); // リンクではないところ
+  h.env.document.fire('click', { target: {} });
+  h.env.document.fire('click', {});
+  assert.equal(forgotten, 0, 'ページ内の移動・リンクではないところでは消さない');
+  click(`${CONTACT}#addr=${REF}`, true);
+  assert.equal(forgotten, 1, '誤りの連絡（/contact/）へ移る前に消す');
+  click('/evevoice/#price');
+  assert.equal(forgotten, 2);
+  assert.equal(h.ctl.state.id, LIVE_ID, 'このページの変数には残す（戻るボタンのキャッシュから確かめ直せる）');
+  await h.advance(61_000);
+  assert.equal(h.text('evt-address'), 'ta***@example.com');
+  assert.equal(forgotten, 3, '全体の表示の期限が来たら消す');
+});
+
+// --- お問い合わせフォームの番号の差し込みと、送る前の検査 ---------------------------------------
 
 const CONTACT_PAGE = read('contact/index.html');
 const CONTACT_SCRIPT = [...CONTACT_PAGE.matchAll(/<script>([\s\S]*?)<\/script>/g)].at(-1)[1];
+const PAID_TEMPLATE = [
+  '【ライセンスキーの送信先のメールアドレスの誤り】',
+  `お問い合わせ番号: ${REF}`,
+  '決済の日時（何時何分ごろ）:',
+  'お支払いに使ったカードの番号の下4桁:',
+  '（Apple Pay などでお支払いの場合も、ウォレットのアプリでそのカードの詳細に表示される、カードの番号の下4桁です。デバイスアカウント番号ではありません）',
+  '（正しいメールアドレスは、上の「メールアドレス」の欄にご入力ください）',
+].join('\n');
+const FREE_TEMPLATE = [
+  '【ライセンスキーの送信先のメールアドレスの誤り】',
+  `お問い合わせ番号: ${REF}`,
+  'お申し込みの日時（何時何分ごろ）:',
+  '（正しいメールアドレスは、上の「メールアドレス」の欄にご入力ください）',
+].join('\n');
 
 function runContact({ search = '?subject=evevoice', hash = '', message = '' } = {}) {
-  const field = (extra = {}) => ({ value: '', addEventListener() {}, setAttribute() {}, ...extra });
-  const elements = {
-    'contact-form': { addEventListener() {}, querySelector: () => field(), querySelectorAll: () => [] },
-    'eiv-status': field(),
-    'eiv-t': field(),
-    'f-kind': field({ selectedIndex: 0 }),
-    'f-message': field({ value: message }),
+  const focused = [];
+  const field = (id, extra = {}) => ({ id, value: '', type: 'text', addEventListener() {}, setAttribute() {}, focus() { focused.push(id); }, ...extra });
+  const els = {
+    'f-name': field('f-name', { value: '山田 太郎' }),
+    'f-email': field('f-email', { type: 'email', value: 'correct@example.com' }),
+    'f-kind': field('f-kind', { type: 'select-one', selectedIndex: 0 }),
+    'f-message': field('f-message', { type: 'textarea', value: message }),
+    'eiv-status': field('eiv-status'),
+    'eiv-t': field('eiv-t'),
+  };
+  const listeners = {};
+  const button = { disabled: false };
+  els['contact-form'] = {
+    addEventListener: (type, fn) => { listeners[type] = fn; },
+    querySelector: (sel) => (sel === '.eiv-submit' ? button : null),
+    querySelectorAll: (sel) => (sel === '[required]' ? ['f-name', 'f-email', 'f-kind', 'f-message'].map((id) => els[id]) : []),
   };
   const replaced = [];
+  const posts = [];
   const window = {
     location: { search, hash, pathname: '/contact/' },
     history: { replaceState: (...args) => replaced.push(args) },
   };
-  const context = { document: { getElementById: (id) => elements[id] || null }, window, URLSearchParams, Date, Object, FormData: class {}, fetch() {} };
+  const context = {
+    document: { getElementById: (id) => els[id] || null, createElement: () => ({}) }, window, URLSearchParams, Date, Object, FormData: class {},
+    fetch: (url) => { posts.push(url); return new Promise(() => {}); },
+  };
   vm.runInNewContext(CONTACT_SCRIPT, context);
-  return { message: elements['f-message'].value, kind: elements['f-kind'].value, replaced };
+  return {
+    message: els['f-message'].value,
+    kind: els['f-kind'].value,
+    replaced,
+    // 本文を変えて（undefined ならそのまま）送るボタンを押す。表示された文・送った回数・最後に移った欄を返す。
+    submit(text) {
+      if (text !== undefined) els['f-message'].value = text;
+      listeners.submit({ preventDefault() {} });
+      return { status: els['eiv-status'].textContent, posts: posts.length, focused: focused.at(-1) };
+    },
+  };
 }
 
-test('お問い合わせ: 有効な番号・ご用件が Eve Voice・本文が空のときだけ、ひな形を入れて # を消す', () => {
-  const r = runContact({ hash: `#ref=${REF}` });
+test('お問い合わせ: 誤りの連絡（#addr=）のときだけ、有料のひな形（決済の日時とカードの番号の下4桁）を入れて # を消す', () => {
+  const r = runContact({ hash: `#addr=${REF}` });
   assert.equal(r.kind, 'Eve Voice について');
-  assert.equal(r.message, [
-    '【ライセンスキーの送信先のメールアドレスの誤り】',
-    `お問い合わせ番号: ${REF}`,
-    '決済のおおよその日時:',
-    'お支払い方法（カードの下4桁、または Apple Pay）:',
-    '（正しいメールアドレスは、上の「メールアドレス」の欄にご入力ください）',
-  ].join('\n'));
+  assert.equal(r.message, PAID_TEMPLATE);
   assert.doesNotMatch(r.message, /https?:|@/, '本文に URL もアドレスも入れない（リンク数の検査にもかからない）');
-  assert.ok(r.message.trim().length >= 10);
+  assert.doesNotMatch(r.message, /または Apple Pay|その旨|おおよその/, 'カードの番号を出さない逃げ道を作らない');
+  assert.deepEqual(r.replaced, [[null, '', '/contact/?subject=evevoice']]);
+});
+
+test('お問い合わせ: 無料ライセンスの誤りの連絡（#addr=…&f=1）は、お申し込みの日時だけを求める', () => {
+  const r = runContact({ hash: `#addr=${REF}&f=1` });
+  assert.equal(r.message, FREE_TEMPLATE);
+  assert.doesNotMatch(r.message, /カード|決済|Apple Pay/);
+  assert.deepEqual(r.replaced, [[null, '', '/contact/?subject=evevoice']]);
+});
+
+test('お問い合わせ: そのほかのリンク（#ref=）は「お問い合わせ番号」の1行だけで、誤りのひな形を入れない', () => {
+  const r = runContact({ hash: `#ref=${REF}` });
+  assert.equal(r.message, `お問い合わせ番号: ${REF}\n`);
+  assert.doesNotMatch(r.message, /誤り|カード|日時/);
   assert.deepEqual(r.replaced, [[null, '', '/contact/?subject=evevoice']]);
 });
 
 test('お問い合わせ: 無効な番号・入力済みの本文・ほかのご用件では入れない', () => {
-  for (const hash of ['#ref=abc', '#ref=Ab3dEf7h9', '#ref=Ab3d-f7h', '#ref=', `#ref=${REF}&email=taro@example.com`, '#REF=Ab3dEf7h']) {
+  for (const hash of ['#ref=abc', '#ref=Ab3dEf7h9', '#ref=Ab3d-f7h', '#ref=', `#ref=${REF}&email=taro@example.com`, '#REF=Ab3dEf7h',
+    `#ref=${REF}&f=1`, '#addr=abc', '#addr=', `#addr=${REF}&f=2`, `#addr=${REF}&f=1&x=1`, `#addr=${REF}&email=taro@example.com`, `#ADDR=${REF}`,
+    `#addr=${REF}f=1`]) {
     const r = runContact({ hash });
     assert.equal(r.message, '', hash);
   }
-  assert.equal(runContact({ hash: `#ref=${REF}`, message: '自分で書いた本文' }).message, '自分で書いた本文');
-  assert.equal(runContact({ hash: `#ref=${REF}`, search: '?subject=gecko-weather' }).message, '');
-  assert.equal(runContact({ hash: `#ref=${REF}`, search: '' }).message, '');
+  for (const hash of [`#ref=${REF}`, `#addr=${REF}`, `#addr=${REF}&f=1`]) {
+    assert.equal(runContact({ hash, message: '自分で書いた本文' }).message, '自分で書いた本文', hash);
+    assert.equal(runContact({ hash, search: '?subject=gecko-weather' }).message, '', hash);
+    assert.equal(runContact({ hash, search: '' }).message, '', hash);
+  }
   // # が番号の形でなければ、アドレスバーはそのまま
   assert.deepEqual(runContact({ hash: '#form' }).replaced, []);
   assert.deepEqual(runContact({ hash: '' }).replaced, []);
   // 既存の ?subject の動きは変わらない
   assert.equal(runContact({ search: '?subject=gecko-weather' }).kind, 'ゲッコー天気について');
   assert.equal(runContact({ search: '?subject=unknown' }).kind, '');
+});
+
+test('お問い合わせ: 誤りの連絡は、ご本人の確認の欄が空のままでは送らない（有料は日時と4桁の数字の両方）', () => {
+  const r = runContact({ hash: `#addr=${REF}` });
+  const fill = (paidAt, last4) => PAID_TEMPLATE
+    .replace('決済の日時（何時何分ごろ）:', `決済の日時（何時何分ごろ）:${paidAt}`)
+    .replace('お支払いに使ったカードの番号の下4桁:', `お支払いに使ったカードの番号の下4桁:${last4}`);
+  let out = r.submit();
+  assert.equal(out.status, '本文の「決済の日時（何時何分ごろ）」をご記入ください。');
+  assert.equal(out.posts, 0);
+  assert.equal(out.focused, 'f-message');
+  out = r.submit(fill(' 10月5日 14時30分ごろ', ''));
+  assert.equal(out.status, '本文の「お支払いに使ったカードの番号の下4桁」に、4桁の数字をご記入ください。');
+  for (const bad of [' Apple Pay', ' 123', ' 12345', ' わかりません']) {
+    out = r.submit(fill(' 10月5日 14時30分ごろ', bad));
+    assert.equal(out.posts, 0, bad);
+  }
+  out = r.submit(fill('', ' 4242'));
+  assert.equal(out.status, '本文の「決済の日時（何時何分ごろ）」をご記入ください。', '日時だけ・4桁だけでは送らない');
+  assert.equal(out.posts, 0);
+  for (const good of [' 4242', '4242', ' ****4242', ' ４２４２', ' 4242（Apple Pay）']) {
+    out = r.submit(fill(' 10月5日 14時30分ごろ', good));
+    assert.equal(out.status, '送信しています…', good);
+  }
+  assert.equal(out.posts, 5);
+  // 欄の次の行に書いた場合も受け付ける
+  out = r.submit(PAID_TEMPLATE
+    .replace('決済の日時（何時何分ごろ）:', '決済の日時（何時何分ごろ）:\n10月5日 14時30分')
+    .replace('お支払いに使ったカードの番号の下4桁:', 'お支払いに使ったカードの番号の下4桁:\n4242'));
+  assert.equal(out.posts, 6);
+});
+
+test('お問い合わせ: 無料の誤りの連絡はお申し込みの日時、#ref= は番号の1行だけのままでは送らない。ほかの本文は従来どおり', () => {
+  let r = runContact({ hash: `#addr=${REF}&f=1` });
+  let out = r.submit();
+  assert.equal(out.status, '本文の「お申し込みの日時（何時何分ごろ）」をご記入ください。');
+  assert.equal(out.posts, 0);
+  out = r.submit(FREE_TEMPLATE.replace('お申し込みの日時（何時何分ごろ）:', 'お申し込みの日時（何時何分ごろ）: きょうの午後3時ごろ'));
+  assert.equal(out.posts, 1);
+
+  r = runContact({ hash: `#ref=${REF}` });
+  out = r.submit();
+  assert.equal(out.status, 'お問い合わせ内容をご記入ください。');
+  assert.equal(out.posts, 0);
+  out = r.submit(`お問い合わせ番号: ${REF}\nキーのメールが見当たりません。`);
+  assert.equal(out.posts, 1);
+
+  r = runContact({ search: '?subject=evevoice' });
+  assert.equal(r.submit('短い').status, 'お問い合わせ内容を10文字以上ご入力ください。');
+  assert.equal(r.submit('アプリの使い方について質問があります。').posts, 1);
+});
+
+// --- 手元のサンドボックス用のサーバー（tests/serve-sandbox.mjs） ---------------------------------
+
+test('serve-sandbox: 購入完了ページの CSP にだけ手元の Worker を足し、リポジトリの外と . で始まるものは返さない', async () => {
+  const S = await import('./serve-sandbox.mjs');
+  const local = S.sandboxThanksPage(PAGE);
+  assert.match(local, /connect-src https:\/\/api\.eivrad\.com http:\/\/localhost:8787;/);
+  assert.equal(local.replace(' http://localhost:8787', ''), PAGE, 'ほかは変えない（インラインスクリプトのハッシュも同じ）');
+  assert.throws(() => S.sandboxThanksPage('<html></html>'));
+  assert.equal(S.resolveFile('/evevoice/thanks/'), path.join(root, 'evevoice', 'thanks', 'index.html'));
+  assert.equal(S.resolveFile('/evevoice/thanks/?session_id=x'), path.join(root, 'evevoice', 'thanks', 'index.html'));
+  for (const bad of ['/../etc/passwd', '/%2e%2e/%2e%2e/etc/passwd', '/.git/config', '/evevoice/.DS_Store', '/a%00b', '/%E0%A4%A', 'relative']) {
+    assert.equal(S.resolveFile(bad), null, bad);
+  }
+
+  const server = S.createSandboxServer();
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    let res = await fetch(`${base}/evevoice/thanks/`);
+    assert.equal(res.status, 200);
+    assert.match(res.headers.get('content-type'), /^text\/html/);
+    assert.equal(await res.text(), local);
+    res = await fetch(`${base}/evevoice/thanks`, { redirect: 'manual' });
+    assert.equal(res.status, 301);
+    assert.equal(res.headers.get('location'), '/evevoice/thanks/');
+    res = await fetch(`${base}/assets/eve-voice-thanks.js`);
+    assert.equal(await res.text(), JS);
+    res = await fetch(`${base}/.git/HEAD`);
+    assert.equal(res.status, 404);
+    res = await fetch(`${base}/evevoice/thanks/`, { method: 'POST' });
+    assert.equal(res.status, 405);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
+
+test('HTML: お問い合わせへのリンク（3つ）は新しいタブ（rel=noopener）で開き、購入完了ページを残す', () => {
+  for (const id of ['evt-report', 'evt-contact', 'evt-missing-contact']) {
+    const tag = PAGE.match(new RegExp(`<a [^>]*id="${id}"[^>]*>`))[0];
+    assert.match(tag, /\shref="\/contact\/\?subject=evevoice"/, id);
+    assert.match(tag, /\starget="_blank"/, id);
+    assert.match(tag, /\srel="noopener"/, id);
+  }
+  assert.equal((PAGE.match(/target="_blank"/g) || []).length, 3, 'ほかのリンクは同じタブ');
+});
+
+test('HTML: 最初の表示（応答の前・JS が動かないとき）の文は、有料と無料のどちらにも合う', () => {
+  assert.match(PAGE, new RegExp(`<p class="evt-lead" id="evt-lead">${T.TEXT.leadDefault}</p>`));
+  assert.match(PAGE, new RegExp(`id="evt-status"[^>]*><p>${T.TEXT.generic.replace(/[()（）]/g, '.')}</p>`));
+  assert.doesNotMatch(PAGE, /お買い上げ/);
+  // 送るまでの目安と敬語を揃える
+  for (const text of Object.values(T.TEXT)) assert.doesNotMatch(text, /1分以内|送ります/, text);
 });

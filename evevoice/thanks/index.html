@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-sG6EQKMhkSZA2Edb8EeANiKRaPU/7N9kYc9mVgzaQVI='; connect-src https://api.eivrad.com http://localhost:8787; img-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-XP2j6xFyb6v2v9tauEQQRiX6ZqNw6koMJMqvCoO/HUM='; connect-src https://api.eivrad.com; img-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
   <meta name="referrer" content="no-referrer">
   <meta name="robots" content="noindex,nofollow">
-  <script>(function(){var k='evThanksSession',q=location.search,s=null;try{s=new URLSearchParams(q).get('session_id')}catch(e){}if(s!==null){var ok=/^cs_(live|test)_[A-Za-z0-9]{10,200}$/.test(s);try{if(ok)sessionStorage.setItem(k,s);else sessionStorage.removeItem(k)}catch(e){}if(ok)window.__evThanksSession=s}if(q||location.hash){try{history.replaceState(null,'',location.pathname)}catch(e){}}})();</script>
+  <script>(function(){var k='evThanksSession',q=location.search,s=null;try{s=new URLSearchParams(q).get('session_id')}catch(e){}if(s!==null){var ok=/^cs_(live|test)_[A-Za-z0-9]{10,200}$/.test(s);try{if(ok)sessionStorage.setItem(k,JSON.stringify({id:s,at:Date.now()}));else sessionStorage.removeItem(k)}catch(e){}if(ok)window.__evThanksSession=s}if(q||location.hash){try{history.replaceState(null,'',location.pathname)}catch(e){}}})();</script>
   <meta name="theme-color" content="#fafaf7">
   <meta name="format-detection" content="telephone=no,email=no,address=no">
   <title>ありがとうございます｜Eve Voice｜合同会社Eivrad</title>
@@ -16,7 +16,7 @@
   <link rel="stylesheet" href="/assets/eve-voice.css?v=20261003a">
   <link rel="stylesheet" href="/assets/eve-voice-thanks.css?v=20261005a">
   <script src="/assets/site.js" defer></script>
-  <script src="/assets/eve-voice-thanks.js?v=20261005a" defer></script>
+  <script src="/assets/eve-voice-thanks.js?v=20261005b" defer></script>
 </head>
 <body id="top" class="ev-page evt-page" data-ev-thanks="v1">
   <a class="skip-link" href="#main">本文へスキップ</a>
@@ -36,7 +36,7 @@
     <div class="evt-intro">
       <p class="eyebrow">THANK YOU</p>
       <h1>ありがとうございます</h1>
-      <p class="evt-lead" id="evt-lead">Eve Voice をお買い上げいただき、ありがとうございます。</p>
+      <p class="evt-lead" id="evt-lead">Eve Voice をご注文いただき、ありがとうございます。</p>
     </div>
 
     <section class="evt-card" aria-labelledby="evt-dest-title">
@@ -47,7 +47,7 @@
       <p class="evt-window" id="evt-window" hidden></p>
       <div class="evt-actions">
         <button type="button" class="evt-button" id="evt-retry" hidden>もう一度確かめる</button>
-        <a class="evt-button evt-button--primary" id="evt-contact" href="/contact/?subject=evevoice" hidden>お問い合わせフォームへ <span aria-hidden="true">↗</span></a>
+        <a class="evt-button evt-button--primary" id="evt-contact" href="/contact/?subject=evevoice" target="_blank" rel="noopener" hidden>お問い合わせフォームへ <span aria-hidden="true">↗</span></a>
       </div>
     </section>
 
@@ -55,7 +55,7 @@
       <h2 id="evt-check-title">メールアドレスに誤りはありませんか</h2>
       <p>1文字でも違っていると、キーは届きません。別の方のアドレスだった場合は、その方にキーが届いてしまいます。</p>
       <p class="evt-typo" id="evt-typo" hidden></p>
-      <a class="evt-button evt-button--primary" id="evt-report" href="/contact/?subject=evevoice">メールアドレスの誤りを連絡する <span aria-hidden="true">↗</span></a>
+      <a class="evt-button evt-button--primary" id="evt-report" href="/contact/?subject=evevoice" target="_blank" rel="noopener">メールアドレスの誤りを連絡する <span aria-hidden="true">↗</span></a>
       <p class="evt-note" id="evt-report-note"></p>
     </section>
 
@@ -65,7 +65,7 @@
         <ul class="evt-list">
           <li>迷惑メールフォルダやプロモーションのタブをご確認ください。</li>
           <li id="evt-receipt">Stripe からの領収書のメールも、同じアドレスに届きます。</li>
-          <li>30分を過ぎても見当たらない場合は、<a id="evt-missing-contact" href="/contact/?subject=evevoice">お問い合わせください</a><span id="evt-missing-ref"></span>。</li>
+          <li>30分を過ぎても見当たらない場合は、<a id="evt-missing-contact" href="/contact/?subject=evevoice" target="_blank" rel="noopener">お問い合わせください</a><span id="evt-missing-ref"></span>。</li>
           <li>キーを紛失したときは、アプリの「ライセンス」の欄の「キーを再送」から、同じアドレスへ再送できます。</li>
         </ul>
       </section>

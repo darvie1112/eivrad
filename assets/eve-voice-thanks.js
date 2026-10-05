@@ -2,8 +2,10 @@
  * Eve Voice — 購入完了ページ（/evevoice/thanks/）
  *
  * Stripe の決済リンクの完了後のリダイレクトで開かれ、ライセンスキーの送信先と送信の状況を表示する。
- * - Checkout Session の ID は、head のインラインスクリプトが URL から読み取ってタブ単位の sessionStorage に移し、
- *   アドレスバーから消す。ここではそれを読むだけ。
+ * - Checkout Session の ID は、head のインラインスクリプトが URL から読み取ってタブ単位の sessionStorage に
+ *   {id, at（保存した時刻）} の形で移し、アドレスバーから消す。ここでは60分以内のものだけを読む。
+ *   eivrad.com のほかのページへのリンクを押したとき（お問い合わせへのリンクは新しいタブで開く）と、全体の表示の期限が来たときは、
+ *   sessionStorage から消す（ほかのページのスクリプトから読めないように。ID はこのページの変数には残る）。
  * - api.eivrad.com の POST /v1/orders/status に ID を本文で送る。URL・Referer には ID を載せない。
  * - サーバーのデータは textContent だけで画面に入れる（innerHTML は使わない）。
  * - メールアドレスの全体は、サーバーが返す fullSeconds の間だけ表示する。過ぎたら伏せた形に差し替え、変数からも消す。
@@ -22,6 +24,8 @@
   var ID_PATTERN = /^cs_(live|test)_[A-Za-z0-9]{10,200}$/;
   var REF_PATTERN = /^[A-Za-z0-9]{8}$/;
   var CONTACT_PATH = '/contact/?subject=evevoice';
+  // sessionStorage の ID を読む期限（保存から60分。全体のアドレスを表示する時間と同じ）。
+  var STORAGE_TTL_MS = 60 * 60 * 1000;
   // 送信の準備中に確かめ直す間隔（秒）。最初の1回と合わせて最大12回（約2分）。その後はボタンで確かめる。
   var POLL_DELAYS = [2, 2, 3, 3, 5, 5, 10, 10, 15, 15, 30];
   var MAX_CHECKS = POLL_DELAYS.length + 1;
@@ -39,12 +43,16 @@
     'outlook.de', 'outlook.it', 'outlook.es', 'outlook.kr'];
 
   var TEXT = {
+    // 応答が来るまで・注文を表示できないときの文（有料と無料のどちらにも合う）。HTML の最初の文と同じ。
+    leadDefault: 'Eve Voice をご注文いただき、ありがとうございます。',
     leadPaid: 'Eve Voice をお買い上げいただき、ありがとうございます。',
     leadFree: 'Eve Voice の無料ライセンスをお申し込みいただき、ありがとうございます。',
     heading: 'ライセンスキーの送信先',
     notFoundHeading: 'ご注文の情報を表示できませんでした',
     loading: '送信先を確認しています…',
-    pending: '送信の準備をしています…（通常は1分以内に送ります）',
+    pending: '送信の準備をしています…（通常は数分以内にお送りします）',
+    // 無料のキーのメールは1日の上限（RUNBOOK §6）で翌日以降に回ることがある。
+    pendingFree: '送信の準備をしています…（お申し込みが多い日は、翌日以降のお届けになることがあります）',
     awaitingPayment: 'お支払いの完了を確認しています。完了すると、キーを自動でお送りします。',
     pendingLater: 'まだ準備中です。しばらくしてから、下のボタンでもう一度お確かめください。',
     sent: '送信しました。差出人は license@send.eivrad.com、件名は「Eve Voice ライセンスキー」です。',
@@ -55,6 +63,8 @@
     unknown: 'この注文のキーの状態は、このページでは表示できません。お問い合わせください。',
     notFound: '決済の完了から30日を過ぎた場合や、ページのアドレスが途中で切れた場合は表示できません。' +
       'ライセンスキーは、決済のときにご入力のメールアドレスへ自動でお送りしています。届いていない場合は、お問い合わせください。',
+    noId: 'ご注文の情報は、ご注文の直後に開いたこのページでだけ表示します（ほかのページへ移った後や、60分を過ぎてから開き直した場合は表示できません）。' +
+      'ライセンスキーは、ご注文のときにご入力のメールアドレスへ自動でお送りしています。届いていない場合は、お問い合わせください。',
     unavailable: 'ただいま送信先を確認できません。',
     generic: 'ライセンスキーは、決済のときにご入力のメールアドレスへ自動でお送りしています（通常は数分以内）。',
     stale: 'ただいま最新の状況を確認できません。少し待ってから、もう一度お確かめください。',
@@ -117,9 +127,18 @@
     return best ? { typed: typed, suggestion: best } : null;
   }
 
-  // お問い合わせへのリンク。番号（英数字8文字）だけを # 以下に付ける。メールアドレスは URL に入れない。
+  // お問い合わせへのリンク（届かない・送れなかった・状態を出せない、など誤りの連絡ではないもの）。
+  // 番号（英数字8文字）だけを #ref= に付ける。フォームは本文に「お問い合わせ番号: <番号>」の1行だけを入れる。
+  // メールアドレスは URL に入れない。
   function contactHref(ref) {
     return typeof ref === 'string' && REF_PATTERN.test(ref) ? CONTACT_PATH + '#ref=' + ref : CONTACT_PATH;
+  }
+
+  // 「メールアドレスの誤りを連絡する」のボタンだけのリンク。#addr=<番号>（無料ライセンスは &f=1）。
+  // フォームは、この印のときだけ誤りの連絡のひな形（ご本人の確認の欄つき）を入れる。運用者は、ひな形の見出しと、
+  // フォームの正しいアドレスが注文のアドレスと違うことの両方を見て、アドレスの訂正（RUNBOOK §7）として扱う。
+  function reportHref(ref, free) {
+    return typeof ref === 'string' && REF_PATTERN.test(ref) ? CONTACT_PATH + '#addr=' + ref + (free ? '&f=1' : '') : CONTACT_PATH;
   }
 
   // checksDone 回確かめた後、次に確かめるまでの待ち時間（ミリ秒）。null なら自動では確かめない。
@@ -160,22 +179,28 @@
     };
   }
 
+  // 誤りの連絡の案内。ご本人の確認（RUNBOOK §7）は、有料は決済の日時とカードの番号の下4桁の両方、無料はお申し込みの日時。
+  // Apple Pay などのウォレットでも、Stripe が記録するのはカードの番号の下4桁（card.last4）で、
+  // デバイスアカウント番号の下4桁（card.wallet.dynamic_last4）ではない。
   function reportNote(ref, free) {
-    return (ref ? 'お問い合わせ番号（' + ref + '）がフォームに入ります。' : 'お問い合わせフォームが開きます。') +
+    return (ref ? 'お問い合わせフォームが新しいタブで開き、お問い合わせ番号（' + ref + '）とご記入の欄が入ります。' : 'お問い合わせフォームが新しいタブで開きます。') +
+      '正しいメールアドレスは「メールアドレス」の欄にご入力ください。' +
       (free
-        ? '正しいメールアドレスは「メールアドレス」の欄に、お申し込みのおおよその日時は本文にお書きください。'
-        : '正しいメールアドレスは「メールアドレス」の欄に、決済のおおよその日時と、カードの下4桁（Apple Pay の場合はその旨）は本文にお書きください。') +
+        ? 'ご本人の確認のため、お申し込みの日時（何時何分ごろ）を本文にお書きください。'
+        : 'ご本人の確認のため、決済の日時（何時何分ごろ）と、お支払いに使ったカードの番号の下4桁の両方を本文にお書きください' +
+          '（Apple Pay などでお支払いの場合も、ウォレットのアプリでそのカードの詳細に表示される、カードの番号の下4桁です。デバイスアカウント番号ではありません）。') +
       '確認のうえ、正しいアドレスへ新しいキーをお送りし、誤ったアドレスに送られたキーは使えないようにします。';
   }
 
   /*
    * 画面に出す内容を決める（DOM に触れない）。
    * input.kind: 'loading' | 'noid' | 'notfound' | 'unavailable' | 'order'
+   * リンク: 誤りの連絡（check.href）だけ #addr=、ほか（contact・ref を使うリンク）は #ref=。
    * 'order' のとき: order（normalizeOrder の結果から email を除いたもの）、address（表示するアドレス）、
    *   full（全体を表示しているか）、stalled（自動の確かめ直しを終えた）、stale（最新の確かめ直しに失敗した）。
    */
   function view(input) {
-    var v = { lead: TEXT.leadPaid, heading: TEXT.heading, address: null, windowNote: null, messages: [], retry: false,
+    var v = { lead: TEXT.leadDefault, heading: TEXT.heading, address: null, windowNote: null, messages: [], retry: false,
       contact: null, check: null, ref: null, free: false };
     var kind = input && input.kind;
     if (kind === 'loading') {
@@ -184,7 +209,7 @@
     }
     if (kind === 'noid' || kind === 'notfound') {
       v.heading = TEXT.notFoundHeading;
-      v.messages = [TEXT.notFound];
+      v.messages = [kind === 'noid' ? TEXT.noId : TEXT.notFound];
       v.contact = CONTACT_PATH;
       return v;
     }
@@ -202,13 +227,13 @@
       var hint = typoHint(v.address);
       v.windowNote = input.full ? TEXT.windowFull : TEXT.windowMasked;
       v.check = {
-        href: contactHref(order.shortRef),
+        href: reportHref(order.shortRef, order.free),
         typo: hint ? '「' + hint.typed + '」は「' + hint.suggestion + '」の誤りではありませんか。' : null,
         note: reportNote(order.shortRef, order.free)
       };
     }
     if (order.status === 'pending') {
-      v.messages = [order.reason === 'awaiting_payment' ? TEXT.awaitingPayment : TEXT.pending];
+      v.messages = [order.reason === 'awaiting_payment' ? TEXT.awaitingPayment : order.free ? TEXT.pendingFree : TEXT.pending];
       if (input.stalled) {
         v.messages.push(TEXT.pendingLater);
         v.retry = true;
@@ -299,8 +324,8 @@
   }
 
   /*
-   * ページを動かす。env: { document, window, fetch, setTimeout, clearTimeout, now, apiUrl, sessionId }
-   * （ブラウザでは下の起動部分が渡す。テストは偽物を渡す。）
+   * ページを動かす。env: { document, window, fetch, setTimeout, clearTimeout, now, apiUrl, sessionId, forgetStoredId }
+   * （ブラウザでは下の起動部分が渡す。テストは偽物を渡す。forgetStoredId は sessionStorage の ID を消す。）
    */
   function start(env) {
     var doc = env.document;
@@ -320,6 +345,9 @@
     function render(input) {
       paint(els, doc, view(input));
     }
+    function forgetStored() {
+      if (typeof env.forgetStoredId === 'function') env.forgetStoredId();
+    }
     function renderOrder() {
       var full = state.full !== null;
       render({ kind: 'order', order: state.order, address: full ? state.full : state.masked, full: full,
@@ -336,6 +364,7 @@
     function expireIfDue() {
       if (state.full !== null && env.now() >= state.deadline) {
         forgetFull();
+        forgetStored();
         if (state.order) renderOrder();
       }
     }
@@ -427,6 +456,16 @@
     doc.addEventListener('visibilitychange', function () {
       if (doc.visibilityState !== 'hidden') expireIfDue();
     });
+    // ページのリンク（/contact/ など、同じ eivrad.com のページ）を押したら、sessionStorage の ID を消す。
+    // 開いた先のページのスクリプト（Turnstile・Cloudflare のビーコンなど）から読めないように。
+    // お問い合わせへのリンクは新しいタブ（rel=noopener）で開くので、このページはそのまま残り、変数の ID で表示と確かめ直しを続ける
+    // （新しいタブが作られる前に消すので、sessionStorage を写すブラウザでも写らない）。# だけのリンク（ページ内の移動）では消さない。
+    doc.addEventListener('click', function (event) {
+      var target = event && event.target;
+      var link = target && typeof target.closest === 'function' ? target.closest('a[href]') : null;
+      var href = link ? link.getAttribute('href') : null;
+      if (typeof href === 'string' && href.charAt(0) === '/' && href.charAt(1) !== '/') forgetStored();
+    });
 
     if (!state.id) {
       render({ kind: 'noid' });
@@ -437,18 +476,42 @@
     return { state: state, check: check, expireIfDue: expireIfDue };
   }
 
-  function readSessionId(win) {
-    if (typeof win.__evThanksSession === 'string') return parseId(win.__evThanksSession);
+  function forgetStoredId(win) {
     try {
-      return parseId(win.sessionStorage.getItem(STORAGE_KEY));
+      win.sessionStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      // 使えないなら、残っているものも無い
+    }
+  }
+
+  // ID を決める。このページを開いたときの値（window）を優先し、無ければ sessionStorage の {id, at} を読む。
+  // 保存から60分を過ぎたもの・形の違うもの・時計が大きく戻ったものは捨てる（sessionStorage からも消す）。
+  function readSessionId(win, now) {
+    if (typeof win.__evThanksSession === 'string') return parseId(win.__evThanksSession);
+    var raw = null;
+    try {
+      raw = win.sessionStorage.getItem(STORAGE_KEY);
     } catch (e) {
       return null;
     }
+    if (raw === null || raw === undefined) return null;
+    var saved = null;
+    try {
+      saved = JSON.parse(raw);
+    } catch (e) {
+      saved = null;
+    }
+    var id = saved && typeof saved === 'object' ? parseId(saved.id) : null;
+    var age = (typeof now === 'number' ? now : Date.now()) - (saved && typeof saved.at === 'number' ? saved.at : NaN);
+    if (id && age >= -5 * 60 * 1000 && age < STORAGE_TTL_MS) return id;
+    forgetStoredId(win);
+    return null;
   }
 
   var api = {
     parseId: parseId, maskEmail: maskEmail, editDistance: editDistance, typoHint: typoHint, contactHref: contactHref,
-    nextDelay: nextDelay, apiUrl: apiUrl, retryAfterSeconds: retryAfterSeconds, normalizeOrder: normalizeOrder,
+    reportHref: reportHref, forgetStoredId: forgetStoredId, STORAGE_TTL_MS: STORAGE_TTL_MS, nextDelay: nextDelay,
+    apiUrl: apiUrl, retryAfterSeconds: retryAfterSeconds, normalizeOrder: normalizeOrder,
     view: view, start: start, readSessionId: readSessionId, TEXT: TEXT, COMMON_DOMAINS: COMMON_DOMAINS,
     REAL_NEARBY_DOMAINS: REAL_NEARBY_DOMAINS, MAX_CHECKS: MAX_CHECKS
   };
@@ -463,7 +526,8 @@
       clearTimeout: window.clearTimeout.bind(window),
       now: function () { return Date.now(); },
       apiUrl: apiUrl(window.location.hostname),
-      sessionId: readSessionId(window)
+      sessionId: readSessionId(window, Date.now()),
+      forgetStoredId: function () { forgetStoredId(window); }
     });
   }
 })();

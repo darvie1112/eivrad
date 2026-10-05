@@ -148,25 +148,74 @@
         subjectField.value = supportSubjects[requestedSubject];
       }
 
-      // Eve Voice の購入完了ページの「メールアドレスの誤りを連絡する」から来たときだけ、
-      // # 以下のお問い合わせ番号（英数字8文字・支払いの番号の末尾）を本文のひな形に入れる。
+      // Eve Voice の購入完了ページから来たときだけ、# 以下のお問い合わせ番号（英数字8文字・支払いの番号の末尾）を本文に入れる。
+      // - #addr=<番号>（「メールアドレスの誤りを連絡する」のボタンだけ。無料ライセンスは &f=1）:
+      //   誤りの連絡のひな形（見出し・番号・ご本人の確認の欄）。運用者はこの見出しを見て、アドレスの訂正（RUNBOOK §7）として扱う。
+      // - #ref=<番号>（届かない・送れなかった、などそのほかのリンク）: 「お問い合わせ番号: <番号>」の1行だけ。
       // # 以下はサーバーにも Referer にも送られない。氏名・メールアドレスは URL から一切入れない。
       // ご用件が「Eve Voice について」で、本文が空のときだけ入れる（入力済みの本文は変えない）。
       var messageField = document.getElementById('f-message');
-      var orderRef = /^#ref=([A-Za-z0-9]{8})$/.exec(window.location.hash);
-      if (orderRef && subjectField && subjectField.value === 'Eve Voice について' &&
+      var REPORT_HEADING = '【ライセンスキーの送信先のメールアドレスの誤り】';
+      // ご本人の確認の欄（ラベル・空欄のときの案内・確かめ方）。有料は決済の日時とカードの番号の下4桁の両方、無料はお申し込みの日時。
+      // Apple Pay などのウォレットでも、Stripe が記録するのはカードの番号の下4桁（デバイスアカウント番号ではない）。
+      var REPORT_FIELDS = {
+        paidAt: { label: '決済の日時（何時何分ごろ）:', ask: 'をご記入ください。', ok: function (v) { return v.length > 0; } },
+        last4: { label: 'お支払いに使ったカードの番号の下4桁:', ask: 'に、4桁の数字をご記入ください。', ok: function (v) { return /(^|[^0-9０-９])[0-9０-９]{4}([^0-9０-９]|$)/.test(v); } },
+        appliedAt: { label: 'お申し込みの日時（何時何分ごろ）:', ask: 'をご記入ください。', ok: function (v) { return v.length > 0; } }
+      };
+      var hash = window.location.hash;
+      var reportRef = /^#addr=([A-Za-z0-9]{8})(&f=1)?$/.exec(hash);
+      var plainRef = /^#ref=([A-Za-z0-9]{8})$/.exec(hash);
+      if ((reportRef || plainRef) && subjectField && subjectField.value === 'Eve Voice について' &&
           messageField && !messageField.value) {
-        messageField.value = [
-          '【ライセンスキーの送信先のメールアドレスの誤り】',
-          'お問い合わせ番号: ' + orderRef[1],
-          '決済のおおよその日時:',
-          'お支払い方法（カードの下4桁、または Apple Pay）:',
-          '（正しいメールアドレスは、上の「メールアドレス」の欄にご入力ください）'
-        ].join('\n');
+        if (reportRef && reportRef[2]) {
+          messageField.value = [
+            REPORT_HEADING,
+            'お問い合わせ番号: ' + reportRef[1],
+            REPORT_FIELDS.appliedAt.label,
+            '（正しいメールアドレスは、上の「メールアドレス」の欄にご入力ください）'
+          ].join('\n');
+        } else if (reportRef) {
+          messageField.value = [
+            REPORT_HEADING,
+            'お問い合わせ番号: ' + reportRef[1],
+            REPORT_FIELDS.paidAt.label,
+            REPORT_FIELDS.last4.label,
+            '（Apple Pay などでお支払いの場合も、ウォレットのアプリでそのカードの詳細に表示される、カードの番号の下4桁です。デバイスアカウント番号ではありません）',
+            '（正しいメールアドレスは、上の「メールアドレス」の欄にご入力ください）'
+          ].join('\n');
+        } else {
+          messageField.value = 'お問い合わせ番号: ' + plainRef[1] + '\n';
+        }
       }
-      if (/^#ref=/.test(window.location.hash) && window.history && window.history.replaceState) {
+      if (/^#(addr|ref)=/.test(hash) && window.history && window.history.replaceState) {
         window.history.replaceState(null, '', window.location.pathname + window.location.search);
       }
+
+      // 本文の検査。10文字以上に加えて、番号の1行だけのまま・誤りの連絡のひな形のご本人の確認の欄が空のまま、では送らない。
+      // 本文の文字から判断する（ブラウザが入力を復元した場合も同じ）。欄の行を消した本文は止めない（運用者が聞き返す）。
+      var messageProblem = function (text) {
+        var trimmed = text.trim();
+        if (trimmed.length < 10) return 'お問い合わせ内容を10文字以上ご入力ください。';
+        if (/^お問い合わせ番号: [A-Za-z0-9]{8}$/.test(trimmed)) return 'お問い合わせ内容をご記入ください。';
+        if (text.indexOf(REPORT_HEADING) < 0) return null;
+        var lines = text.split('\n').map(function (line) { return line.trim(); });
+        var fields = [REPORT_FIELDS.paidAt, REPORT_FIELDS.last4, REPORT_FIELDS.appliedAt];
+        var isLabel = function (line) {
+          return fields.some(function (f) { return line.indexOf(f.label) === 0; });
+        };
+        for (var f = 0; f < fields.length; f++) {
+          var field = fields[f];
+          for (var i = 0; i < lines.length; i++) {
+            if (lines[i].indexOf(field.label) !== 0) continue;
+            var value = lines[i].slice(field.label.length).trim();
+            // 欄の次の行に書いた場合も受け付ける（次の行がほかの欄・案内の括弧書きでなければ）。
+            if (!value && i + 1 < lines.length && !isLabel(lines[i + 1]) && lines[i + 1].charAt(0) !== '（') value = lines[i + 1];
+            if (!field.ok(value)) return '本文の「' + field.label.slice(0, -1) + '」' + field.ask;
+          }
+        }
+        return null;
+      };
 
       // 絶対時刻ではなく「描画からの経過ミリ秒」を送る。
       // 絶対時刻だと利用者の時計がずれているだけで弾いてしまう。
@@ -210,12 +259,12 @@
           var el = fields[i];
           var bad = !el.value.trim() ||
             (el.type === 'email' && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(el.value.trim())) ||
-            (el.id === 'f-message' && el.value.trim().length < 10);
+            (el.id === 'f-message' && messageProblem(el.value) !== null);
           el.setAttribute('aria-invalid', bad ? 'true' : 'false');
           if (bad) {
             el.focus();
             return el.id === 'f-message'
-              ? 'お問い合わせ内容を10文字以上ご入力ください。'
+              ? messageProblem(el.value)
               : el.type === 'email' && el.value.trim()
                 ? 'メールアドレスの形式をご確認ください。'
                 : '必須の項目が入力されておりません。';
