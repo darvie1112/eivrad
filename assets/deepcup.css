@@ -1,0 +1,56 @@
+/* Deepcup pages (/deepcup/): the site's paper, type and rules, with Deepcup's teal and cream. */
+.deepcup-page{--dc-accent:#17585f;--dc-soft:#f5ecdc;--dc-line:#dccfb8;--dc-dark:#0f4c53;--dc-on-dark:#e9dfca}
+.dc-hero{padding-top:56px}
+.dc-kicker{display:flex;align-items:center;justify-content:space-between;gap:20px;color:var(--dc-accent)}
+.dc-status{font-size:11px;border:1px solid var(--dc-line);border-radius:2px;padding:6px 13px;letter-spacing:.04em}
+.dc-hero-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:60px;align-items:end;padding-block:52px 66px}
+.dc-name{display:flex;align-items:center;gap:16px;font-size:15px;letter-spacing:.1em;margin-bottom:22px;color:var(--dc-accent)}
+.dc-name img{width:56px;height:56px;border-radius:13px}
+.dc-hero h1{font-size:clamp(40px,4.5vw,66px);line-height:1.6;letter-spacing:-.065em}
+.dc-intro{max-width:360px;justify-self:end;font-size:15px;line-height:2}
+.dc-intro>p+p{font-size:13px;color:var(--muted);margin-top:20px;line-height:2.1}
+.dc-intro .text-link{margin-top:17px}
+.dc-hero-bottom{border-top:1px solid var(--line);padding-block:20px;display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-size:10px;letter-spacing:.07em}
+.dc-hero-bottom a{letter-spacing:0}
+.dc-hero-bottom a span{margin-left:16px}
+.dc-soft{background:var(--dc-soft)}
+.dc-feature-list{margin-top:42px;border-top:1px solid var(--dc-line);display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.dc-feature-list article{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:28px 30px 28px 0;border-bottom:1px solid var(--dc-line);min-width:0}
+.dc-feature-list article:nth-child(2n){padding:28px 0 28px 30px;border-left:1px solid var(--dc-line)}
+.dc-feature-number{font-size:12px;color:var(--dc-accent);margin-top:5px}
+.dc-feature-list h3{font-size:20px;letter-spacing:-.02em;line-height:1.7}
+.dc-feature-list p{font-size:14px;color:var(--muted);margin-top:12px;line-height:2}
+.dc-facts{margin-top:40px;border-top:1px solid var(--line)}
+.dc-facts>div{display:grid;grid-template-columns:200px 1fr;gap:20px;padding:18px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.9}
+.dc-facts dt{font-size:12px;color:var(--dc-accent);letter-spacing:.04em}
+.dc-facts dd{min-width:0;overflow-wrap:break-word}
+.dc-links{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:28px;font-size:14px}
+.dc-links a,.dc-faq a,.dc-english a,.dc-note a{text-decoration:underline;text-decoration-color:#b9bcae}
+.dc-links a{min-height:44px;display:inline-flex;align-items:center}
+.dc-note{font-size:12px;color:var(--muted);line-height:1.9;margin-top:28px;max-width:900px}
+.dc-help-grid{display:grid;grid-template-columns:1fr 1.45fr;gap:60px}
+.dc-faq{border-top:1px solid var(--dc-line)}
+.dc-faq details{border-bottom:1px solid var(--dc-line)}
+.dc-faq summary{font-size:15px;padding:22px 24px 22px 0;cursor:pointer;line-height:1.8;list-style-position:inside}
+.dc-faq summary::marker{color:var(--dc-accent);font-size:12px}
+.dc-faq details p{font-size:14px;color:var(--muted);line-height:2;padding:0 0 24px}
+.deepcup-page .contact{background:var(--dc-dark);color:var(--paper)}
+.deepcup-page .contact p,.deepcup-page .contact .eyebrow,.dc-support .contact-link small{color:var(--dc-on-dark)}
+.dc-support{display:grid;grid-template-columns:1fr 1.25fr;align-items:center;gap:36px 70px;padding-block:64px 44px}
+.dc-support .contact-link{display:flex;justify-content:space-between;gap:20px;width:100%;padding-block:16px}
+.dc-support .contact-link>span:first-child{font-size:clamp(25px,2.7vw,40px)}
+.dc-support .dc-support-hint{font-size:12px;margin-top:20px}
+.dc-english{grid-column:1/-1;max-width:850px;border-top:1px solid #4d7b80;padding-top:28px;margin-top:10px}
+.dc-english h3{font-size:14px;letter-spacing:.02em}
+.dc-support .dc-english p{font-size:12px;line-height:1.9;margin-top:10px}
+.dc-support .dc-english a{text-decoration-color:#8fb3b6}
+.dc-english-light{max-width:850px;margin-top:40px;padding-top:24px;border-top:1px solid var(--line)}
+.dc-english-light h3{font-size:14px;letter-spacing:.02em}
+.dc-english-light p{font-size:12px;color:var(--muted);line-height:1.9;margin-top:10px}
+/* The privacy page: lists inside the numbered sections. */
+.legal-document ul.dc-legal-list{margin:6px 0 0;padding-left:1.2em;display:grid;gap:4px}
+.legal-document ul.dc-legal-list>li{padding-left:2px;list-style:"・"}
+.legal-document [lang="en"] ul.dc-legal-list>li{list-style:disc}
+@media(max-width:1000px){.dc-hero-grid{gap:36px;grid-template-columns:1.3fr 1fr}.dc-feature-list h3{font-size:18px}.dc-help-grid{gap:36px;grid-template-columns:.85fr 1.4fr}.dc-support{gap:30px}}
+@media(max-width:760px){.dc-hero{padding-top:30px}.dc-kicker{gap:12px}.dc-kicker .eyebrow{font-size:8px;letter-spacing:.1em}.dc-status{font-size:9px;padding:5px 8px}.dc-hero-grid{grid-template-columns:1fr;gap:26px;padding-block:32px 38px}.dc-name{font-size:13px;margin-bottom:16px}.dc-name img{width:48px;height:48px;border-radius:11px}.dc-hero h1{font-size:clamp(32px,7.6vw,54px);line-height:1.65}.dc-intro{max-width:480px;justify-self:start;font-size:14px}.dc-intro>p+p{font-size:14px;line-height:2;margin-top:15px}.dc-hero-bottom{font-size:8px;letter-spacing:.02em;gap:12px;padding-block:18px}.dc-hero-bottom a{font-size:10px}.dc-hero-bottom a span{margin-left:5px}.dc-feature-list{grid-template-columns:1fr;margin-top:30px}.dc-feature-list article,.dc-feature-list article:nth-child(2n){grid-template-columns:28px 1fr;padding:24px 0;border-left:0}.dc-feature-number{font-size:11px;margin-top:4px}.dc-feature-list h3{font-size:20px}.dc-feature-list p{margin-top:9px}.dc-facts>div{grid-template-columns:1fr;gap:4px;padding:16px 0}.dc-help-grid{grid-template-columns:1fr;gap:24px}.dc-faq summary{font-size:14px;padding-block:20px;padding-right:0}.dc-support{grid-template-columns:1fr;padding-block:44px 35px;gap:22px}.dc-support .contact-link{margin-top:0;min-height:65px}.dc-support .contact-link>span:first-child{font-size:clamp(24px,6.9vw,37px)}.dc-support .dc-support-hint{margin-top:15px}.dc-english{margin-top:4px;padding-top:24px}}
+@media(max-width:380px){.dc-hero h1{font-size:34px}.dc-hero-bottom{flex-wrap:wrap;gap:8px}.dc-kicker{flex-wrap:wrap;gap:10px}.dc-feature-list h3{font-size:19px}.dc-support .contact-link>span:first-child{font-size:23px}}
