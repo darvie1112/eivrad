@@ -9,6 +9,9 @@
 .gecko-intro{max-width:350px;justify-self:end;font-size:15px;line-height:2}
 .gecko-intro>p+p{font-size:13px;color:var(--muted);margin-top:20px;line-height:2.1}
 .gecko-intro .text-link{margin-top:17px}
+.gecko-store-links{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:16px;font-size:13px;line-height:1.8}
+.gecko-store-links a{text-decoration:underline;text-underline-offset:4px}
+.gecko-support .gecko-store-links{margin-top:18px}
 .gecko-hero-bottom{border-top:1px solid var(--line);padding-block:20px;display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-size:10px;letter-spacing:.07em}
 .gecko-hero-bottom a{letter-spacing:0}
 .gecko-hero-bottom a span{margin-left:16px}

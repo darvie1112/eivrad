@@ -13,7 +13,7 @@
   <meta property="og:description" content="音声認識もAI整文もMac内で。専門用語は自分の辞書に、英文は選択して日本語に。4,980円（税込）の買い切り・14日間の無料体験つき。">
   <meta property="og:url" content="https://eivrad.com/evevoice/">
   <link rel="stylesheet" href="/assets/site.css?v=20260911c">
-  <link rel="stylesheet" href="/assets/eve-voice.css?v=20261020c">
+  <link rel="stylesheet" href="/assets/eve-voice.css?v=20261022a">
   <meta name="robots" content="index,follow">
   <script src="/assets/site.js" defer></script>
   <script src="/assets/eve-voice.js?v=20261020c" defer></script>
@@ -26,6 +26,34 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Eve Voice — 話すだけで、日本語が入る。">
 <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      "name": "Eve Voice",
+      "url": "https://eivrad.com/evevoice/",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "macOS 26 以降",
+      "softwareRequirements": "Apple シリコン搭載の Mac（M1 以降）、メモリ 8GB 以上",
+      "description": "Macで話して、文章を整え、いつもの入力欄へ。端末内の音声認識とAI整文、自分用の単語辞書、英文の日本語翻訳に対応。",
+      "inLanguage": "ja",
+      "offers": {
+        "@type": "Offer",
+        "price": "4980",
+        "priceCurrency": "JPY",
+        "url": "https://eivrad.com/evevoice/"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "合同会社Eivrad",
+        "url": "https://eivrad.com/"
+      }
+    }
+  ]
+}
+  </script>
 </head>
 <body id="top" class="ev-page">
   <a class="skip-link" href="#main">本文へスキップ</a>
@@ -156,7 +184,7 @@
         <h3><svg width="20" height="24" viewBox="0 0 20 24" fill="none" aria-hidden="true"><rect x="7" y="2" width="6" height="12" rx="3" stroke="currentColor"/><path d="M4 10v2a6 6 0 0 0 12 0v-2M10 18v4m-4 0h8" stroke="currentColor" stroke-linecap="round"/></svg>使うマイクも、選べます。</h3>
         <p>内蔵・USBなどのマイクに対応。機器名と音量を確認でき、小さい声の補正も使えます。</p>
       </div>
-      <p class="ev-note">音声認識・AI整文は、聞き違いや意味の変化が起こることがあります。人名・数字・日付・否定を含む文章は、使う前に原文と結果をご確認ください。AI整文には、Apple Intelligenceが使える状態が必要です。メモリ12GB未満のMacでは、「自然な文章」は初期設定でAIを使わず、句読点だけを付けてすぐに入力します（設定の「AIで文章を整える」でオンにできますが、仕上がりまで時間がかかります）。「箇条書き」は、どのMacでも端末内AIで整えます。</p>
+      <p class="ev-note">音声認識・AI整文は、聞き違いや意味の変化が起こることがあります。人名・数字・日付・否定を含む文章は、使う前に原文と結果をご確認ください。AI整文には、Apple Intelligenceが使える状態が必要です。メモリ12GB未満のMacでは、「自然な文章」は初期設定でAIを使わず、句読点だけを付けてすぐに入力します（設定の「AIで文章を整える」でオンにできますが、仕上がりまで時間がかかります）。「箇条書き」は、Apple Intelligenceが使えるMacでは、メモリにかかわらず端末内AIで整えます。使えないMacでは箇条書きにならず、文の頭のフィラーを消すだけです（<a href="#usage-notes">使い方の補足</a>）。</p>
     </div></section>
 
     <section class="ev-dictionary section container" id="dictionary" aria-labelledby="dictionary-title">
@@ -195,7 +223,7 @@
           <li><span class="ev-flow-label">02 / 確認する</span><div class="ev-import-preview"><div><span>クロード</span><span aria-hidden="true">→</span><strong>Claude</strong></div><div><span>ジェミニ</span><span aria-hidden="true">→</span><strong>Gemini</strong></div><p>追加する内容をプレビュー</p></div><h4>表記を見てから追加</h4><p>重複や表記の違いも確認できます。</p></li>
           <li><span class="ev-flow-label">03 / 持ち運ぶ</span><div class="ev-export-image" aria-hidden="true"><svg viewBox="0 0 84 62" fill="none"><rect x="12" y="7" width="60" height="40" rx="2" stroke="currentColor"/><path d="M4 54h76M28 26h28m-8-7 8 7-8 7" stroke="currentColor"/></svg><span>JSON</span></div><h4>必要な項目だけ書き出す</h4><p>別のMacのEve Voiceへ引き継げます。</p></li>
         </ol>
-        <p class="ev-illustration-label">図は操作のイメージです。読み込みにはEve Voiceが対応する書式が必要です。</p>
+        <p class="ev-illustration-label">図は操作のイメージです。読み込みにはEve Voiceが対応する書式が必要です。TXT・CSV・JSON の書き方と件数は、<a href="#usage-notes">使い方の補足</a>にまとめています。</p>
       </div>
     </section>
 
@@ -267,7 +295,7 @@
         <div><dt>メモリ</dt><dd>8GB以上</dd></div>
         <div><dt>音声認識</dt><dd>「速さ重視（Apple の音声認識）」と「精度重視（Whisper large-v3）」を、どのMacでも選べます。Whisperは「通常版」と「省メモリ版」から選べます。はじめは、メモリ12GB以上のMacは精度重視の通常版、12GB未満のMacは速さ重視で始まり、精度重視に切り替えると省メモリ版を使います。設定からいつでも変更できます。</dd></div>
         <div><dt>空き容量</dt><dd>精度重視は、初回に Whisper のモデルを取得します。通常版は約3.1GB、省メモリ版は約0.95GBです。取得には、モデルの容量に加えて1GB以上の余裕が必要です。速さ重視では、このモデルの取得は不要です。</dd></div>
-        <div><dt>文章を整える機能</dt><dd>AI整文には、Apple Intelligence が使える状態が必要です。使えない場合も、音声入力そのものはご利用いただけます。メモリ12GB未満のMacでは、「自然な文章」は初期設定でAIを使わず、句読点だけを付けます（設定でオンにできます）。「箇条書き」は、どのMacでも端末内AIで整えます。</dd></div>
+        <div><dt>文章を整える機能</dt><dd>AI整文には、Apple Intelligence が使える状態が必要です。使えない場合も、音声入力そのものはご利用いただけます。そのときは文の頭のフィラーを消すだけで、「箇条書き」の形にはなりません。メモリ12GB未満のMacでは、「自然な文章」は初期設定でAIを使わず、句読点だけを付けます（設定でオンにできます）。「箇条書き」は、Apple Intelligence が使えるMacでは、メモリにかかわらず端末内AIで整えます。くわしくは<a href="#usage-notes">使い方の補足</a>をご覧ください。</dd></div>
         <div><dt>英文の翻訳</dt><dd>macOS の翻訳機能を使い、英語から日本語へMac内で翻訳します。初回に翻訳用の言語データの取得が必要な場合があります。</dd></div>
         <div><dt>インターネット</dt><dd>無料体験の開始、ライセンスの登録と確認（接続中は1日1回程度。少なくとも30日に一度）、初回のモデル準備、更新の取得にはインターネット接続が必要です。最後の確認から30日を過ぎると、接続して確認し直すまでご利用いただけません。音声認識・AI整文・翻訳の処理はMac内で行います。</dd></div>
       </dl>
@@ -287,6 +315,10 @@
         <details><summary>どの音声認識を使っていますか。</summary><p>Appleの音声認識を使う「速さ重視」と、Whisper large-v3を使う「精度重視」を、どのMacでも選べます。精度重視には「通常版」（約3.1GB）と「省メモリ版」（約0.95GB）があり、省メモリ版は速く動くかわりに、精度が少し下がります。どちらも日本語をMac内で認識します。速さ・精度は、Macの機種、マイク、話し方や周囲の音によって変わります。</p></details>
         <details><summary>メモリ8GBのMacでも使えますか。</summary><p>はい、メモリ8GB以上のMacでお使いいただけます。メモリ12GB未満のMacは、はじめは「速さ重視（Apple）」で始まり、「精度重視」に切り替えると省メモリ版のWhisperを使います。また、「自然な文章」は初期設定でAIを使わず、句読点だけを付けてすぐに入力します。オンにもできますが、仕上がりまで時間がかかります。「箇条書き」は端末内AIで整えるため、時間がかかります。お使いのMacでの速さは、無料体験でお確かめください。</p></details>
         <details><summary>専門用語を登録すると、何が変わりますか。</summary><p>よく使う名前や用語を認識のヒントにし、登録した読みや聞き違いを指定の表記へ補正します。800件まで登録でき、任意のパックや手持ちの用語集も取り込めます。辞書はすべての誤認識を防ぐものではないため、使う言葉に絞って登録し、結果を確認してください。</p></details>
+        <details id="usage-notes"><summary>Apple Intelligence があるときと、ないときで、整え方はどう違いますか。</summary><p>整え方は2段です。先に、AIを使わない規則で、文の頭にあって読点で区切られた「えーと」「ええと」「えっと」「あのー」「そのー」（英語の um、uh）だけを消します。推測で書き換えることはしません。この規則は、仕上げが「そのまま」以外のときにかかります。数字の言い直しは、AIの前に規則で直します。「3時、いや、4時」のように、数字と単位のあとに「いや」「じゃなくて」「ではなくて」「ではなく」「訂正」が来て、また数字と単位が続くときは、あとの方にします。単位は、時・分・円・個・本・件・人・日・月・年・枚・回・%・キロです。午前・午後も引き継ぎます。</p><p>Apple Intelligence が使える Mac で、「AIで文章を整える」がオンのとき（メモリ12GB以上の初期設定）は、「自然な文章」を端末内のAIが整えます。「えーと」などのフィラーを除き、句読点を加え、言い直しは最後の内容にします。意味・否定・時制・名前・数値・単位・URL・コード・技術用語は変えません。翻訳・要約・推測・情報の追加はしません。「箇条書き」は、端末内のAIが箇条書きにします。</p><p>同じように Apple Intelligence が使える Mac で、その設定がオフのとき（メモリ12GB未満の初期設定）は、「自然な文章」はAIを使わず、規則で句読点を付け、上のフィラーの削除をします。「箇条書き」は、この設定に関係なく端末内のAIで整えます。仕上がりまで時間がかかることがあります。</p><p>Apple Intelligence が使えない Mac では、AIでの整文は行いません。「自然な文章」も「箇条書き」も、認識した文に上のフィラーの削除だけをかけて入力します。「箇条書き」の形にはなりません。アプリには「簡易整形を使います」と出ます。</p><p>1回の発話が1,000文字を超えるときは、AIでの整文を省き、全文を残します（「自然な文章」なら句読点だけです）。AIが時間内に終わらないときや、失敗したときも、簡易整形の文を入力します。何も入らないことはありません。</p></details>
+        <details id="usage-dictionary"><summary>辞書ファイルは、どの書式で、何件まで読み込めますか。</summary><p>TXT、CSV、JSON を読み込めます。どの形式も UTF-8 で、1ファイル 1 MiB 以下、1回に 2,000 件までです。読み込んだあとの合計は 800 件までです。読みに「=」と「|」は使えません。読み込む前のプレビューで、追加・登録済み・ぶつかる・上限超えが、行ごとに分かります。元の辞書は書き換えず、後ろに足します。</p><p>TXT は1行に1語です。「読み=表記」（例：くろーど=Claude）。読みを複数にするときは「|」で区切ります（例：くろーど|クロード=Claude）。「=」の無い行は、表記だけの登録で、認識のヒントに使います。空行と、「#」で始まる行は読み飛ばします。</p><p>CSV は、1行目の見出しを aliases,term にします。各行は「読み,正しい表記」の2列です。読みが複数のときは「|」で区切ります。</p><p>JSON は、Eve Voice が書き出す形式です（format は eve-voice-dictionary、schemaVersion は 1。name と、entries のなかの aliases と term）。手で作るより、アプリから書き出したファイルを使うのが確実です。</p></details>
+        <details id="usage-translation"><summary>「翻訳の用語」は、どう書きますか。</summary><p>1行に English=日本語 と書きます。「＝」「→」「-&gt;」も使えます。「#」で始まる行はコメントです。訳す前の英文に当てるので、名前が訳で別の字になるのを防ぎます。単語単位で、大文字と小文字を区別します。長い登録が先に当たります（Sanae Takaichi は、Takaichi より先です）。1回の原文は 60,000 文字までです。長い文は、段落や文の区切りで分けて訳し、つなげ直します。英語から日本語だけです。</p></details>
+        <details id="usage-screen"><summary>「画面の文字を参照」は、何を読みますか。</summary><p>設定で「前面ウインドウの文字」を選んだときだけ動きます。初期設定はオフです。macOS の「画面収録」の許可が必要で、許可しなくても音声入力は使えます。ほかのアプリの入力欄でショートカット録音を始めたときに、前面のウインドウ1枚だけを画像としてメモリに取り込み、Mac の中の文字認識（日本語・英語）で読みます。最大 2,000 字です。画像はディスクに保存しません。使い道は、画面にすでに出ている表記に合わせることだけです（画面に「Slack」とあれば、聞き取った「スラック」を「Slack」にします）。画面の文章を足したり、画面の指示に従ったりはしません。この補正は、「そのまま」を含むどの仕上げでもかかります。パスワード管理アプリ（パスワード、キーチェーンアクセス、1Password など）や、パスワード入力欄にカーソルがあるときは読みません。別の設定「入力欄の文章」は、画面を読む代わりに、録音を始めた入力欄から最大500文字を参考にします。こちらも Mac の中で処理し、保存しません。</p></details>
       </div></div>
     </div></section>
 
