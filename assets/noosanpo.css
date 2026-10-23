@@ -1,0 +1,58 @@
+/* 脳のおさんぽ pages (/noosanpo/): the site's paper, type and rules, with the app's green and cream (lib/app/theme.dart). */
+.noosanpo-page,.noosanpo-legal{--ns-accent:#356f4c;--ns-soft:#f7edda;--ns-line:#dccbb0;--ns-dark:#285a3c;--ns-on-dark:#f2ead8}
+.ns-hero{padding-top:56px}
+.ns-kicker{display:flex;align-items:center;justify-content:space-between;gap:20px;color:var(--ns-accent)}
+.ns-status{font-size:11px;border:1px solid var(--ns-line);border-radius:2px;padding:6px 13px;letter-spacing:.04em}
+.ns-hero-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:60px;align-items:end;padding-block:52px 66px}
+.ns-name{display:flex;align-items:center;gap:16px;font-size:15px;letter-spacing:.1em;margin-bottom:22px;color:var(--ns-accent)}
+.ns-name img{width:56px;height:56px;border-radius:13px}
+.ns-hero h1{font-size:clamp(40px,4.5vw,66px);line-height:1.6;letter-spacing:-.065em}
+.ns-intro{max-width:360px;justify-self:end;font-size:15px;line-height:2}
+.ns-intro>p+p{font-size:13px;color:var(--muted);margin-top:20px;line-height:2.1}
+.ns-intro .text-link{margin-top:17px}
+.ns-hero-bottom{border-top:1px solid var(--line);padding-block:20px;display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-size:10px;letter-spacing:.07em}
+.ns-hero-bottom a{letter-spacing:0}
+.ns-hero-bottom a span{margin-left:16px}
+.ns-soft{background:var(--ns-soft)}
+.ns-feature-list{margin-top:42px;border-top:1px solid var(--ns-line);display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.ns-feature-list article{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:28px 30px 28px 0;border-bottom:1px solid var(--ns-line);min-width:0}
+.ns-feature-list article:nth-child(2n){padding:28px 0 28px 30px;border-left:1px solid var(--ns-line)}
+.ns-feature-number{font-size:12px;color:var(--ns-accent);margin-top:5px}
+.ns-feature-list h3{font-size:20px;letter-spacing:-.02em;line-height:1.7}
+.ns-feature-list p{font-size:14px;color:var(--muted);margin-top:12px;line-height:2}
+.ns-facts{margin-top:40px;border-top:1px solid var(--line)}
+.ns-facts>div{display:grid;grid-template-columns:200px 1fr;gap:20px;padding:18px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.9}
+.ns-facts dt{font-size:12px;color:var(--ns-accent);letter-spacing:.04em}
+.ns-facts dd{min-width:0;overflow-wrap:break-word}
+.ns-links{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:28px;font-size:14px}
+.ns-links a,.ns-faq a,.ns-english a,.ns-note a{text-decoration:underline;text-decoration-color:#b9bcae}
+.ns-links a{min-height:44px;display:inline-flex;align-items:center}
+.ns-note{font-size:12px;color:var(--muted);line-height:1.9;margin-top:28px;max-width:900px}
+.ns-help-grid{display:grid;grid-template-columns:1fr 1.45fr;gap:60px}
+.ns-faq{border-top:1px solid var(--ns-line)}
+.ns-faq details{border-bottom:1px solid var(--ns-line)}
+.ns-faq summary{font-size:15px;padding:22px 24px 22px 0;cursor:pointer;line-height:1.8;list-style-position:inside}
+.ns-faq summary::marker{color:var(--ns-accent);font-size:12px}
+.ns-faq details p{font-size:14px;color:var(--muted);line-height:2;padding:0 0 24px}
+.noosanpo-page .contact{background:var(--ns-dark);color:var(--paper)}
+.noosanpo-page .contact p,.noosanpo-page .contact .eyebrow,.ns-support .contact-link small{color:var(--ns-on-dark)}
+.ns-support{display:grid;grid-template-columns:1fr 1.25fr;align-items:center;gap:36px 70px;padding-block:64px 44px}
+.ns-support .contact-link{display:flex;justify-content:space-between;gap:20px;width:100%;padding-block:16px}
+.ns-support .contact-link>span:first-child{font-size:clamp(25px,2.7vw,40px)}
+.ns-support .ns-support-hint{font-size:12px;margin-top:20px}
+.ns-english{grid-column:1/-1;max-width:850px;border-top:1px solid #5b7f66;padding-top:28px;margin-top:10px}
+.ns-english h3{font-size:14px;letter-spacing:.02em}
+.ns-support .ns-english p{font-size:12px;line-height:1.9;margin-top:10px}
+.ns-support .ns-english a{text-decoration-color:#a9c4b0}
+.ns-english-light{max-width:850px;margin-top:40px;padding-top:24px;border-top:1px solid var(--line)}
+.ns-english-light h3{font-size:14px;letter-spacing:.02em}
+.ns-english-light p{font-size:12px;color:var(--muted);line-height:1.9;margin-top:10px}
+/* The privacy page: lists inside the numbered sections. */
+.legal-document ul.ns-legal-list{margin:6px 0 0;padding-left:1.2em;display:grid;gap:4px}
+.legal-document ul.ns-legal-list>li{padding-left:2px;list-style:"・"}
+.legal-document [lang="en"] ul.ns-legal-list>li{list-style:disc}
+@media(max-width:1000px){.ns-hero-grid{gap:36px;grid-template-columns:1.3fr 1fr}.ns-feature-list h3{font-size:18px}.ns-help-grid{gap:36px;grid-template-columns:.85fr 1.4fr}.ns-support{gap:30px}}
+@media(max-width:760px){.ns-hero{padding-top:30px}.ns-kicker{gap:12px}.ns-kicker .eyebrow{font-size:8px;letter-spacing:.1em}.ns-status{font-size:9px;padding:5px 8px}.ns-hero-grid{grid-template-columns:1fr;gap:26px;padding-block:32px 38px}.ns-name{font-size:13px;margin-bottom:16px}.ns-name img{width:48px;height:48px;border-radius:11px}.ns-hero h1{font-size:clamp(32px,7.6vw,54px);line-height:1.65}.ns-intro{max-width:480px;justify-self:start;font-size:14px}.ns-intro>p+p{font-size:14px;line-height:2;margin-top:15px}.ns-hero-bottom{font-size:8px;letter-spacing:.02em;gap:12px;padding-block:18px}.ns-hero-bottom a{font-size:10px}.ns-hero-bottom a span{margin-left:5px}.ns-feature-list{grid-template-columns:1fr;margin-top:30px}.ns-feature-list article,.ns-feature-list article:nth-child(2n){grid-template-columns:28px 1fr;padding:24px 0;border-left:0}.ns-feature-number{font-size:11px;margin-top:4px}.ns-feature-list h3{font-size:20px}.ns-feature-list p{margin-top:9px}.ns-facts>div{grid-template-columns:1fr;gap:4px;padding:16px 0}.ns-help-grid{grid-template-columns:1fr;gap:24px}.ns-faq summary{font-size:14px;padding-block:20px;padding-right:0}.ns-support{grid-template-columns:1fr;padding-block:44px 35px;gap:22px}.ns-support .contact-link{margin-top:0;min-height:65px}.ns-support .contact-link>span:first-child{font-size:clamp(24px,6.9vw,37px)}.ns-support .ns-support-hint{margin-top:15px}.ns-english{margin-top:4px;padding-top:24px}}
+@media(max-width:380px){.ns-hero h1{font-size:34px}.ns-hero-bottom{flex-wrap:wrap;gap:8px}.ns-kicker{flex-wrap:wrap;gap:10px}.ns-feature-list h3{font-size:19px}.ns-support .contact-link>span:first-child{font-size:23px}}
+/* The operator line under the contact link: keep the link visible on the dark band. */
+.ns-support .ns-support-hint a{text-decoration:underline;text-decoration-color:#a9c4b0}
