@@ -10,6 +10,8 @@
 .dc-intro{max-width:360px;justify-self:end;font-size:15px;line-height:2}
 .dc-intro>p+p{font-size:13px;color:var(--muted);margin-top:20px;line-height:2.1}
 .dc-intro .text-link{margin-top:17px}
+.dc-store-links{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:16px;font-size:13px;line-height:1.8}
+.dc-store-links a{text-underline-offset:4px}
 .dc-hero-bottom{border-top:1px solid var(--line);padding-block:20px;display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-size:10px;letter-spacing:.07em}
 .dc-hero-bottom a{letter-spacing:0}
 .dc-hero-bottom a span{margin-left:16px}
@@ -25,7 +27,7 @@
 .dc-facts dt{font-size:12px;color:var(--dc-accent);letter-spacing:.04em}
 .dc-facts dd{min-width:0;overflow-wrap:break-word}
 .dc-links{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:28px;font-size:14px}
-.dc-links a,.dc-faq a,.dc-english a,.dc-note a{text-decoration:underline;text-decoration-color:#b9bcae}
+.dc-links a,.dc-faq a,.dc-english a,.dc-note a,.dc-store-links a,.dc-facts a{text-decoration:underline;text-decoration-color:#b9bcae}
 .dc-links a{min-height:44px;display:inline-flex;align-items:center}
 .dc-note{font-size:12px;color:var(--muted);line-height:1.9;margin-top:28px;max-width:900px}
 .dc-help-grid{display:grid;grid-template-columns:1fr 1.45fr;gap:60px}
