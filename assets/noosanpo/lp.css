@@ -1,0 +1,237 @@
+/* /noosanpo/ 専用。サポート・法務ページの noosanpo.css とは分けて使います。 */
+@font-face {
+  font-family: "Zen Old Mincho Eivrad";
+  src: url(/assets/noosanpo/heading-mincho.woff2) format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+.ns-product {
+  --ns-accent: #a9553c;
+  --ns-soft: #f7edda;
+  --ns-cream: #f5f0e4;
+  --ns-ink: #322a25;
+  --ns-muted: #605247;
+  --ns-label: #764330;
+  --ns-line: #d7c4ae;
+  color: var(--ns-ink);
+  font-size: 18px;
+  line-height: 1.85;
+  letter-spacing: .01em;
+}
+
+.ns-product main :is(h1, h2) {
+  font-family: "Zen Old Mincho Eivrad", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  font-weight: 700;
+  letter-spacing: .005em;
+}
+
+.ns-product main h2 { font-size: clamp(30px, 3.1vw, 42px); line-height: 1.6; }
+.ns-product main h2 > span { display: inline-block; }
+.ns-product main :is(h3, h4) { font-weight: 600; font-size: 21px; line-height: 1.7; letter-spacing: .01em; }
+.ns-product main h4 { margin: 0; }
+.ns-product main :is(p, dd) { overflow-wrap: anywhere; }
+.ns-product main :is(ul, ol) { margin: 0; padding: 0; }
+.ns-product main li { list-style: none; }
+.ns-product main figure { margin: 0; min-width: 0; }
+.ns-product main img { max-width: 100%; }
+.ns-product .primary-nav { font-size: 16px; letter-spacing: .02em; }
+.ns-product .primary-nav > a { display: inline-flex; align-items: center; min-height: 56px; }
+.ns-product .primary-nav > a:hover { opacity: 1; text-decoration: underline; }
+.ns-product .skip-link { min-height: 56px; }
+.ns-product .ns-section { padding-block: 88px; }
+.ns-product .ns-section-label { color: var(--ns-label); font-size: 16px; margin-bottom: 16px; }
+.ns-product .ns-section-label span { margin-right: 16px; font-variant-numeric: tabular-nums; }
+.ns-product .ns-section-intro { max-width: 740px; margin-top: 20px; }
+.ns-product .ns-soft { background: var(--ns-soft); }
+
+/* 最初と最後の面は、トップの札と同じ赤茶です。 */
+.ns-product :is(.ns-hero, .ns-download) { background: var(--ns-accent); color: var(--ns-cream); }
+.ns-product :is(.ns-hero, .ns-download) :focus-visible { outline-color: var(--ns-cream); }
+.ns-product .ns-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  grid-template-areas: "copy image" "details image";
+  align-items: center;
+  gap: clamp(40px, 5vw, 80px);
+  row-gap: 20px;
+  padding-block: 56px 64px;
+}
+.ns-product .ns-hero-copy { grid-area: copy; min-width: 0; max-width: 720px; }
+.ns-product .ns-hero-details { grid-area: details; min-width: 0; }
+.ns-product .ns-brand { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; font-size: 22px; }
+.ns-product .ns-brand img { flex: none; width: 60px; height: 60px; border-radius: 22%; }
+.ns-product .ns-hero h1 { font-size: clamp(36px, 3.8vw, 56px); line-height: 1.5; }
+.ns-product .ns-lead { margin-top: 22px; }
+.ns-product .ns-free { margin-top: 18px; font-weight: 600; }
+.ns-product .ns-store-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.ns-product .ns-hero .ns-store-buttons { margin-top: 16px; }
+.ns-product .ns-store-button {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  min-height: 76px;
+  padding: 12px 18px;
+  border: 1px solid var(--ns-cream);
+  border-radius: 8px;
+  background: var(--ns-soft);
+  color: var(--ns-ink);
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.6;
+  letter-spacing: 0;
+  transition: background-color .15s;
+}
+.ns-product .ns-store-button small { display: block; font-size: 16px; font-weight: 400; }
+.ns-product .ns-store-button:hover { background: #fff9ee; text-decoration: underline; }
+.ns-product .ns-hero-terms { display: grid; gap: 8px; margin-top: 0; }
+.ns-product .ns-platforms { margin-top: 20px; }
+.ns-product .ns-game-link { display: inline-flex; align-items: center; min-height: 56px; gap: 24px; text-decoration: underline; margin-top: 8px; }
+.ns-product .ns-hero-figure { grid-area: image; width: min(100%, 312px); justify-self: center; }
+.ns-product .ns-hero-figure figcaption { color: var(--ns-cream); }
+
+/* 枠は CSS だけで付け、実際の画面をそのまま見せます。 */
+.ns-product .ns-screen-frame { overflow: hidden; border: 2px solid #8c776b; border-radius: 20px; background: var(--ns-soft); box-shadow: 0 8px 24px #322a2514; }
+.ns-product .ns-screen-frame img { width: 100%; height: auto; }
+.ns-product figcaption { margin-top: 16px; color: var(--ns-muted); }
+.ns-product :is(.ns-hero-terms, .ns-platforms, figcaption) { font-size: 17px; line-height: 1.8; }
+.ns-product .ns-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+  gap: 40px;
+  margin-top: 40px;
+  padding: 40px;
+  border-radius: 20px;
+  background: var(--paper);
+}
+.ns-product .ns-group-copy { min-width: 0; }
+.ns-product .ns-group-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 18px; }
+.ns-product main .ns-group-title h3 { font-size: 22px; }
+.ns-product .ns-group-title > span { color: var(--ns-label); font-size: 16px; white-space: nowrap; }
+.ns-product .ns-group-intro { margin-top: 12px; }
+.ns-product .ns-game-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 32px; row-gap: 24px; margin-top: 28px; }
+.ns-product .ns-game-list li { min-width: 0; }
+.ns-product main :is(.ns-game-list, .ns-word-examples) h4 { font-size: 20px; }
+.ns-product :is(.ns-game-list, .ns-word-examples) p { margin-top: 8px; }
+.ns-product .ns-group--memory { grid-template-columns: 320px minmax(0, 1fr); }
+.ns-product .ns-group--memory .ns-group-figure { grid-column: 1; grid-row: 1; }
+.ns-product .ns-group--memory .ns-group-copy { grid-column: 2; }
+.ns-product .ns-group--memory .ns-game-list { grid-template-columns: 1fr; }
+.ns-product .ns-group--words { grid-template-columns: minmax(0, 1fr); }
+.ns-product .ns-group-figure { width: 100%; }
+.ns-product .ns-word-examples { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; margin-top: 28px; }
+.ns-product .ns-word-examples > article { min-width: 0; }
+.ns-product .ns-word-examples figure { width: min(100%, 280px); margin: 24px auto 0; }
+
+.ns-product .ns-screen-band { margin-top: 48px; padding-block: 40px; background: var(--ns-accent); color: var(--ns-cream); }
+.ns-product .ns-screen-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 16px; padding-top: 24px; }
+.ns-product .ns-screen-strip:focus-visible { outline: 2px solid var(--ns-cream); outline-offset: 6px; }
+.ns-product .ns-screen-strip > figure { display: grid; grid-template-rows: 1fr auto; min-width: 0; margin: 0; }
+.ns-product .ns-screen-strip .ns-screen-frame { background: #fff8ec; }
+.ns-product .ns-screen-strip figcaption { margin-top: 12px; color: var(--ns-cream); }
+
+@media (max-width: 1100px) {
+  .ns-product .ns-screen-strip { display: flex; gap: 24px; overflow-x: auto; padding-bottom: 12px; scroll-snap-type: x proximity; -webkit-overflow-scrolling: touch; }
+  .ns-product .ns-screen-strip > figure { flex: 0 0 200px; scroll-snap-align: start; }
+}
+@media (max-width: 760px) {
+  .ns-product .ns-screen-strip { margin-inline: -20px; padding-inline: 20px; scroll-padding-inline: 20px; }
+  .ns-product .ns-screen-strip > figure { flex-basis: min(62vw, 240px); }
+}
+@media (max-width: 350px) {
+  .ns-product .ns-screen-strip { margin-inline: -16px; padding-inline: 16px; scroll-padding-inline: 16px; }
+}
+
+.ns-product .ns-usability-grid { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 64px; align-items: start; margin-top: 40px; }
+.ns-product .ns-feature-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 40px; }
+.ns-product .ns-feature-list p { margin-top: 10px; }
+.ns-product .ns-time-note { margin-top: 44px; padding: 32px; border-radius: 16px; background: var(--ns-soft); }
+.ns-product .ns-time-note p { margin-top: 14px; }
+.ns-product .ns-time-note strong { font-weight: 600; }
+.ns-product .ns-facts { margin-top: 36px; }
+.ns-product .ns-facts > div { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 28px; padding-block: 22px; border-bottom: 1px solid var(--ns-line); }
+.ns-product .ns-facts > div:first-child { border-top: 1px solid var(--ns-line); }
+.ns-product .ns-facts dt { font-weight: 600; color: var(--ns-label); }
+.ns-product .ns-facts a, .ns-product .ns-english-light a { text-decoration: underline; }
+.ns-product .ns-details > summary { min-height: 56px; padding-block: 16px; font-size: 18px; cursor: pointer; }
+.ns-product .ns-note { margin-top: 32px; padding: 24px 28px; border-radius: 12px; background: var(--paper); }
+.ns-product .ns-links { display: flex; flex-wrap: wrap; gap: 4px 28px; margin-top: 20px; }
+.ns-product .ns-links a { display: inline-flex; align-items: center; min-height: 56px; text-decoration: underline; }
+.ns-product .ns-english-light { max-width: 920px; margin-top: 32px; padding-top: 28px; border-top: 1px solid var(--ns-line); }
+.ns-product .ns-english-light p { font-size: 16px; margin-top: 12px; }
+.ns-product .ns-download-inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 48px 64px; padding-block: 64px; }
+.ns-product .ns-download-title { display: flex; align-items: center; gap: 24px; }
+.ns-product .ns-download-title > img { width: 100px; height: 100px; flex: none; border-radius: 22%; }
+.ns-product main .ns-download h2 { font-size: clamp(28px, 2.9vw, 38px); }
+.ns-product .ns-download p { margin-top: 16px; }
+.ns-product .ns-download .ns-store-buttons { grid-template-columns: 1fr; }
+
+@media (min-width: 761px) {
+  .ns-product .ns-feature-list { grid-area: 1 / 1; }
+  .ns-product .ns-usability-figure { grid-area: 1 / 2; }
+}
+
+@media (max-width: 1100px) {
+  .ns-product .ns-hero-grid { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); column-gap: 36px; }
+  .ns-product .ns-hero .ns-store-buttons { grid-template-columns: 1fr; }
+  .ns-product .ns-group { gap: 32px; padding: 32px; grid-template-columns: minmax(0, 1fr) 240px; }
+  .ns-product .ns-group--memory { grid-template-columns: 240px minmax(0, 1fr); }
+  .ns-product .ns-group--words { grid-template-columns: minmax(0, 1fr); }
+  .ns-product .ns-game-list { grid-template-columns: 1fr; }
+  .ns-product .ns-group--words .ns-game-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ns-product .ns-usability-grid { grid-template-columns: minmax(0, 1fr) 264px; gap: 36px; }
+  .ns-product .ns-feature-list { grid-template-columns: 1fr; }
+  .ns-product .ns-download-title { align-items: flex-start; }
+  .ns-product .ns-download-title > img { width: 76px; height: 76px; }
+}
+
+@media (max-width: 900px) {
+  .ns-product .ns-hero-grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "copy" "image" "details"; gap: 24px; padding-block: 32px 48px; }
+  .ns-product .ns-hero-copy { max-width: 720px; }
+  .ns-product .ns-hero h1 { font-size: clamp(30px, 5.6vw, 48px); }
+  .ns-product .ns-hero .ns-store-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ns-product .ns-hero-figure { width: min(100%, 304px); }
+  .ns-product .ns-section { padding-block: 64px; }
+  .ns-product .ns-download-inner { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .ns-product .ns-download .ns-store-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  .ns-product .menu-toggle { min-width: 56px; min-height: 56px; margin-right: -10px; }
+  .ns-product .ns-brand { font-size: 21px; gap: 12px; margin-bottom: 18px; }
+  .ns-product .ns-brand img { width: 48px; height: 48px; }
+  .ns-product .ns-group, .ns-product .ns-group--memory { grid-template-columns: minmax(0, 1fr); gap: 28px; padding: 28px; margin-top: 28px; }
+  .ns-product .ns-group-copy { display: contents; }
+  .ns-product .ns-group-figure { order: 2; }
+  .ns-product .ns-game-list { order: 3; }
+  .ns-product .ns-group--memory .ns-group-copy, .ns-product .ns-group--memory .ns-group-figure { grid-column: auto; grid-row: auto; }
+  .ns-product .ns-group-figure { width: min(100%, 280px); justify-self: center; }
+  .ns-product .ns-group--words .ns-game-list { grid-template-columns: 1fr; }
+  .ns-product .ns-word-examples { grid-template-columns: 1fr; order: 2; }
+  .ns-product .ns-usability-grid { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .ns-product .ns-usability-figure { width: min(100%, 280px); justify-self: center; }
+  .ns-product .ns-time-note { padding: 28px; }
+  .ns-product .ns-facts > div { grid-template-columns: minmax(0, 1fr); gap: 6px; padding-block: 20px; }
+  .ns-product .ns-note { padding: 24px; }
+}
+
+@media (max-width: 520px) {
+  .ns-product { font-size: 17px; }
+  .ns-product .ns-hero h1 { font-size: clamp(28px, 6.7vw, 34px); }
+  .ns-product .ns-lead { margin-top: 16px; }
+  .ns-product .ns-hero .ns-store-buttons, .ns-product .ns-download .ns-store-buttons { grid-template-columns: minmax(0, 1fr); }
+  .ns-product .ns-store-button { min-height: 72px; }
+  .ns-product .ns-group { padding: 24px 20px; }
+  .ns-product .ns-time-note { padding: 24px 20px; }
+  .ns-product .ns-download-title { flex-direction: column; gap: 20px; }
+}
+
+@media (max-width: 350px) {
+  .ns-product #games-title { font-size: 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ns-product * { animation: none !important; transition: none !important; }
+}
