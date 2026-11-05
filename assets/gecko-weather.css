@@ -1,54 +1,291 @@
-.gecko-page{--gecko-accent:#4c6249;--gecko-soft:#edf0e7}
-.gecko-hero{padding-top:56px}
-.gecko-kicker{display:flex;align-items:center;justify-content:space-between;gap:20px;color:var(--gecko-accent)}
-.release-status{font-size:11px;border:1px solid #cbd3c3;border-radius:2px;padding:6px 13px;letter-spacing:.04em}
-.gecko-hero-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:60px;align-items:end;padding-block:52px 66px}
-.gecko-name{font-size:15px;letter-spacing:.1em;margin-bottom:20px;color:var(--gecko-accent)}
-.gecko-hero h1{font-size:clamp(40px,4.5vw,66px);line-height:1.6;letter-spacing:-.065em}
-.gecko-small-break{display:none}
-.gecko-intro{max-width:350px;justify-self:end;font-size:15px;line-height:2}
-.gecko-intro>p+p{font-size:13px;color:var(--muted);margin-top:20px;line-height:2.1}
-.gecko-intro .text-link{margin-top:17px}
-.gecko-store-links{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:16px;font-size:13px;line-height:1.8}
-.gecko-store-links a{text-decoration:underline;text-underline-offset:4px}
-.gecko-support .gecko-store-links{margin-top:18px}
-.gecko-hero-bottom{border-top:1px solid var(--line);padding-block:20px;display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-size:10px;letter-spacing:.07em}
-.gecko-hero-bottom a{letter-spacing:0}
-.gecko-hero-bottom a span{margin-left:16px}
-.gecko-features,.gecko-help{background:var(--gecko-soft)}
-.gecko-feature-list{margin-top:42px;border-top:1px solid #cdd4c5;display:grid;grid-template-columns:repeat(3,1fr)}
-.gecko-feature-list article{padding:28px 30px 0 0}
-.gecko-feature-list article+article{border-left:1px solid #cdd4c5;margin-top:28px;padding:0 30px}
-.gecko-feature-list article:last-child{padding-right:0}
-.gecko-feature-number{font-size:12px;color:var(--gecko-accent);display:block;margin-bottom:22px}
-.gecko-feature-list h3{font-size:20px;letter-spacing:-.02em;line-height:1.7}
-.gecko-feature-list p{font-size:14px;color:var(--muted);margin-top:16px;line-height:2}
-.gecko-note{font-size:12px;color:var(--muted);line-height:1.9;margin-top:32px;max-width:900px}
-.gecko-plans{display:grid;grid-template-columns:1fr 1fr;margin-top:40px;border-block:1px solid var(--line)}
-.gecko-plan{padding:30px 40px 34px 0}
-.gecko-plan+.gecko-plan{border-left:1px solid var(--line);padding-left:40px}
-.gecko-plan .eyebrow{color:var(--gecko-accent);margin-bottom:12px}
-.gecko-plan h3{font-size:24px}
-.gecko-plan-intro{font-size:12px;color:var(--muted);margin-top:8px}
-.gecko-plan ul{font-size:14px;line-height:1.9;padding-left:1.2em;margin:22px 0 0}
-.gecko-plan li+li{margin-top:10px}
-.gecko-plan li::marker{color:var(--gecko-accent)}
-.gecko-help-grid{display:grid;grid-template-columns:1fr 1.45fr;gap:60px}
-.gecko-faq{border-top:1px solid #cdd4c5}
-.gecko-faq details{border-bottom:1px solid #cdd4c5}
-.gecko-faq summary{font-size:15px;padding:22px 24px 22px 0;cursor:pointer;line-height:1.8;list-style-position:inside}
-.gecko-faq summary::marker{color:var(--gecko-accent);font-size:12px}
-.gecko-faq details p{font-size:14px;color:var(--muted);line-height:2;padding:0 0 24px}
-.gecko-faq a,.gecko-english a{text-decoration:underline}
-.gecko-page .contact{background:var(--ink);color:var(--paper)}
-.gecko-page .contact p,.gecko-page .contact .eyebrow,.gecko-support .contact-link small{color:#d5d8d0}
-.gecko-support{display:grid;grid-template-columns:1fr 1.25fr;align-items:center;gap:36px 70px;padding-block:64px 44px}
-.gecko-support .contact-link{display:flex;justify-content:space-between;gap:20px;width:100%;padding-block:16px}
-.gecko-support .contact-link>span:first-child{font-size:clamp(25px,2.7vw,40px)}
-.gecko-support .gecko-support-hint{font-size:12px;color:#d5d8d0;margin-top:20px}
-.gecko-english{grid-column:1/-1;max-width:850px;border-top:1px solid #62665e;padding-top:28px;margin-top:10px}
-.gecko-english h3{font-size:14px;letter-spacing:.02em}
-.gecko-support .gecko-english p{font-size:12px;color:#d5d8d0;line-height:1.9;margin-top:10px}
-@media(max-width:1000px){.gecko-hero-grid{gap:36px;grid-template-columns:1.3fr 1fr}.gecko-feature-list h3{font-size:18px}.gecko-feature-list article{padding-right:22px}.gecko-feature-list article+article{padding-inline:22px}.gecko-help-grid{gap:36px;grid-template-columns:.85fr 1.4fr}.gecko-support{gap:30px}}
-@media(max-width:760px){.gecko-hero{padding-top:30px}.gecko-kicker{gap:12px}.gecko-kicker .eyebrow{font-size:8px;letter-spacing:.1em}.release-status{font-size:9px;padding:5px 8px}.gecko-hero-grid{grid-template-columns:1fr;gap:26px;padding-block:32px 38px}.gecko-name{font-size:13px;margin-bottom:14px}.gecko-hero h1{font-size:clamp(32px,7.6vw,54px);line-height:1.65}.gecko-intro{max-width:480px;justify-self:start;font-size:14px}.gecko-intro>p+p{font-size:14px;line-height:2;margin-top:15px}.gecko-hero-bottom{font-size:8px;letter-spacing:.02em;gap:12px;padding-block:18px}.gecko-hero-bottom a{font-size:10px}.gecko-hero-bottom a span{margin-left:5px}.gecko-feature-list{grid-template-columns:1fr;margin-top:30px}.gecko-feature-list article,.gecko-feature-list article+article,.gecko-feature-list article:last-child{display:grid;grid-template-columns:28px 1fr;gap:12px;margin:0;border-left:0;border-bottom:1px solid #cdd4c5;padding:24px 0}.gecko-feature-number{margin:4px 0 0;font-size:11px}.gecko-feature-list h3{font-size:21px}.gecko-feature-list p{margin-top:9px}.gecko-note{font-size:12px;margin-top:24px}.gecko-plans{grid-template-columns:1fr;margin-top:30px}.gecko-plan,.gecko-plan+.gecko-plan{padding:26px 0;border-left:0}.gecko-plan+.gecko-plan{border-top:1px solid var(--line)}.gecko-plan h3{font-size:23px}.gecko-plan ul{margin-top:18px}.gecko-help-grid{grid-template-columns:1fr;gap:24px}.gecko-faq summary{font-size:14px;padding-block:20px;padding-right:0}.gecko-support{grid-template-columns:1fr;padding-block:44px 35px;gap:22px}.gecko-support .contact-link{margin-top:0;min-height:65px}.gecko-support .contact-link>span:first-child{font-size:clamp(24px,6.9vw,37px)}.gecko-support .gecko-support-hint{font-size:12px;margin-top:15px}.gecko-english{margin-top:4px;padding-top:24px}}
-@media(max-width:380px){.gecko-small-break{display:initial}.gecko-hero h1{font-size:36px}.gecko-hero-bottom{flex-wrap:wrap;gap:8px}.gecko-kicker{flex-wrap:wrap;gap:10px}.gecko-feature-list h3{font-size:19px}.gecko-support .contact-link>span:first-child{font-size:23px}}
+/* /gecko-weather/ 専用。共通CSSには手を加えない。 */
+@font-face {
+  font-family: "Zen Old Mincho Eivrad";
+  src: url(/assets/gecko-weather/heading-mincho.woff2) format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+.gecko-page {
+  --gecko-green: #4c6249;
+  --gecko-cream: #f5f0e4;
+  --gecko-soft: #eef0e8;
+  --gecko-ink: #283327;
+  --gecko-muted: #505c4d;
+  --gecko-line: #c3cbbd;
+  --gecko-mincho: "Zen Old Mincho Eivrad", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  background: var(--gecko-cream);
+  color: var(--gecko-ink);
+}
+
+.gecko-page .site-header, .gecko-page .site-footer { color: var(--ink); }
+.gecko-page .site-footer { background: var(--paper); }
+.gecko-page main { font-size: 16px; line-height: 1.9; }
+.gecko-page main :where(h1, h2) { font-family: var(--gecko-mincho); font-weight: 700; }
+.gecko-page main h2 { font-size: clamp(28px, 3.2vw, 44px); letter-spacing: -.02em; line-height: 1.6; }
+.gecko-page main h3 { font-size: clamp(21px, 2vw, 27px); line-height: 1.65; font-weight: 600; letter-spacing: -.015em; }
+.gecko-page main :where(figure, figcaption) { margin: 0; }
+.gecko-page main :where(p, h1, h2, h3, th, td, dd, summary, a) { overflow-wrap: anywhere; }
+.gecko-page main :where(div, figure, article) { min-width: 0; }
+.gecko-page main p + p { margin-top: 16px; }
+.gecko-page main a:not(.gecko-store-button):not(.gecko-contact-button) { text-underline-offset: 5px; }
+.gecko-page main :focus-visible { outline-color: var(--gecko-green); }
+.gecko-section { padding-block: clamp(64px, 7.5vw, 108px); }
+.gecko-section-heading { max-width: 850px; margin-bottom: 46px; }
+.gecko-section-heading > p:last-child:not(.gecko-eyebrow) { margin-top: 20px; }
+.gecko-page main .gecko-eyebrow { margin: 0 0 14px; font-size: 15px; font-weight: 600; line-height: 1.6; color: var(--gecko-green); }
+.gecko-page main figcaption { margin-top: 16px; font-size: 15px; line-height: 1.8; color: var(--gecko-muted); }
+.gecko-page main .gecko-aside { font-size: 15px; color: var(--gecko-muted); }
+.gecko-text-link { display: inline-flex; align-items: center; justify-content: space-between; gap: 24px; max-width: 100%; border-bottom: 1px solid var(--gecko-green); padding-block: 10px; margin-top: 18px; font-size: 15px; line-height: 1.7; }
+.gecko-text-link span { flex-shrink: 0; }
+.gecko-text-link:hover { border-bottom-width: 2px; padding-bottom: 9px; }
+
+/* 札と同じ緑の上に、説明とお世話の実画面を置く。 */
+.gecko-hero { background: var(--gecko-green); color: var(--gecko-cream); }
+.gecko-hero-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, .85fr); grid-template-areas: "copy image" "meta image"; align-items: center; column-gap: clamp(32px, 5vw, 80px); row-gap: 20px; padding-block: 56px 52px; }
+.gecko-hero-copy { grid-area: copy; max-width: 710px; }
+.gecko-hero-meta { grid-area: meta; }
+.gecko-brand { display: flex; align-items: center; gap: 16px; }
+.gecko-brand img { width: 56px; flex-shrink: 0; border-radius: 22%; }
+.gecko-brand p { font-size: 21px; font-weight: 600; line-height: 1.4; letter-spacing: .025em; }
+.gecko-brand p span { display: block; font-size: 15px; font-weight: 400; letter-spacing: 0; margin-top: 4px; }
+.gecko-hero h1 { margin-top: 28px; font-size: clamp(38px, 4.25vw, 64px); letter-spacing: -.025em; line-height: 1.5; }
+.gecko-hero-lead { max-width: 590px; margin-top: 22px; font-size: 17px; }
+.gecko-install { margin-top: 24px; }
+.gecko-install-lead { font-size: 19px; font-weight: 600; }
+.gecko-store-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; max-width: 510px; margin-top: 14px; }
+.gecko-store-button { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-height: 76px; padding: 12px 16px; border: 1px solid var(--gecko-cream); border-radius: 8px; background: var(--gecko-cream); color: var(--gecko-ink); line-height: 1.5; text-align: center; transition: background-color .15s, border-color .15s; }
+.gecko-store-button span { display: block; font-size: 15px; }
+.gecko-store-button strong { display: block; font-size: 16px; font-weight: 600; }
+.gecko-store-button:hover { background: #e3e8db; border-color: #e3e8db; }
+.gecko-hero :focus-visible, .gecko-support-section :focus-visible { outline-color: var(--gecko-cream) !important; }
+.gecko-page main .gecko-install-note { margin-top: 14px; font-size: 15px; line-height: 1.8; }
+.gecko-page main .gecko-weather-intro { margin-top: 24px; padding-top: 20px; border-top: 1px solid #8b9c83; font-size: 15px; max-width: 570px; }
+.gecko-page main .gecko-compat { margin-top: 14px; font-size: 15px; }
+.gecko-hero-links { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 22px; font-size: 15px; }
+.gecko-hero-links a { text-decoration: underline; }
+.gecko-hero-links a span { margin-left: 8px; }
+.gecko-hero-figure { grid-area: image; max-width: 355px; justify-self: center; width: 100%; }
+.gecko-hero-figure .gecko-screen { margin-inline: auto; }
+.gecko-page main .gecko-hero-figure figcaption { color: var(--gecko-cream); }
+.gecko-screen { width: min(100%, 292px); padding: 5px; border: 1px solid #313c2e; border-radius: 29px; background: #263023; box-shadow: 0 18px 36px -14px rgb(27 42 25 / 28%); margin-inline: auto; }
+.gecko-screen img { width: 100%; height: auto; border-radius: 23px; }
+.gecko-screen--hero { width: min(100%, 314px); padding: 6px; border-radius: 35px; box-shadow: 0 24px 52px -14px rgb(20 34 18 / 38%); }
+.gecko-screen--hero img { border-radius: 28px; }
+.gecko-features .gecko-screen, .gecko-widgets .gecko-screen { padding: 0; border: 1px solid var(--gecko-line); border-radius: 12px; box-shadow: none; }
+.gecko-features .gecko-screen img, .gecko-widgets .gecko-screen img { border-radius: 11px; }
+.gecko-notification-crop { position: relative; aspect-ratio: 1; overflow: hidden; padding: 0; }
+.gecko-notification-crop img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 59%; }
+.gecko-widget-ios, .gecko-widget-android { position: relative; padding: 0; overflow: hidden; }
+.gecko-widget-ios img, .gecko-widget-android img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.gecko-widget-ios { aspect-ratio: 16 / 15; }
+.gecko-widget-ios img { object-position: 50% 16%; }
+.gecko-widget-android { aspect-ratio: 2 / 1; }
+.gecko-widget-android img { object-position: 50% 35%; }
+
+/* 確認・記録・振り返り。 */
+.gecko-features { background: var(--gecko-cream); }
+.gecko-feature { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: clamp(32px, 7vw, 110px); align-items: center; padding-block: 56px; border-top: 1px solid var(--gecko-line); }
+.gecko-feature:last-child { padding-bottom: 0; }
+.gecko-feature-copy { max-width: 500px; }
+.gecko-step { display: flex; gap: 16px; align-items: center; font-size: 18px; color: var(--gecko-green); font-variant-numeric: tabular-nums; margin-bottom: 20px; }
+.gecko-step span { font-size: 15px; border-left: 1px solid var(--gecko-line); padding-left: 16px; }
+.gecko-feature-copy > h3 + p { margin-top: 20px; }
+.gecko-screen-pair { display: block; max-width: 320px; justify-self: center; width: 100%; }
+.gecko-screen-pair > figure:last-child { padding-top: 0; }
+.gecko-screen--pair { width: min(100%, 232px); border-radius: 24px; }
+.gecko-screen--pair img { border-radius: 18px; }
+.gecko-single-screen { width: 100%; max-width: 300px; justify-self: center; }
+.gecko-feature--reverse .gecko-feature-copy { grid-column: 2; grid-row: 1; }
+.gecko-feature--reverse .gecko-single-screen { grid-column: 1; grid-row: 1; max-width: 400px; }
+.gecko-art-band { margin: 0; background: var(--gecko-soft); }
+.gecko-art-band > img { width: 100%; height: auto; }
+.gecko-page main .gecko-art-band figcaption { margin: 0; padding: 14px 20px; font-size: 15px; text-align: center; }
+
+/* 写真と、端末ごとの表示先。 */
+.gecko-widgets { background: var(--gecko-soft); padding-top: 0; }
+.gecko-widgets > .container { padding-top: 48px; }
+.gecko-widget-intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 90px); align-items: center; }
+.gecko-widget-copy { max-width: 570px; }
+.gecko-widget-layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 72px); margin-top: 54px; align-items: center; }
+.gecko-widget-pictures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+.gecko-widget-pictures > figure:last-child { padding-top: 48px; }
+.gecko-widget-availability h3 { margin-bottom: 22px; }
+.gecko-table { width: 100%; border-collapse: collapse; table-layout: fixed; text-align: left; font-size: 16px; line-height: 1.8; }
+.gecko-table caption { text-align: left; padding-bottom: 14px; font-size: 15px; color: var(--gecko-muted); }
+.gecko-table :where(th, td) { padding: 18px 16px; border-bottom: 1px solid var(--gecko-line); vertical-align: top; font-weight: 400; }
+.gecko-table thead th { font-weight: 600; border-top: 1px solid var(--gecko-line); }
+.gecko-table th:first-child { padding-left: 0; }
+.gecko-table :where(th, td):last-child { padding-right: 0; }
+.gecko-platform-table th:first-child { width: 45%; }
+.gecko-widget-availability > .gecko-aside { margin-top: 24px; }
+
+/* 比較と料金。写真のバックアップ除外は常に見える位置に。 */
+.gecko-plans-section { background: var(--gecko-cream); }
+.gecko-comparison th:first-child { width: 46%; }
+.gecko-comparison thead th { background: var(--gecko-soft); }
+.gecko-comparison thead th:first-child { padding-left: 18px; }
+.gecko-comparison :where(th, td):last-child { padding-right: 18px; }
+.gecko-comparison td:last-child { background: rgb(76 98 73 / 5%); }
+.gecko-premium-label { white-space: nowrap; }
+.gecko-plan-detail { max-width: 900px; font-size: 15px; color: var(--gecko-muted); margin-top: 24px; }
+.gecko-backup-note { padding: 24px 28px; margin-top: 28px; background: var(--gecko-soft); border-left: 3px solid var(--gecko-green); }
+.gecko-page main .gecko-backup-note p { margin-top: 8px; }
+.gecko-pricing { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; padding-block: 44px; margin-top: 40px; border-block: 1px solid var(--gecko-line); }
+.gecko-price-main > p:last-child, .gecko-trial p { font-size: 15px; margin-top: 20px; }
+.gecko-prices { display: flex; flex-wrap: wrap; gap: 20px 44px; margin-block: 20px 24px; }
+.gecko-prices > p { display: flex; flex-direction: column; gap: 4px; }
+.gecko-page main .gecko-prices p + p { margin-top: 0; }
+.gecko-prices > p > span { font-size: 15px; }
+.gecko-prices strong { font-size: clamp(38px, 4vw, 56px); font-weight: 400; line-height: 1.2; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.gecko-prices strong span { font-size: 18px; margin-left: 5px; }
+.gecko-trial { border-left: 1px solid var(--gecko-line); padding-left: 40px; }
+.gecko-page main .gecko-trial h3 { font-size: 22px; }
+.gecko-subscription-note { max-width: 1020px; margin-top: 30px; font-size: 15px; color: var(--gecko-muted); }
+.gecko-page main .gecko-subscription-note h3 { font-size: 16px; margin-bottom: 10px; }
+.gecko-subscription-note a { text-decoration: underline; }
+
+/* 新規向けと既存利用者向けの質問。JSなしでも開閉できる。 */
+.gecko-help { background: var(--gecko-soft); }
+.gecko-help-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px; align-items: start; }
+.gecko-faq { border-top: 1px solid var(--gecko-line); margin-top: 24px; }
+.gecko-faq details { border-bottom: 1px solid var(--gecko-line); }
+.gecko-faq summary { padding: 23px 28px 23px 0; font-size: 17px; font-weight: 500; line-height: 1.8; cursor: pointer; list-style-position: inside; }
+.gecko-faq summary::marker { color: var(--gecko-green); }
+.gecko-faq details > div { padding: 0 0 26px; font-size: 16px; }
+.gecko-faq a { text-decoration: underline; }
+.gecko-faq details[open] summary { color: var(--gecko-green); }
+
+/* 出典・免責はここにまとめる。 */
+.gecko-weather-notes { background: var(--gecko-soft); padding-block: 48px; }
+.gecko-weather-layout { display: grid; grid-template-columns: minmax(180px, .35fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.gecko-heading-chunk { display: inline-block; }
+.gecko-art-badge { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: var(--gecko-green); margin-bottom: 16px; }
+.gecko-art-badge img { width: 66px; }
+.gecko-page main .gecko-weather-heading h2 { font-size: 28px; }
+.gecko-weather-panel { padding: 0; background: transparent; font-size: 15px; }
+.gecko-weather-panel a { text-decoration: underline; }
+.gecko-page main .gecko-sample-note { padding-top: 20px; margin-top: 24px; border-top: 1px solid var(--gecko-line); }
+.gecko-weather-english { border-top: 1px solid var(--gecko-line); margin-top: 22px; }
+.gecko-weather-english summary { cursor: pointer; padding-top: 18px; }
+.gecko-weather-english > div { padding-top: 18px; }
+
+/* 最後にもストアと問い合わせの入り口を置く。 */
+.gecko-support-section { background: var(--gecko-green); color: var(--gecko-cream); }
+.gecko-support-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 6vw, 90px); align-items: center; }
+.gecko-support-icon { width: 56px; border-radius: 22%; margin-bottom: 24px; }
+.gecko-page main .gecko-support-section .gecko-eyebrow { color: var(--gecko-cream); }
+.gecko-support-copy > h2 + p { margin-top: 20px; }
+.gecko-contact-button { display: inline-flex; justify-content: space-between; align-items: center; gap: 28px; min-height: 58px; max-width: 100%; background: var(--gecko-cream); color: var(--gecko-ink); padding: 14px 22px; border-radius: 8px; margin-top: 24px; font-weight: 600; line-height: 1.7; }
+.gecko-contact-button:hover { background: #e3e8db; }
+.gecko-contact-button span { flex-shrink: 0; }
+.gecko-page main .gecko-support-copy > p:last-child { font-size: 15px; margin-top: 18px; }
+.gecko-download > h3 + p { margin-top: 14px; }
+.gecko-download > p { font-size: 15px; }
+.gecko-download .gecko-store-buttons { margin-block: 20px 16px; }
+.gecko-specs { font-size: 15px; border-top: 1px solid #8b9c83; margin-top: 30px; }
+.gecko-specs > div { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 14px; padding-block: 15px; border-bottom: 1px solid #8b9c83; }
+.gecko-english { padding-top: 32px; margin-top: 52px; border-top: 1px solid #8b9c83; max-width: 980px; }
+.gecko-english > summary { cursor: pointer; }
+.gecko-page main .gecko-english h3 { font-size: 18px; }
+.gecko-english p { font-size: 15px; margin-top: 14px; }
+.gecko-english a { text-decoration: underline; }
+.gecko-support-legal { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 28px; font-size: 15px; }
+.gecko-support-legal a { text-decoration: underline; }
+
+@media (max-width: 1100px) {
+  .gecko-hero-grid { grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); column-gap: 36px; }
+  .gecko-hero h1 { font-size: 4.6vw; }
+  .gecko-widget-layout { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+  .gecko-widget-pictures { gap: 16px; }
+  .gecko-store-button { padding-inline: 10px; }
+  .gecko-store-button strong { font-size: 15px; }
+}
+
+@media (max-width: 900px) {
+  .gecko-hero-grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: "copy" "image" "meta"; gap: 38px; padding-block: 34px 42px; }
+  .gecko-hero h1 { font-size: clamp(34px, 6.2vw, 52px); }
+  .gecko-hero-copy { max-width: 660px; }
+  .gecko-hero-figure { width: 100%; max-width: 380px; }
+  .gecko-feature { gap: 32px; }
+  .gecko-widget-intro { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .gecko-widget-layout { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  .gecko-widget-pictures { max-width: 620px; margin-inline: auto; gap: 28px; }
+  .gecko-widget-availability { max-width: 680px; }
+  .gecko-pricing { gap: 28px; }
+  .gecko-trial { padding-left: 28px; }
+  .gecko-help-columns { grid-template-columns: 1fr; gap: 40px; }
+  .gecko-weather-layout { grid-template-columns: minmax(0, 1fr); gap: 30px; }
+  .gecko-weather-heading { display: grid; grid-template-columns: 72px minmax(0, 1fr); column-gap: 24px; align-items: center; }
+  .gecko-art-badge { grid-row: 1 / 3; }
+  .gecko-weather-heading .gecko-eyebrow { align-self: end; margin-bottom: 4px; }
+  .gecko-weather-heading h2 { align-self: start; font-size: clamp(22px, 6.6vw, 28px); }
+  .gecko-support-grid { grid-template-columns: minmax(0, 1fr); gap: 40px; }
+  .gecko-download { order: -1; padding-top: 0; border-top: 0; }
+  .gecko-support-copy { padding-top: 28px; border-top: 1px solid #8b9c83; }
+}
+
+@media (max-width: 640px) {
+  .gecko-page main { font-size: 16px; line-height: 1.85; }
+  .gecko-section { padding-block: 56px; }
+  .gecko-section-heading { margin-bottom: 32px; }
+  .gecko-hero-grid { padding-top: 24px; }
+  .gecko-brand { gap: 12px; }
+  .gecko-brand img { width: 40px; }
+  .gecko-brand p { font-size: 18px; line-height: 1.3; }
+  .gecko-brand p span { font-size: 15px; margin-top: 2px; }
+  .gecko-hero h1 { margin-top: 16px; font-size: clamp(30px, 7.8vw, 48px); line-height: 1.4; letter-spacing: -.025em; }
+  .gecko-hero-lead { margin-top: 14px; font-size: 15px; line-height: 1.75; }
+  .gecko-install { margin-top: 16px; }
+  .gecko-install-lead { font-size: 17px; }
+  .gecko-store-buttons { gap: 10px; margin-top: 12px; }
+  .gecko-store-button { min-height: 72px; padding: 10px 8px; }
+  .gecko-hero-figure { max-width: 342px; }
+  .gecko-hero-links { gap: 10px 20px; }
+  .gecko-feature { grid-template-columns: minmax(0, 1fr); gap: 30px; padding-block: 36px; }
+  .gecko-feature-copy { max-width: none; }
+  .gecko-feature--reverse .gecko-feature-copy, .gecko-feature--reverse .gecko-single-screen { grid-column: auto; grid-row: auto; }
+  .gecko-step { margin-bottom: 14px; }
+  .gecko-screen--pair { border-radius: 19px; padding: 4px; }
+  .gecko-screen--pair img { border-radius: 14px; }
+  .gecko-art-band > img { height: 200px; object-fit: cover; object-position: 25% 50%; }
+  .gecko-widgets { padding-top: 0; }
+  .gecko-widget-layout { margin-top: 34px; }
+  .gecko-widget-pictures { grid-template-columns: minmax(0, 1fr); max-width: 300px; gap: 36px; }
+  .gecko-widget-pictures > figure:last-child { padding-top: 0; }
+  .gecko-table { font-size: 15px; line-height: 1.8; }
+  .gecko-table :where(th, td) { padding: 16px 10px; }
+  .gecko-comparison { font-size: 14px; }
+  .gecko-comparison th:first-child { width: 40%; }
+  .gecko-page .gecko-comparison :is(th, td) { padding: 12px 6px; }
+  .gecko-page .gecko-comparison thead th:first-child { padding-left: 6px; }
+  .gecko-backup-note { padding: 20px; }
+  .gecko-pricing { grid-template-columns: minmax(0, 1fr); padding-block: 30px; margin-top: 28px; }
+  .gecko-trial { border-left: 0; border-top: 1px solid var(--gecko-line); padding: 28px 0 0; }
+  .gecko-page main .gecko-trial h3 { font-size: 21px; }
+  .gecko-trial h3 br { display: none; }
+  .gecko-faq summary { padding: 20px 0; font-size: 16px; }
+  .gecko-weather-heading { grid-template-columns: 72px minmax(0, 1fr); column-gap: 16px; }
+  .gecko-weather-notes { padding-block: 48px; }
+  .gecko-contact-button { width: 100%; }
+  .gecko-english { padding-top: 26px; margin-top: 36px; }
+}
+
+@media (max-width: 350px) {
+  .gecko-hero-grid { padding-top: 20px; }
+  .gecko-hero h1 { margin-top: 12px; }
+  .gecko-hero-lead { margin-top: 12px; }
+  .gecko-store-button strong { font-size: 15px; }
+  .gecko-screen-pair figcaption br { display: none; }
+  .gecko-prices { gap: 20px 32px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gecko-page main *, .gecko-page main *::before, .gecko-page main *::after { animation: none !important; transition: none !important; }
+}
+
+@media print {
+  .gecko-screen { box-shadow: none; }
+  .gecko-page main { color: #000; }
+  .gecko-feature, .gecko-pricing { break-inside: avoid; }
+}
