@@ -384,3 +384,195 @@
 }
 @media(max-width:380px){.ev-h1-main{font-size:52px}.ev-h1-sub{font-size:17px}.ev-page h2{font-size:26px}.ev-page .ev-tategaki{font-size:22px}.ev-hero-actions{gap:12px 16px}.ev-primary-link{padding-inline:14px;gap:20px}.ev-product-caption>span:last-child{display:none}.ev-numbers dd{font-size:40px}.ev-wordbook dd{font-size:19px}.ev-price{font-size:60px}.ev-faq details p{padding-left:0}.ev-brand-note{gap:18px}.ev-page .ev-brand-note h2{font-size:16px}.ev-brand-note .text-link{font-size:10px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ev-page *, .ev-page *:before,.ev-page *:after{animation:none!important;transition:none!important}.ev-motion [data-ev-reveal].ev-await{opacity:1;transform:none}.ev-appshot{transform:none!important}}
+
+/* 2026-11-05: 紹介ページだけに適用します。購入完了ページは同じCSSを読みます。 */
+.ev-page:not(.evt-page){--ev-slate:#35495f;--ev-cream:#f5f0e4;overflow-wrap:break-word}
+.ev-page:not(.evt-page) :is(.ev-h1-main,.ev-h1-sub,.ev-cover-side){animation:none}
+.ev-page:not(.evt-page) .ev-cover{grid-template-columns:minmax(0,6fr) minmax(0,5fr);gap:0 56px;padding-block:56px}
+.ev-page:not(.evt-page) .ev-cover-side{padding-left:32px}
+.ev-page:not(.evt-page) .ev-hero-lead{font-family:var(--font);font-size:18px;line-height:1.9;letter-spacing:0}
+.ev-page:not(.evt-page) .ev-hero-actions{display:grid;gap:12px;margin-top:24px}
+.ev-page:not(.evt-page) :is(.ev-primary-link,.ev-secondary-link){width:100%;min-height:56px;gap:14px;padding:14px 20px;font-size:15px;line-height:1.7;letter-spacing:0}
+.ev-page:not(.evt-page) .ev-primary-link{color:var(--ev-cream)}
+.ev-page:not(.evt-page) .ev-primary-link>span:first-child{min-width:0}
+.ev-page:not(.evt-page) .ev-secondary-link{border:1px solid var(--ev-accent);color:var(--ev-accent)}
+.ev-page:not(.evt-page) .ev-secondary-link:hover{background:var(--ev-soft)}
+.ev-page:not(.evt-page) .ev-secondary-link>[aria-hidden]{transform:none}
+.ev-page:not(.evt-page) .ev-hero-small{margin-top:18px;color:var(--ink)}
+.ev-page:not(.evt-page) .ev-hero-requirements{margin-top:16px;padding-top:16px;border-top:1px solid var(--line);color:var(--ink)}
+.ev-page:not(.evt-page) .ev-hero-ai{margin-top:10px;color:var(--muted)}
+.ev-page:not(.evt-page) .ev-hero-ai a{text-decoration:underline}
+.ev-page:not(.evt-page) .ev-how-link{align-self:flex-start;display:inline-flex;align-items:center;gap:24px;min-height:44px;margin-top:12px;font-size:15px;text-decoration:underline}
+.ev-page:not(.evt-page) .ev-contents{padding-top:28px}
+.ev-page:not(.evt-page) .ev-product-stage{background:var(--ev-slate);color:var(--ev-cream)}
+.ev-page:not(.evt-page) .ev-product-caption{background:transparent;color:var(--ev-cream);border-color:#8d9ba9;border-radius:8px 8px 0 0;font-size:15px}
+.ev-page:not(.evt-page) .ev-product-caption>span:last-child{color:var(--ev-cream)}
+.ev-page:not(.evt-page) .ev-product-caption i{background:var(--ev-cream)}
+.ev-page:not(.evt-page) .ev-screen-crop{border-color:#8d9ba9;box-shadow:0 16px 40px #12203033}
+.ev-page:not(.evt-page) :is(.ev-appshot figcaption,.ev-media-note){font-size:15px;line-height:1.9}
+.ev-page:not(.evt-page) .ev-appshot figcaption{align-items:baseline}
+.ev-page:not(.evt-page) .ev-appshot figcaption>span:last-child{max-width:540px}
+
+/* 表紙の実画面のすぐ下で、話し言葉と仕上がりを一度だけ大きく見せます。 */
+.ev-page:not(.evt-page) .ev-correction{margin-top:48px;padding:32px 0 8px;border-top:1px solid var(--rule)}
+.ev-page:not(.evt-page) .ev-correction h2{font-size:clamp(22px,2.2vw,30px)}
+.ev-page:not(.evt-page) .ev-kinetic{max-width:1000px;margin-top:24px;font-size:clamp(23px,3vw,38px);line-height:1.9;word-break:normal}
+.ev-page:not(.evt-page) .ev-k-cut{color:var(--muted);background-image:linear-gradient(var(--ev-accent),var(--ev-accent));background-size:100% 2px}
+.ev-page:not(.evt-page) .ev-k-result{margin-top:20px;font-size:clamp(24px,3.1vw,40px);line-height:1.8}
+.ev-page:not(.evt-page) .ev-intro-copy .ev-note{margin-top:20px}
+
+/* 長い説明と注記を15px以上で読めるようにします。飾りの欧文は従来どおりです。 */
+.ev-page:not(.evt-page) :is(.ev-hero-small,.ev-hero-requirements,.ev-hero-ai,.ev-workflow p,.ev-note,.ev-illustration-label,.ev-feature p,.ev-feature-link,.ev-detail-copy>p,.ev-wordbook>p,.ev-dictionary-heading p,.ev-pack p,.ev-import-flow>li>p,.ev-translation-details>div>p,.ev-translation-recording figcaption>p:not(.eyebrow),.ev-plan-intro,.ev-plan ul,.ev-plan-cta-note,.ev-specs>div,.ev-faq details p,.ev-support-hint){font-size:15px;line-height:1.9}
+.ev-page:not(.evt-page) :is(.ev-wordbook figcaption,.ev-pack ul,.ev-pack summary,.ev-numbers dt,.ev-numbers dd small){font-size:14px}
+.ev-page:not(.evt-page) .ev-pack summary{min-height:44px}
+.ev-page:not(.evt-page) .ev-specs>div{grid-template-columns:180px minmax(0,1fr)}
+.ev-page:not(.evt-page) .ev-specs dd{min-width:0}
+
+/* 手順の図は01に残し、02は3つの用途と実際の操作へ絞ります。 */
+.ev-page:not(.evt-page) .ev-feature-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:40px}
+.ev-page:not(.evt-page) .ev-feature{display:block;min-width:0;padding:32px 28px 36px;border-bottom:1px solid var(--line)}
+.ev-page:not(.evt-page) .ev-feature:first-child{padding-left:0}
+.ev-page:not(.evt-page) .ev-feature:last-child{padding-right:0}
+.ev-page:not(.evt-page) .ev-feature+.ev-feature{border-left:1px solid var(--line)}
+.ev-page:not(.evt-page) .ev-feature-number{display:block}
+.ev-page:not(.evt-page) .ev-feature-number b{font-size:64px}
+.ev-page:not(.evt-page) .ev-feature-number>span{margin-top:14px}
+.ev-page:not(.evt-page) .ev-feature-copy{margin-top:24px}
+.ev-page:not(.evt-page) .ev-feature h3{font-size:24px}
+.ev-page:not(.evt-page) .ev-feature-link{display:inline-flex;align-items:center;gap:20px;min-height:44px;margin-top:12px;text-decoration:underline}
+.ev-page:not(.evt-page) .ev-demo{margin-top:56px}
+.ev-page:not(.evt-page) .ev-demo video{border:1px solid #6e7c74;border-radius:8px;box-shadow:0 12px 28px #22302a14}
+.ev-page:not(.evt-page) .ev-finish-lead{font-size:15px}
+.ev-page:not(.evt-page) .ev-feature-microphone{align-items:baseline}
+.ev-page:not(.evt-page) .ev-feature-microphone p{font-size:15px}
+
+/* 英文の貼り付け欄を含む実画面を、最初から見える主画像にします。 */
+.ev-page:not(.evt-page) .ev-translation{color:var(--ev-cream);--muted:#d2dbcf}
+.ev-page:not(.evt-page) .ev-translation-shot{width:100%;max-width:400px;justify-self:center;margin:0}
+.ev-page:not(.evt-page) .ev-translation-shot img{width:100%;height:auto;border:1px solid #15251f;border-radius:10px;box-shadow:0 18px 44px #10221966}
+.ev-page:not(.evt-page) .ev-translation-shot figcaption{font-size:15px;line-height:1.9;color:var(--muted);margin-top:16px}
+.ev-page:not(.evt-page) .ev-translation-details{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;margin-top:56px;padding-top:28px;border-top:1px solid var(--line)}
+.ev-page:not(.evt-page) .ev-translation-details>div+div{margin:0;padding:0;border:0}
+.ev-page:not(.evt-page) .ev-translation-video{margin-top:44px;padding-top:28px;border-bottom:0}
+.ev-page:not(.evt-page) .ev-translation-recording{align-items:center;margin:0 auto}
+.ev-page:not(.evt-page) .ev-translation-recording video{border:1px solid #15251f;border-radius:8px;box-shadow:0 12px 28px #1022194d}
+
+/* トップのEve Voiceの札と同じ色を、買い切りの面にも使います。 */
+.ev-page:not(.evt-page) .ev-plan--buy{background:var(--ev-slate);color:var(--ev-cream);padding:44px 36px 48px;--muted:#f5f0e4;--ev-accent:#f5f0e4;--ev-line:#8d9ba9}
+.ev-page:not(.evt-page) .ev-plan--buy .ev-plan-cta--buy{background:var(--ev-cream);color:var(--ev-slate);border-color:var(--ev-cream)}
+.ev-page:not(.evt-page) .ev-plan--buy .ev-plan-cta--buy:hover{background:#fff;border-color:#fff}
+.ev-page:not(.evt-page) .ev-plan--buy :focus-visible{outline-color:var(--ev-cream)}
+.ev-page:not(.evt-page) .ev-plan-cta{font-size:15px;letter-spacing:0}
+.ev-page:not(.evt-page) .ev-distribution-note{padding-top:14px;border-top:1px solid var(--line)}
+.ev-page:not(.evt-page) .ev-startup-table{width:100%;table-layout:fixed;border-collapse:collapse;margin-top:28px;font-size:15px;line-height:1.9}
+.ev-page:not(.evt-page) .ev-startup-table caption{text-align:left;padding-bottom:20px;font-family:var(--serif);font-size:22px;color:var(--ink)}
+.ev-page:not(.evt-page) .ev-startup-table :is(th,td){width:50%;vertical-align:top;padding:20px 24px;border:1px solid var(--line);text-align:left;overflow-wrap:anywhere}
+.ev-page:not(.evt-page) .ev-startup-table th{background:var(--ev-soft);font-family:var(--serif);font-size:20px;font-weight:400;color:var(--ink)}
+.ev-page:not(.evt-page) .ev-startup-table th>span{display:block;font-family:var(--font);font-size:15px}
+.ev-page:not(.evt-page) .ev-startup-table td>span{display:block;margin-bottom:8px;color:var(--muted)}
+.ev-page:not(.evt-page) .ev-startup-table strong{display:block;font-family:var(--serif);font-size:22px;font-weight:400;color:var(--ev-accent)}
+
+.ev-page:not(.evt-page) .ev-usage{margin-top:80px;padding-top:32px;border-top:1px solid var(--rule)}
+.ev-page:not(.evt-page) .ev-usage>h3{position:sticky;top:120px;font-family:var(--serif);font-weight:400;font-size:clamp(26px,3vw,40px)}
+.ev-page:not(.evt-page) .ev-faq details p{padding:0 20px 24px 56px;overflow-wrap:anywhere}
+
+@media(max-width:1000px){
+ .ev-page:not(.evt-page) .ev-cover{grid-template-columns:minmax(0,1fr);padding-block:40px}
+ .ev-page:not(.evt-page) .ev-cover-side{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 36px;margin-top:36px;padding:28px 0 0;border-left:0;border-top:1px solid var(--line)}
+ .ev-page:not(.evt-page) .ev-cover-side>*{grid-column:1}
+ .ev-page:not(.evt-page) .ev-cover-side .ev-contents{grid-column:2;grid-row:1/span 7;padding-top:0}
+ .ev-page:not(.evt-page) .ev-feature{padding-inline:20px}
+ .ev-page:not(.evt-page) .ev-feature h3{font-size:22px}
+ .ev-page:not(.evt-page) .ev-feature-microphone{display:block}
+ .ev-page:not(.evt-page) .ev-feature-microphone p{margin-top:10px}
+}
+@media(max-width:760px){
+ .ev-page:not(.evt-page) .ev-cover{padding-block:24px 32px}
+ .ev-page:not(.evt-page) .ev-name{margin-bottom:16px}
+ .ev-page:not(.evt-page) .ev-h1-sub{margin-top:16px;padding-top:12px;font-size:18px;line-height:1.6}
+ .ev-page:not(.evt-page) .ev-cover-side{display:flex;gap:0;margin-top:20px;padding-top:0;border-top:0}
+ .ev-page:not(.evt-page) .ev-hero-lead{font-size:16px;line-height:1.8}
+ .ev-page:not(.evt-page) .ev-hero-actions{gap:10px;margin-top:16px}
+ .ev-page:not(.evt-page) :is(.ev-primary-link,.ev-secondary-link){padding:12px 16px}
+ .ev-page:not(.evt-page) .ev-hero-requirements{margin-top:14px;padding-top:14px}
+ .ev-page:not(.evt-page) .ev-product-caption{font-size:13px}
+ .ev-page:not(.evt-page) .ev-appshot figcaption{align-items:start;gap:6px}
+ .ev-page:not(.evt-page) .ev-correction{margin-top:32px;padding-top:24px}
+ .ev-page:not(.evt-page) .ev-kinetic{font-size:23px;margin-top:18px}
+ .ev-page:not(.evt-page) .ev-k-result{font-size:25px}
+ .ev-page:not(.evt-page) .ev-feature-list{grid-template-columns:minmax(0,1fr);margin-top:28px}
+ .ev-page:not(.evt-page) .ev-feature,.ev-page:not(.evt-page) .ev-feature:first-child,.ev-page:not(.evt-page) .ev-feature:last-child{padding:28px 0}
+ .ev-page:not(.evt-page) .ev-feature+.ev-feature{border-left:0}
+ .ev-page:not(.evt-page) .ev-feature-number{display:flex;align-items:baseline;gap:18px}
+ .ev-page:not(.evt-page) .ev-feature-number b{font-size:48px}
+ .ev-page:not(.evt-page) .ev-feature-number>span{margin-top:0}
+ .ev-page:not(.evt-page) .ev-feature-copy{margin-top:18px}
+ .ev-page:not(.evt-page) .ev-demo{margin-top:36px}
+ .ev-page:not(.evt-page) .ev-translation-details{grid-template-columns:minmax(0,1fr);gap:28px;margin-top:36px}
+ .ev-page:not(.evt-page) .ev-translation-recording{gap:24px}
+ .ev-page:not(.evt-page) .ev-plan--buy{padding:32px 24px 36px}
+ .ev-page:not(.evt-page) .ev-plan--buy .ev-price{font-size:clamp(54px,12vw,72px)}
+ .ev-page:not(.evt-page) .ev-plan--buy .ev-price small{font-size:12px;margin-left:6px}
+ .ev-page:not(.evt-page) .ev-startup-table :is(th,td){padding:16px 12px}
+ .ev-page:not(.evt-page) .ev-startup-table th{font-size:18px}
+ .ev-page:not(.evt-page) .ev-startup-table strong{font-size:20px}
+ .ev-page:not(.evt-page) .ev-specs>div{grid-template-columns:minmax(0,1fr)}
+ .ev-page:not(.evt-page) .ev-usage{margin-top:52px}
+ .ev-page:not(.evt-page) .ev-usage>h3{position:static;font-size:26px}
+ .ev-page:not(.evt-page) .ev-faq details p{padding:0 0 24px 44px}
+}
+@media(max-width:380px){
+ .ev-page:not(.evt-page) .ev-h1-sub{font-size:17px}
+ .ev-page:not(.evt-page) .ev-faq details p{padding-left:0}
+ .ev-page:not(.evt-page) .ev-plan--buy{padding-inline:18px}
+ .ev-page:not(.evt-page) .ev-kinetic{font-size:21px}
+ .ev-page:not(.evt-page) .ev-k-result{font-size:23px}
+}
+
+/* L3: 決定6〜14。紹介ページだけに適用します。 */
+.ev-page:not(.evt-page){--ev-accent:#35495f;--ev-deep:#26394d;--ev-soft:#e9edf0;--ev-line:#cad3dc;--ink:#26394d;--muted:#5d6570;--soft:#e9edf0;--line:#cad3dc;--rule:#26394d}
+.ev-page:not(.evt-page) .ev-cover-meta{display:flex;flex-direction:column;flex:1;min-width:0}
+.ev-page:not(.evt-page) .ev-appshot{margin-top:24px}
+.ev-page:not(.evt-page) .ev-product-stage{padding:24px}
+.ev-page:not(.evt-page) .ev-screen-crop{max-height:none;aspect-ratio:1120/400;border:1px solid #8d9ba9;box-shadow:none}
+.ev-page:not(.evt-page) .ev-contents a>i{border-bottom-color:#8d9ba9}
+.ev-page:not(.evt-page) .ev-wordbook dd>span{color:#7c8b9b}
+.ev-page:not(.evt-page) .ev-demo video{border-color:#7c8b9b;box-shadow:0 12px 28px #26394d14}
+.ev-page:not(.evt-page) .ev-translation{background:#35495f;--ev-accent:#f5f0e4;--muted:#d9e0e7;--line:#7c8b9b;--rule:#f5f0e4;--ev-line:#7c8b9b;--ev-soft:#e9edf0}
+.ev-page:not(.evt-page) .ev-translation .section-number{color:#f5f0e4}
+.ev-page:not(.evt-page) .ev-translation :focus-visible{outline-color:#f5f0e4}
+.ev-page:not(.evt-page) .ev-translation-shot img{border-color:#26394d;box-shadow:0 18px 44px #26394d66}
+.ev-page:not(.evt-page) .ev-translation-recording video{background:#26394d;border-color:#26394d;box-shadow:0 12px 28px #26394d4d}
+.ev-page:not(.evt-page) .contact{background:#26394d}
+.ev-page:not(.evt-page) .ev-support .contact-link{border-color:#7c8b9b}
+.ev-page:not(.evt-page) :is(.contact p,.contact .eyebrow,.ev-support .contact-link small,.ev-support-hint){color:#d9e0e7}
+.ev-page:not(.evt-page) .ev-import-heading{margin-top:32px;padding-top:24px}
+.ev-page:not(.evt-page) .ev-pack>ul{border-top:0;margin-top:16px;padding-top:0;gap:4px 16px}
+.ev-page:not(.evt-page) .ev-pack>ul>li{border:0;padding:0}
+@media(min-width:761px){
+ .ev-page:not(.evt-page) .ev-h1-main{font-size:clamp(64px,7.2vw,104px);line-height:1.12}
+}
+@media(min-width:1001px){
+ .ev-page:not(.evt-page) .ev-cover{padding-top:48px}
+ .ev-page:not(.evt-page) .ev-h1-sub{margin-top:20px;padding-top:14px;font-size:clamp(18px,1.7vw,24px)}
+ .ev-page:not(.evt-page) .ev-appshot{margin-top:20px}
+}
+@media(min-width:761px) and (max-width:1000px){
+ .ev-page:not(.evt-page) .ev-cover-meta{display:contents}
+}
+.ev-page:not(.evt-page) .section{padding-block:80px}
+.ev-page:not(.evt-page) .section-heading{margin-bottom:40px}
+.ev-page:not(.evt-page) .ev-intro{padding-block:64px 48px}
+@media(max-width:760px){
+ .ev-page:not(.evt-page) .ev-cover{display:flex;flex-direction:column}
+ .ev-page:not(.evt-page) :is(.ev-cover-title,.ev-cover-side){display:contents}
+ .ev-page:not(.evt-page) .ev-hero-lead{order:1}
+ .ev-page:not(.evt-page) .ev-hero-actions{order:2}
+ .ev-page:not(.evt-page) .ev-appshot{order:3}
+ .ev-page:not(.evt-page) .ev-cover-meta{order:4}
+ .ev-page:not(.evt-page) .ev-product-stage{padding:12px}
+ .ev-page:not(.evt-page) .ev-demo h3 br{display:revert}
+ .ev-page:not(.evt-page) .section{padding-block:48px}
+ .ev-page:not(.evt-page) .section-heading{margin-bottom:28px}
+ .ev-page:not(.evt-page) .ev-intro{padding-block:48px}
+}

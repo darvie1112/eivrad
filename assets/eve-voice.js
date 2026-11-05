@@ -1,32 +1,16 @@
-// A fixed, local illustration of the translation workflow, not a translation service.
-const translationSampleButton = document.getElementById('translation-sample-button');
-const translationSampleOutput = document.getElementById('translation-sample-output');
-
-if (translationSampleButton && translationSampleOutput) {
-  translationSampleButton.hidden = false;
-  translationSampleButton.addEventListener('click', () => {
-    const showTranslation = translationSampleButton.getAttribute('aria-expanded') !== 'true';
-    const paragraph = document.createElement('p');
-    paragraph.textContent = showTranslation
-      ? 'テキストを選択し、翻訳のショートカットキーを押してください。'
-      : '下のボタンを押すと、訳文を表示します。';
-    if (!showTranslation) paragraph.className = 'ev-sample-placeholder';
-    paragraph.classList.add('ev-swap-in');
-    translationSampleOutput.replaceChildren(paragraph);
-    translationSampleButton.setAttribute('aria-expanded', String(showTranslation));
-    translationSampleButton.querySelector('[data-sample-label]').textContent = showTranslation
-      ? '例文に戻す'
-      : '例文を日本語に';
+// Videos start only from their controls. Leaving the viewport or tab pauses playback.
+const demoVideos = [...document.querySelectorAll('.ev-page:not(.evt-page) video')];
+if ('IntersectionObserver' in window) {
+  const videoObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) entry.target.pause();
+    });
   });
+  demoVideos.forEach(video => videoObserver.observe(video));
 }
-
-// Collapsing the optional recording also stops it; no background playback.
-const translationRecording = document.querySelector('.ev-translation-video');
-if (translationRecording) {
-  translationRecording.addEventListener('toggle', () => {
-    if (!translationRecording.open) translationRecording.querySelector('video')?.pause();
-  });
-}
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) demoVideos.forEach(video => video.pause());
+});
 
 // A link to a question (e.g. "登録のしかた" → #faq-activate) lands on it already open.
 function openLinkedDetails(hash) {
@@ -43,13 +27,11 @@ document.addEventListener('click', event => {
   if (link) openLinkedDetails(link.getAttribute('href'));
 });
 
-// Gentle, one-time entrance. Reduced-motion and no-JS visitors see all content immediately.
+// Keep the chosen count-up and correction marks; scrolling never hides or moves text.
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-let entranceObserver;
+let countObserver;
 let kineticObserver;
 let motionFrame = 0;
-const revealSections = [...document.querySelectorAll('.ev-intro-copy, .ev-numbers, .ev-workflow li, .ev-demo, .ev-feature, .ev-finish, .ev-detail-grid, .ev-pack-grid, .ev-import-flow, .ev-translate-sample, .ev-plans, .ev-brand-note')];
-const heroMedia = document.querySelector('[data-ev-parallax]');
 const readingProgress = document.querySelector('.ev-reading-progress');
 const numbers = document.querySelector('.ev-numbers');
 const counters = [...document.querySelectorAll('.ev-count[data-ev-count]')];
@@ -61,11 +43,6 @@ function updateMotion() {
   const range = document.documentElement.scrollHeight - window.innerHeight;
   const progress = range > 0 ? Math.min(1, Math.max(0, window.scrollY / range)) : 0;
   if (readingProgress) readingProgress.style.transform = `scaleX(${progress})`;
-  if (heroMedia) {
-    const top = heroMedia.getBoundingClientRect().top;
-    const shift = motionPreference.matches || window.innerWidth <= 760 ? 0 : Math.max(-10, Math.min(10, (window.innerHeight / 2 - top) * .025));
-    heroMedia.style.transform = `translateY(${shift}px)`;
-  }
 }
 function scheduleMotion() {
   if (!motionFrame) motionFrame = window.requestAnimationFrame(updateMotion);
@@ -102,31 +79,23 @@ function runCount() {
 }
 
 function configureMotion() {
-  entranceObserver?.disconnect();
+  countObserver?.disconnect();
   kineticObserver?.disconnect();
   finishCount();
   const animate = !motionPreference.matches && 'IntersectionObserver' in window;
   document.documentElement.classList.toggle('ev-motion', !motionPreference.matches);
-  revealSections.forEach(element => element.classList.remove('ev-await'));
   kinetic?.classList.remove('ev-k-armed', 'ev-k-played');
   if (animate) {
-    entranceObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.remove('ev-await');
-          if (entry.target === numbers && counters.length) runCount();
-          entranceObserver.unobserve(entry.target);
+    if (numbers && counters.length && numbers.getBoundingClientRect().top > window.innerHeight) {
+      prepareCount();
+      countObserver = new IntersectionObserver(entries => {
+        if (entries.some(entry => entry.isIntersecting)) {
+          runCount();
+          countObserver.disconnect();
         }
-      });
-    }, { threshold: 0, rootMargin: '0px 0px -32px 0px' });
-    revealSections.forEach(element => {
-      element.setAttribute('data-ev-reveal', '');
-      if (element.getBoundingClientRect().top > window.innerHeight) {
-        element.classList.add('ev-await');
-        if (element === numbers && counters.length) prepareCount();
-        entranceObserver.observe(element);
-      }
-    });
+      }, { threshold: 0, rootMargin: '0px 0px -32px 0px' });
+      countObserver.observe(numbers);
+    }
     if (kinetic) {
       kinetic.classList.add('ev-k-armed');
       kineticObserver = new IntersectionObserver(entries => {
@@ -151,10 +120,9 @@ configureMotion();
 
 // Printing or saving as PDF shows every section and the final figures.
 window.addEventListener('beforeprint', () => {
-  entranceObserver?.disconnect();
+  countObserver?.disconnect();
   kineticObserver?.disconnect();
   finishCount();
-  revealSections.forEach(element => element.classList.remove('ev-await'));
   kinetic?.classList.add('ev-k-played');
 });
 
