@@ -56,3 +56,31 @@
 @media(max-width:380px){.ns-hero h1{font-size:34px}.ns-hero-bottom{flex-wrap:wrap;gap:8px}.ns-kicker{flex-wrap:wrap;gap:10px}.ns-feature-list h3{font-size:19px}.ns-support .contact-link>span:first-child{font-size:23px}}
 /* The operator line under the contact link: keep the link visible on the dark band. */
 .ns-support .ns-support-hint a{text-decoration:underline;text-decoration-color:#a9c4b0}
+/* The product page (/noosanpo/): the way to the stores, the game screens and the list of games. The small print is larger than on the support page, because the app is made to be read comfortably. */
+.ns-store-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:22px}
+.ns-store-button{display:flex;flex-direction:column;justify-content:center;min-height:64px;padding:10px 14px;border-radius:2px;background:var(--ns-dark);color:#fff;font-size:14px;line-height:1.5;transition:background .2s}
+.ns-store-button small{font-size:12px;letter-spacing:.02em;color:var(--ns-on-dark)}
+.ns-store-button:hover{background:var(--ns-accent)}
+.ns-shots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:26px;margin-top:42px}
+.ns-shots figure{margin:0;min-width:0}
+.ns-shots img{width:100%;border:1px solid var(--ns-line);border-radius:16px}
+.ns-shots figcaption{margin-top:12px;font-size:14px;line-height:1.7;text-align:center}
+.ns-game-list{list-style:none;margin:48px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:40px;border-top:1px solid var(--ns-line)}
+.ns-game-list li{display:grid;grid-template-columns:30px 1fr;gap:10px;padding:20px 0;border-bottom:1px solid var(--ns-line);min-width:0}
+.ns-game-list h3{font-size:17px;line-height:1.7;letter-spacing:-.01em}
+.ns-game-list p{font-size:14px;line-height:1.9;color:var(--muted);margin-top:4px;text-wrap:pretty}
+.ns-product .ns-soft .ns-facts,.ns-product .ns-soft .ns-facts>div,.ns-product .ns-soft .ns-english-light{border-color:var(--ns-line)}
+.ns-product .ns-facts a,.ns-product .ns-english-light a{text-decoration:underline;text-decoration-color:#b9bcae}
+.ns-product .ns-intro>p+p{font-size:14px}
+.ns-product .ns-feature-list p{font-size:15px;text-wrap:pretty}
+.ns-product .ns-facts>div{font-size:15px}
+.ns-product .ns-facts dt{font-size:13px}
+.ns-product .ns-note{font-size:14px}
+.ns-product .ns-english-light p{font-size:13px}
+.ns-product .contact p:not(.eyebrow){font-size:14px}
+.ns-product .ns-support .contact-link small{font-size:11px}
+.ns-product .contact :focus-visible{outline-color:var(--paper)}
+.ns-product .section-note{font-size:12px}
+@media(max-width:1000px){.ns-product .ns-hero-grid{grid-template-columns:1fr;gap:28px;padding-block:40px 48px}.ns-product .ns-intro{max-width:520px;justify-self:start}.ns-game-list{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:30px}}
+@media(max-width:760px){.ns-shots{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 14px;margin-top:30px}.ns-game-list{grid-template-columns:1fr;margin-top:34px}.ns-product .ns-kicker .eyebrow{font-size:9px}.ns-product .ns-status{font-size:11px;padding:5px 9px}.ns-product .ns-hero-bottom{align-items:center;padding-block:8px;font-size:9px}.ns-product .ns-hero-bottom a{display:inline-flex;align-items:center;min-height:44px;font-size:13px}}
+@media(max-width:380px){.ns-store-buttons{grid-template-columns:1fr}.ns-product h2{font-size:26px}}
