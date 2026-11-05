@@ -56,3 +56,168 @@
 @media(max-width:1000px){.dc-hero-grid{gap:36px;grid-template-columns:1.3fr 1fr}.dc-feature-list h3{font-size:18px}.dc-help-grid{gap:36px;grid-template-columns:.85fr 1.4fr}.dc-support{gap:30px}}
 @media(max-width:760px){.dc-hero{padding-top:30px}.dc-kicker{gap:12px}.dc-kicker .eyebrow{font-size:8px;letter-spacing:.1em}.dc-status{font-size:9px;padding:5px 8px}.dc-hero-grid{grid-template-columns:1fr;gap:26px;padding-block:32px 38px}.dc-name{font-size:13px;margin-bottom:16px}.dc-name img{width:48px;height:48px;border-radius:11px}.dc-hero h1{font-size:clamp(32px,7.6vw,54px);line-height:1.65}.dc-intro{max-width:480px;justify-self:start;font-size:14px}.dc-intro>p+p{font-size:14px;line-height:2;margin-top:15px}.dc-hero-bottom{font-size:8px;letter-spacing:.02em;gap:12px;padding-block:18px}.dc-hero-bottom a{font-size:10px}.dc-hero-bottom a span{margin-left:5px}.dc-feature-list{grid-template-columns:1fr;margin-top:30px}.dc-feature-list article,.dc-feature-list article:nth-child(2n){grid-template-columns:28px 1fr;padding:24px 0;border-left:0}.dc-feature-number{font-size:11px;margin-top:4px}.dc-feature-list h3{font-size:20px}.dc-feature-list p{margin-top:9px}.dc-facts>div{grid-template-columns:1fr;gap:4px;padding:16px 0}.dc-help-grid{grid-template-columns:1fr;gap:24px}.dc-faq summary{font-size:14px;padding-block:20px;padding-right:0}.dc-support{grid-template-columns:1fr;padding-block:44px 35px;gap:22px}.dc-support .contact-link{margin-top:0;min-height:65px}.dc-support .contact-link>span:first-child{font-size:clamp(24px,6.9vw,37px)}.dc-support .dc-support-hint{margin-top:15px}.dc-english{margin-top:4px;padding-top:24px}}
 @media(max-width:380px){.dc-hero h1{font-size:34px}.dc-hero-bottom{flex-wrap:wrap;gap:8px}.dc-kicker{flex-wrap:wrap;gap:10px}.dc-feature-list h3{font-size:19px}.dc-support .contact-link>span:first-child{font-size:23px}}
+/* 紹介ページ専用。サポート・法務ページ用の既存定義は維持する。 */
+@font-face{font-family:"Zen Old Mincho Eivrad";src:url(/assets/deepcup/heading-mincho.woff2) format("woff2");font-weight:700;font-display:swap}
+.dc-landing{--dc-night:#04171f;--dc-cream:#f5f0e4;--dc-tint:#f5ecdc;--dc-lp-muted:#c8cec8;--dc-lp-line:rgba(245,240,228,.25);color:var(--dc-night);font-size:16px;line-height:1.9}
+.dc-landing :is(h1,h2){font-family:"Zen Old Mincho Eivrad","Hiragino Mincho ProN","Yu Mincho",serif;font-weight:700;letter-spacing:.01em;overflow-wrap:anywhere}
+.dc-landing h1{font-size:clamp(34px,4.4vw,62px);line-height:1.45}
+.dc-landing h2{font-size:clamp(30px,3.6vw,48px);line-height:1.55}
+.dc-heading-chunk{display:inline-block;white-space:nowrap}
+.dc-landing h3{font-size:19px;line-height:1.7;font-weight:500}
+.dc-landing :is(p,dd){overflow-wrap:break-word}
+.dc-landing figure{margin:0;min-width:0}
+.dc-shell{width:calc(100% - 112px);max-width:1328px;min-width:0;margin-inline:auto}
+.dc-night{background:var(--dc-night);color:var(--dc-cream)}
+.dc-night :focus-visible{outline-color:var(--dc-cream)}
+.dc-tint{background:var(--dc-tint)}
+.dc-paper{background:var(--paper)}
+.dc-lp-section{padding-block:clamp(64px,7.5vw,112px)}
+.dc-landing :is(#timer,#sound,#outside){padding-block:80px}
+.dc-label{display:flex;align-items:center;gap:12px;margin-bottom:20px;font-size:15px;line-height:1.6;letter-spacing:.08em}
+.dc-label:before{content:"";display:block;width:7px;height:7px;flex-shrink:0;border-radius:50%;background:#e7b56a}
+.dc-night .dc-label:before{background:#e7b56a}
+.dc-section-lead{margin-top:26px}
+.dc-copy-block{margin-top:28px}
+.dc-copy-block>p{margin-top:8px}
+.dc-caption,.dc-landing figcaption{font-size:15px;line-height:1.8}
+.dc-caption{margin-top:18px;color:var(--dc-lp-muted)}
+
+/* 最初の画面。費用とストアのボタンを見出しのすぐ下に置く。 */
+.dc-lp-hero{padding-block:clamp(28px,4.5vw,64px) 64px}
+.dc-hero-layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.85fr);grid-template-areas:"copy art" "after art";align-items:center;column-gap:clamp(40px,6vw,88px);row-gap:28px}
+.dc-hero-copy{grid-area:copy;min-width:0}
+.dc-hero-after{grid-area:after;min-width:0}
+.dc-brand{display:flex;align-items:center;gap:14px;margin-bottom:24px;font-size:26px;line-height:1.2;letter-spacing:.03em}
+.dc-brand img{width:52px;height:52px;flex-shrink:0;border-radius:12px}
+.dc-brand small{display:block;margin-top:6px;font-size:15px;line-height:1.5;letter-spacing:0;color:var(--dc-lp-muted)}
+.dc-purchase{margin-top:28px;max-width:520px}
+.dc-price{font-size:16px}
+.dc-compat{font-size:15px;margin-top:7px;color:var(--dc-lp-muted)}
+.dc-store-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px;max-width:520px}
+.dc-store-buttons>a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;min-height:76px;padding:12px 8px;background:var(--dc-cream);color:var(--dc-night);border:1px solid var(--dc-cream);border-radius:8px;text-align:center;line-height:1.5;transition:background-color .2s,transform .15s}
+.dc-store-buttons small{font-size:15px}
+.dc-store-buttons span{font-size:16px;font-weight:500}
+.dc-store-buttons>a:hover{background:#e9dfca;border-color:#e9dfca}
+.dc-store-buttons>a:active{transform:translateY(1px)}
+.dc-hero-description{max-width:560px;margin-top:28px}
+.dc-hero-description>p+p{margin-top:12px}
+.dc-section-link{display:inline-flex;align-items:center;gap:24px;min-height:48px;margin-top:18px;border-bottom:1px solid var(--dc-lp-line);font-size:15px}
+.dc-hero-figure{grid-area:art;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
+.dc-hero-screen{width:min(100%,338px)}
+.dc-screen{padding:5px;overflow:hidden;border:1px solid #50605e;border-radius:27px;background:#07131a;box-shadow:0 18px 42px rgba(0,0,0,.16)}
+.dc-screen>img,.dc-screen>video{display:block;width:100%;height:auto;border-radius:21px}
+.dc-hero-screen>video{aspect-ratio:9/16;object-fit:cover}
+.dc-hero-figure figcaption{max-width:360px;color:var(--dc-lp-muted)}
+.dc-motion-toggle{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:8px 20px;background:transparent;color:var(--dc-cream);border:1px solid #9caea9;border-radius:6px;font-size:15px;line-height:1.7;cursor:pointer}
+.dc-motion-toggle:hover:not(:disabled){background:rgba(245,240,228,.08)}
+.dc-motion-toggle:disabled{cursor:default;color:var(--dc-lp-muted);border-color:#6c807e}
+
+/* 同じ夜の色の中で、3つの絵柄を比較する。横送りはこの領域だけ。 */
+.dc-lp-scenes{padding-top:0}
+.dc-scenes-intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:end;gap:64px;padding-top:56px;border-top:1px solid var(--dc-lp-line)}
+.dc-scenes-intro>p{max-width:510px;justify-self:end}
+.dc-style-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(24px,5vw,70px);width:100%;min-width:0;margin-top:40px;padding:8px 8px 32px;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-color:#8c9b97 var(--dc-night);scrollbar-width:thin;outline-offset:-2px}
+.dc-style-card{scroll-snap-align:center;text-align:center}
+.dc-style-card .dc-screen{width:min(100%,280px);margin-inline:auto}
+.dc-style-card figcaption{margin-top:20px;font-size:18px}
+.dc-gallery-help{display:none}
+.dc-scenes-footer{display:grid;grid-template-columns:220px minmax(0,660px);align-items:center;justify-content:center;gap:32px;margin-top:24px}
+.dc-scenes-footer>img{width:220px;height:auto;object-fit:contain}
+.dc-scenes-footer h3{margin-bottom:8px}
+
+/* タイマーと音。設定を読む文字と、実物の画面を並べる。 */
+.dc-feature-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:clamp(40px,7vw,110px)}
+.dc-feature-copy{min-width:0;max-width:600px}
+.dc-feature-figure{display:flex;flex-direction:column;align-items:center;gap:22px;text-align:center}
+.dc-feature-figure .dc-screen{width:min(100%,320px)}
+.dc-feature-figure figcaption{color:#49594f}
+.dc-feature-layout--reverse .dc-feature-copy{grid-column:2;grid-row:1}
+.dc-feature-layout--reverse .dc-feature-figure{grid-column:1;grid-row:1}
+#sound .dc-screen{width:min(100%,440px);aspect-ratio:616/760;padding:0;border:0;border-radius:16px;box-shadow:none}
+#sound .dc-screen>img{width:100%;height:100%;object-fit:cover;object-position:50% 100%;border-radius:inherit}
+.dc-lp-note{margin-top:28px;padding-left:18px;border-left:2px solid #b3a284;color:#49594f;font-size:15px;line-height:1.9}
+.dc-lp-note>p+p{margin-top:12px}
+
+/* OSの表示例は切り抜いた実物のまま、細い枠だけを添える。 */
+.dc-outside-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);align-items:center;gap:clamp(36px,6vw,88px)}
+.dc-outside-figure{display:flex;flex-direction:column;align-items:center;gap:24px}
+.dc-surface-frame{width:min(100%,500px);overflow:hidden;border:1px solid #b5b7ab;border-radius:18px;box-shadow:0 12px 32px rgba(4,23,31,.08)}
+.dc-surface-frame:first-child{max-width:480px}
+.dc-surface-frame>img{width:100%;height:auto}
+.dc-outside-figure figcaption{color:#49594f;text-align:center}
+.dc-widget-note{margin-top:24px}
+
+/* 最後は夜の色へ戻り、仕様とストアへの入口をまとめる。 */
+.dc-about-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;gap:clamp(40px,7vw,110px)}
+.dc-specs{border-top:1px solid var(--dc-lp-line)}
+.dc-specs>div{display:grid;grid-template-columns:100px minmax(0,1fr);gap:20px;padding-block:19px;border-bottom:1px solid var(--dc-lp-line)}
+.dc-specs dt{font-size:15px;color:var(--dc-lp-muted)}
+.dc-specs dd{font-size:16px}
+.dc-data-note{max-width:960px;margin-top:44px;color:var(--dc-lp-muted);font-size:15px;line-height:1.9}
+.dc-data-note>p+p{margin-top:12px}
+.dc-data-note a,.dc-lp-links a,.dc-english-summary a{text-decoration:underline;text-decoration-color:#9caea9}
+.dc-final-store{display:grid;grid-template-columns:minmax(0,360px) minmax(0,520px);gap:48px;justify-content:center;align-items:center;margin-top:48px;padding-top:42px;border-top:1px solid var(--dc-lp-line);text-align:center}
+.dc-closing-art{width:100%;height:auto}
+.dc-final-store h3{font-size:22px}
+.dc-closing-copy>p{margin-top:14px}
+.dc-final-store .dc-store-buttons{width:100%;margin-top:24px}
+.dc-lp-links{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 28px;margin-top:20px;font-size:15px}
+.dc-lp-links a{display:inline-flex;align-items:center;gap:12px;min-height:48px}
+.dc-english-summary{max-width:960px;margin-top:36px;padding-top:24px;border-top:1px solid var(--dc-lp-line);font-size:15px;color:var(--dc-lp-muted)}
+.dc-english-summary summary{width:fit-content;min-height:48px;cursor:pointer;color:var(--dc-cream)}
+.dc-english-summary p{margin-top:10px;line-height:1.9}
+
+@media(min-width:901px){.dc-style-gallery{max-width:1120px;margin-inline:auto;column-gap:32px;padding-inline:0}.dc-style-card .dc-screen{width:min(100%,320px)}}
+@media(max-width:1100px){.dc-shell{width:calc(100% - 72px)}.dc-hero-layout{column-gap:40px}.dc-landing h1{font-size:clamp(34px,4.2vw,48px)}}
+@media(max-width:900px){
+  .dc-hero-layout,.dc-feature-layout,.dc-outside-layout,.dc-about-layout{grid-template-columns:minmax(0,1fr);gap:44px}
+  .dc-hero-layout{grid-template-areas:"copy" "art" "after";row-gap:24px}
+  .dc-hero-after .dc-hero-description{margin-top:0}
+  .dc-hero-copy,.dc-feature-copy{max-width:640px}
+  .dc-landing h1{font-size:clamp(32px,5.2vw,48px)}
+  .dc-hero-screen{width:min(100%,320px)}
+  .dc-feature-layout--reverse .dc-feature-copy,.dc-feature-layout--reverse .dc-feature-figure{grid-column:auto;grid-row:auto}
+  .dc-scenes-intro{gap:32px}
+  .dc-outside-figure{align-items:center}
+  .dc-gallery-help{display:block;margin-top:28px;font-size:15px;color:var(--dc-lp-muted)}
+  .dc-style-gallery{grid-template-columns:repeat(3,min(76vw,260px));gap:22px;margin-top:14px;padding-bottom:24px}
+}
+@media(max-width:800px){.dc-shell{width:calc(100% - 48px)}}
+@media(max-width:760px){
+  .dc-shell{width:calc(100% - 40px)}
+  .dc-lp-hero{padding-block:24px 52px}
+  .dc-brand{gap:12px;margin-bottom:18px;font-size:23px}
+  .dc-brand img{width:48px;height:48px}
+  .dc-brand small{margin-top:5px}
+  .dc-landing h1{font-size:clamp(30px,6.8vw,44px);line-height:1.4;letter-spacing:0}
+  .dc-landing h2{font-size:clamp(28px,6.4vw,38px)}
+  .dc-purchase{margin-top:20px}
+  .dc-price{font-size:15px;line-height:1.75}
+  .dc-compat{margin-top:7px;line-height:1.7}
+  .dc-store-buttons{gap:10px;margin-top:16px}
+  .dc-store-buttons>a{min-height:72px;padding:10px 8px}
+  .dc-store-buttons span{font-size:15px;letter-spacing:-.01em}
+  .dc-hero-description{margin-top:26px}
+  .dc-section-link{margin-top:12px}
+  .dc-lp-section{padding-block:60px}
+  .dc-landing :is(#timer,#sound,#outside){padding-block:48px}
+  .dc-feature-layout{display:flex;flex-direction:column;align-items:stretch;gap:0}
+  .dc-feature-layout .dc-feature-copy{display:contents}
+  .dc-feature-layout .dc-feature-figure{order:1;margin-top:24px}
+  .dc-feature-layout :is(.dc-copy-block,.dc-lp-note){order:2}
+  .dc-lp-scenes{padding-top:0}
+  .dc-scenes-intro{grid-template-columns:minmax(0,1fr);gap:24px;padding-top:40px}
+  .dc-scenes-intro>p{max-width:none;justify-self:start}
+  .dc-scenes-footer h3{font-size:18px}
+  .dc-label{margin-bottom:14px}
+  .dc-section-lead{margin-top:22px}
+  .dc-data-note{margin-top:32px}
+  .dc-final-store{grid-template-columns:minmax(0,1fr);gap:24px;margin-top:36px;padding-top:32px}
+  .dc-final-store h3{font-size:20px}
+}
+@media(max-width:680px){
+  .dc-scenes-footer{grid-template-columns:minmax(0,1fr);margin-top:24px}
+  .dc-scenes-footer>img{width:min(60vw,220px);justify-self:center}
+  .dc-specs>div{grid-template-columns:minmax(0,1fr);gap:5px;padding-block:16px}
+}
+@media(max-width:350px){.dc-shell{width:calc(100% - 32px)}.dc-lp-hero{padding-top:20px}.dc-brand{margin-bottom:14px}.dc-purchase{margin-top:16px}.dc-purchase .dc-store-buttons{margin-top:14px}}
