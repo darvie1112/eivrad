@@ -1,0 +1,219 @@
+/* トップページだけの見せ方。ほかのページと共有する site.css は変えない。 */
+@font-face{font-family:"Zen Old Mincho Eivrad";src:url(/assets/home/zen-old-mincho-bold-subset.woff2) format("woff2");font-weight:700;font-display:swap}
+:root{--gut:56px;--edge:max(var(--gut),calc((100vw - 1328px)/2));--night:#003030;--wine:#5c1a22;--cream:#f5f0e4;--cream-muted:#c5d2cc;--mincho:"Zen Old Mincho Eivrad","Hiragino Mincho ProN","Yu Mincho",serif;--ease:cubic-bezier(.2,.7,.2,1)}
+@media(max-width:1100px){:root{--gut:36px}}
+@media(max-width:800px){:root{--gut:24px}}
+@media(max-width:760px){:root{--gut:20px}}
+@media(max-width:350px){:root{--gut:16px}}
+html,body{overflow-x:clip}
+/* 濃い色の面が下を通るので、ロゴの地が透けないよう帯は不透明にする */
+.site-header{background:var(--paper);backdrop-filter:none;-webkit-backdrop-filter:none}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* 見出しの字 */
+.hero h1,.hero-lead,h2,.home-products-heading h3{font-family:var(--mincho);font-weight:700}
+.hero h1{letter-spacing:-.02em;line-height:1.34}
+h2{letter-spacing:.005em;line-height:1.56}
+.home-products-heading h3{letter-spacing:.01em}
+
+/* 絵の下の小さな札 */
+.hero-plate figcaption,.about-plate figcaption{position:absolute;z-index:2;bottom:0;background:var(--paper);color:var(--muted);font-size:10px;line-height:1.6;letter-spacing:.08em;padding:9px 14px 7px}
+
+/* 最初の画面：左に言葉、右にこちらを見るモル */
+.hero-plate{position:relative;margin:0;overflow:hidden;background:#173a3a}
+.stage{position:absolute;inset:0}
+.stage img{width:100%;height:100%;object-fit:cover;object-position:40% 50%}
+.stage-eyes{display:none}
+.stage-on .stage{inset:auto;left:0;top:0;width:1280px;height:720px;transform-origin:0 0}
+.stage-on .stage img{width:1280px;height:720px;object-fit:fill}
+.stage-ready .stage-eyes{display:block;position:absolute;inset:0}
+/* 目は、絵から瞳だけを消した下絵の上で丸い瞳が動く。止まっている時は元の絵と同じに見える */
+.eye,.owl-eye{position:absolute;display:block;overflow:hidden;background:url(/assets/home/morunel-eyes.webp) 0 0/45.17px 128.54px no-repeat}
+.eye--l{left:269.47px;top:265.5px;width:45.17px;height:30.61px;background-position:0 0px;clip-path:polygon(4.53px 16.5px,9.53px 9.5px,15.53px 5.5px,23.53px 4px,32.53px 5px,37.53px 9.5px,40.53px 15.5px,38.53px 19.5px,34.53px 23.5px,27.53px 26.5px,19.53px 27.5px,12.53px 25.5px,8.53px 21.5px)}
+.eye--r{left:380.48px;top:294.58px;width:42.87px;height:35.96px;background-position:0 -30.61px;clip-path:polygon(5.52px 10.42px,11.52px 5.42px,18.52px 3.92px,26.52px 5.42px,33.52px 10.42px,38.52px 17.42px,39.02px 22.42px,34.52px 27.42px,28.52px 31.02px,21.52px 31.42px,15.52px 29.92px,10.52px 25.42px,7.52px 19.42px)}
+.owl-eye--l{left:640px;top:376.45px;width:30.62px;height:30.61px;background-position:0 -66.57px;clip-path:circle(14.6px at 14.9px 13.25px)}
+.owl-eye--r{left:691.29px;top:360.38px;width:31.39px;height:31.37px;background-position:0 -97.17px;clip-path:circle(14.6px at 12.91px 11.22px)}
+.eye-pupil{position:absolute;display:block;border-radius:50%;background:#090706;box-shadow:0 0 .8px #090706;will-change:transform}
+.eye-pupil:after{content:"";position:absolute;border-radius:50%;background:#f3ead9;box-shadow:0 0 .7px #f3ead9}
+.eye--l .eye-pupil{left:14.81px;top:1.97px;width:20.7px;height:20.7px}
+.eye--l .eye-pupil:after{left:5.02px;top:8.1px;width:3.98px;height:3.98px}
+.eye--r .eye-pupil{left:12.24px;top:4.05px;width:22.05px;height:22.05px}
+.eye--r .eye-pupil:after{left:4.85px;top:6.92px;width:4.33px;height:4.33px}
+.owl-eye--l .eye-pupil{left:6.36px;top:4.7px;width:17.09px;height:17.09px}
+.owl-eye--l .eye-pupil:after{left:4.95px;top:3.88px;width:3.72px;height:3.72px}
+.owl-eye--r .eye-pupil{left:3.35px;top:1.64px;width:19.08px;height:19.08px}
+.owl-eye--r .eye-pupil:after{left:6.06px;top:6.81px;width:3.58px;height:3.58px}
+/* まばたきは、同じ絵の「目を閉じたふたり」を一瞬だけ重ねる */
+.stage-shut{position:absolute;left:257.99px;top:252.5px;width:476.94px;height:164.51px;background:url(/assets/home/morunel-shut.webp) 0 0/100% 100% no-repeat;opacity:0;transition:opacity .06s linear}
+.is-blink .stage-shut{opacity:1}
+
+@media(min-width:1001px){
+  .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.02fr);grid-template-rows:auto auto 1fr auto;column-gap:clamp(24px,4.5vw,64px);padding-top:0}
+  .hero-main{display:contents}
+  .hero>.eyebrow{grid-area:1/1;padding-top:clamp(40px,6.5vh,72px)}
+  .hero h1{grid-area:2/1;padding-top:30px;font-size:clamp(40px,5.3vw,78px)}
+  .hero-intro{grid-area:3/1;justify-self:start;max-width:none;padding:24px 0 48px}
+  .hero-plate{grid-area:1/2/4/3;margin-right:calc(var(--edge)*-1);min-height:min(74vh,700px,58vw)}
+  .hero-plate figcaption{right:var(--edge)}
+  .hero-bottom{grid-area:4/1/5/3}
+}
+@media(max-width:1000px){
+  .hero{display:flex;flex-direction:column;padding-top:0}
+  .hero-main{display:contents}
+  .hero-plate{order:-1;margin-inline:calc(var(--edge)*-1);aspect-ratio:16/9}
+  .hero-plate figcaption{right:var(--edge)}
+  .hero>.eyebrow{margin-top:28px}
+  .hero h1{margin-top:18px}
+  .hero-intro{margin:24px 0 36px}
+}
+@media(max-width:760px){.hero-plate{aspect-ratio:4/3}}
+
+/* 見出しが1文字ずつ着地する（読み込み時の、この画面で唯一の演出） */
+.kinetic .hero h1{visibility:hidden;animation:h1-safety 0s linear 1.2s forwards}
+.kinetic .hero h1.is-split{visibility:visible;animation:none}
+@keyframes h1-safety{to{visibility:visible}}
+.ch{display:inline-block;animation:ch-land .62s var(--ease) both;animation-delay:calc(var(--i)*55ms + 120ms)}
+@keyframes ch-land{from{opacity:0;transform:translateY(.46em) rotate(3deg)}to{opacity:1;transform:none}}
+.ch.is-jump{animation:ch-jump .62s cubic-bezier(.3,1.5,.5,1) both}
+@keyframes ch-jump{0%{transform:none}38%{transform:translateY(-.2em) rotate(-5deg)}70%{transform:translateY(.02em) rotate(1deg)}100%{transform:none}}
+
+/* 私たちについて：左へ広がる大きな絵 */
+.about-plate{position:relative;margin:0;overflow:hidden;background:#2b1712}
+.about-plate img{width:100%;aspect-ratio:1/1.04;object-fit:cover;object-position:50% 78%}
+.about-plate figcaption{left:var(--edge)}
+@media(min-width:761px){
+  .about-intro{grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);grid-template-rows:1fr auto auto;column-gap:clamp(32px,6vw,88px);row-gap:24px}
+  .about-intro h2{grid-area:2/2}
+  .about-copy{grid-area:3/2}
+  .about-plate{grid-area:1/1/4/2;margin-left:calc(var(--edge)*-1)}
+}
+@media(max-width:760px){.about-plate{margin:6px calc(var(--edge)*-1) 0}.about-plate img{aspect-ratio:5/4;object-position:50% 70%}}
+
+/* 動く言葉：会社の一文を3拍で見せる。動かない時は3枚の積み重ね */
+.verse{position:relative;font-family:var(--mincho);font-weight:700}
+.verse-block{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(18px,3vh,34px);min-height:clamp(320px,62vh,620px);padding:56px var(--gut);overflow:hidden}
+.verse-block--sound{background:var(--night);color:var(--cream)}
+.verse-block--film{background:var(--wine);color:var(--cream)}
+.verse-block--tool{background:var(--cream);color:var(--night)}
+.verse-line{position:relative;z-index:1;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;margin:0;line-height:1.08}
+.v-row{display:flex;align-items:baseline;justify-content:center;flex-basis:100%}
+.v{display:inline-block}
+.v--xl{font-size:clamp(96px,min(23vw,34svh),330px);letter-spacing:-.02em}
+.v--md{font-size:clamp(40px,min(8.4vw,13svh),118px)}
+.v--sm{font-size:clamp(28px,min(6.2vw,9.4svh),88px)}
+@media(max-width:760px){.v--xl{font-size:31vw}.v--md{font-size:12vw}.v--sm{font-size:9.6vw}.verse-line{flex-wrap:nowrap}.verse-line:has(.v-row){flex-wrap:wrap}}
+.v--fill{--x:0px;background:url(/assets/home/verse-film.webp) var(--x) 50%/auto 100% repeat-x;background-color:var(--cream);-webkit-background-clip:text;background-clip:text;color:transparent}
+.v--fill+.v--fill{background-position:calc(var(--x) - 1em) 50%}
+.verse-wave{position:absolute;inset:0;color:var(--cream);opacity:.42}
+@media(max-width:760px){.verse-wave{inset:28% 0}}
+.verse-wave svg{display:block;width:100%;height:100%}
+.verse-wave path{fill:none;stroke:currentColor;stroke-width:1.2;vector-effect:non-scaling-stroke}
+.verse-icons{position:relative;z-index:1;display:flex;justify-content:center;gap:clamp(12px,1.8vw,24px)}
+.v-icon{width:clamp(48px,min(6.4vw,10svh),92px);height:auto;aspect-ratio:1;border-radius:23%;outline:1px solid rgba(0,48,48,.14);outline-offset:-1px}
+/* iPhone の Safari はアドレス欄が縮むので、面の高さは大きいほうの画面に合わせる */
+.kinetic .verse{height:280lvh}
+/* Safari は固定の箱の色を下のバーへ写し、箱を過ぎても持ち続ける。箱だけを見えない扱いにして、中の3拍だけ見せる */
+.kinetic .verse-stick{position:sticky;top:0;height:100lvh;overflow:hidden;visibility:hidden}
+.kinetic .verse-block{position:absolute;inset:0;min-height:0;padding-top:calc(56px + 76px);visibility:visible}
+.kinetic .verse-block--film,.kinetic .verse-block--tool{clip-path:polygon(120% 0,120% 0,120% 100%,120% 100%)}
+.kinetic .v,.kinetic .v-icon{will-change:transform,opacity}
+@media(max-height:480px){.kinetic .verse-block{padding:104px var(--gut) 12px;gap:10px}}
+
+/* MORUNEL：画面いっぱいの1枚。壁の余白に言葉を置く */
+.home-brand{position:relative;display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr;gap:0;margin:62px calc(var(--edge)*-1) 0;padding:0;border-top:0;overflow:hidden;background:#3a2417}
+.home-brand-plate{grid-area:1/1/3/2;width:100%;height:100%;aspect-ratio:1672/860;object-fit:cover;object-position:50% 72%}
+.home-brand:after{content:"";grid-area:1/1/3/2;background:linear-gradient(90deg,rgba(38,20,10,.56),rgba(38,20,10,.28) 34%,rgba(38,20,10,0) 56%);pointer-events:none}
+.home-brand-name,.home-brand-copy{position:relative;z-index:1;padding-left:var(--edge);max-width:calc(var(--edge) + 430px)}
+.home-brand-name{grid-area:1/1;padding-top:clamp(28px,5vw,76px)}
+.home-brand-copy{grid-area:2/1;padding-top:16px}
+.home-brand,.home-brand .eyebrow,.home-brand h3>span,.home-brand-copy>p{color:var(--cream)}
+.home-brand h3{margin-top:14px;font-size:clamp(30px,3.4vw,46px)}
+.home-brand .text-link{border-bottom-color:rgba(245,240,228,.72)}
+.home-brand .text-link:hover{border-bottom-color:var(--cream)}
+.home-brand :focus-visible{outline-color:var(--cream)}
+@media(max-width:760px){
+  .home-brand{display:block;margin-top:40px;background:transparent}
+  .home-brand:after{display:none}
+  .home-brand-plate{height:auto;aspect-ratio:16/11;object-position:82% 60%}
+  .home-brand-name,.home-brand-copy{max-width:none;padding-inline:var(--edge)}
+  .home-brand-name{padding-top:24px}
+  .home-brand,.home-brand .eyebrow,.home-brand h3>span,.home-brand-copy>p{color:var(--ink)}
+  .home-brand .eyebrow,.home-brand h3>span,.home-brand-copy>p{color:var(--muted)}
+  .home-brand .text-link{border-bottom-color:#9a9e90}
+  .home-brand :focus-visible{outline-color:var(--ink)}
+}
+
+/* アプリの札：アプリのアイコンを、それぞれの色の面に置く。Deepcup だけ動く絵 */
+.home-products{border-top:0;padding-top:0}
+.home-product-list--three{gap:44px clamp(20px,2.4vw,32px)}
+.home-product-list--four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.home-product-list--three .home-product,.home-product-list--three .home-product+.home-product,.home-product-list--three .home-product:last-child{padding:0 0 10px;border:0}
+.home-product-cell{position:relative;display:flex;min-width:0}
+.home-product-cell>.home-product{flex:1;min-width:0}
+.home-product-visual{position:relative;display:block;aspect-ratio:4/5;margin-bottom:22px;overflow:hidden;background:#e4e6dd}
+.home-product-visual img,.home-product-visual video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1s var(--ease)}
+.home-product:hover .home-product-visual img,.home-product:hover .home-product-visual video{transform:scale(1.03)}
+.home-product-visual--icon{display:grid;place-items:center;background:var(--plate)}
+.home-product-visual--icon img{position:relative;inset:auto;width:60%;height:auto;aspect-ratio:1;border-radius:22.4%}
+.home-product--voice{--plate:#35495f}
+.home-product--voice .home-product-visual--icon img{border-radius:0}
+.home-product--gecko{--plate:#4c6249}
+.home-product--noosanpo{--plate:#a9553c}
+.home-product--noosanpo h4{color:#a04c30}
+.home-product-visual--loop{background:#04171f}
+.home-product-list--four .home-product-meta{display:grid;justify-content:start;gap:3px}
+.home-product h4{margin-top:18px}
+.home-product>p{margin-bottom:20px}
+/* 数字：公開している数を、目盛りの長さでも見せる */
+.home-product-fact{display:grid;grid-template-columns:auto 1fr;align-items:baseline;column-gap:10px;margin-top:auto;padding-top:14px;border-top:1px solid var(--line)}
+.fact-num{font-size:13px;line-height:1.2;white-space:nowrap}
+.fact-num b{display:inline-block;font-family:var(--font);font-size:38px;font-weight:300;letter-spacing:-.03em;margin-right:2px;font-variant-numeric:tabular-nums}
+.fact-note{font-size:11px;color:var(--muted);line-height:1.6}
+.fact-ticks{--p:1;grid-column:1/-1;display:block;height:9px;margin-top:9px;width:calc(var(--n)*8px);background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 8px);clip-path:inset(0 calc((1 - var(--p))*100%) 0 0)}
+.home-product-link{margin-top:14px}
+.loop-toggle{position:absolute;z-index:2;top:10px;right:10px;display:grid;place-items:center;width:44px;height:44px;padding:0;border:0;border-radius:50%;background:rgba(4,23,32,.62);color:var(--cream);cursor:pointer}
+.loop-toggle[hidden]{display:none}
+.loop-toggle:before{content:"";width:11px;height:13px;border-inline:3px solid currentColor}
+.loop-toggle.is-stopped:before{width:0;height:0;margin-left:4px;border:0;border-left:12px solid currentColor;border-block:8px solid transparent}
+.loop-toggle:hover{background:rgba(4,23,32,.86)}
+.loop-toggle:focus-visible{outline-color:var(--cream);outline-offset:-6px}
+@media(max-width:1180px){
+  .home-product-list--four{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .home-product-list--three{gap:40px clamp(20px,2.4vw,32px)}
+  .home-product-visual{aspect-ratio:5/4}
+  .home-product-visual--icon img{width:44%}
+}
+@media(max-width:560px){.home-product-list--four{grid-template-columns:1fr}}
+
+/* お問い合わせ：夜の色で締める */
+.contact{background:var(--night);color:var(--cream);overflow:hidden}
+.contact .eyebrow,.contact p:not(.eyebrow),.contact-link small{color:var(--cream-muted)}
+.contact-link{border-bottom-color:rgba(245,240,228,.55)}
+.contact :focus-visible{outline-color:var(--cream)}
+.contact-inner{display:grid;grid-template-columns:minmax(0,1fr) clamp(210px,24vw,340px) minmax(0,1fr);gap:clamp(16px,3vw,44px);align-items:center;padding-block:clamp(36px,4vw,56px)}
+.contact-plate{grid-area:1/2;width:100%;height:auto}
+.contact-inner>div{grid-area:1/1}
+.contact-link{grid-area:1/3}
+@media(max-width:760px){
+  .contact-inner{grid-template-columns:1fr;gap:18px;padding-block:32px 44px}
+  .contact-plate{grid-area:auto;width:min(68%,260px);margin-inline:auto}
+  .contact-inner>div,.contact-link{grid-area:auto}
+}
+
+/* 操作に応える小さな動き（押した・乗せたが分かるものだけ） */
+.primary-nav>a:not(.nav-contact){position:relative}
+.primary-nav>a:not(.nav-contact):after{content:"";position:absolute;left:0;right:0;bottom:5px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:100% 50%;transition:transform .3s var(--ease)}
+.primary-nav .nav-contact{background:linear-gradient(var(--ink),var(--ink)) 0 100%/100% 0 no-repeat;transition:background-size .28s var(--ease),color .2s,border-color .2s,transform .14s}
+@media(hover:hover){
+  .primary-nav>a:hover{opacity:1}
+  .primary-nav>a:not(.nav-contact):hover:after{transform:scaleX(1);transform-origin:0 50%}
+  .primary-nav .nav-contact:hover{background-size:100% 100%;border-color:var(--ink);color:var(--paper)}
+  .text-link:hover>span,.contact-link:hover .contact-arrow,.home-product:hover .home-product-link>span{animation:arrow-pass .46s var(--ease)}
+}
+.text-link>span,.home-product-link>span{display:inline-block}
+@keyframes arrow-pass{0%{transform:none;opacity:1}46%{transform:translate(.62em,-.62em);opacity:0}47%{transform:translate(-.62em,.62em);opacity:0}100%{transform:none;opacity:1}}
+.text-link,.contact-link,.home-product{transition:transform .14s}
+.text-link:active,.contact-link:active,.nav-contact:active{transform:translateY(1px)}
+.home-product:active{transform:scale(.992)}
+.loop-toggle:active{transform:scale(.94)}
+@media print{.verse{display:none}.kinetic .hero h1{visibility:visible;animation:none}.ch{animation:none}}
