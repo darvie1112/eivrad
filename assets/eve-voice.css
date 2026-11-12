@@ -576,3 +576,18 @@
  .ev-page:not(.evt-page) .section-heading{margin-bottom:28px}
  .ev-page:not(.evt-page) .ev-intro{padding-block:48px}
 }
+/* 2026-11 polish: unify header bar height and heading Mincho webfont with the rest of eivrad.com (LP only; /evevoice/thanks/ untouched). */
+@font-face{
+  font-family:"Zen Old Mincho Eve";
+  src:url(/assets/eve-voice/heading-mincho.woff2) format("woff2");
+  font-weight:700;
+  font-display:swap;
+}
+.ev-page:not(.evt-page){--ev-mincho:"Zen Old Mincho Eve",var(--serif)}
+.ev-page:not(.evt-page) .header-inner{min-height:98px}
+@media(max-width:800px){.ev-page:not(.evt-page) .header-inner{min-height:82px}}
+@media(max-width:760px){.ev-page:not(.evt-page) .header-inner{min-height:76px}}
+.ev-page:not(.evt-page) :is(h1,h2){font-family:var(--ev-mincho);font-weight:700}
+.ev-page:not(.evt-page) .ev-hero h1{letter-spacing:-.025em}
+.ev-page:not(.evt-page) .ev-h1-sub{letter-spacing:.03em}
+.ev-page:not(.evt-page) h2{letter-spacing:-.015em}
